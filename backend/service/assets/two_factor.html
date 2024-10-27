@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Two-Factor Authentication Code</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fb;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 0;
+        }
+        .header {
+            background-color: #1a73e8;
+            padding: 20px;
+            color: #ffffff;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+            color: #333333;
+            line-height: 1.6;
+        }
+        .footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #777777;
+            border-top: 1px solid #dddddd;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f7fb;">
+<table class="container" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+    <tr>
+        <td class="header" style="background-color: #1a73e8; padding: 20px; color: #ffffff; text-align: center;">
+            <h1 style="margin: 0; font-size: 24px;">Your Two-Factor Code</h1>
+        </td>
+    </tr>
+    <tr>
+        <td class="content" style="padding: 20px; color: #333333; line-height: 1.6; font-size: 16px;">
+            <p style="margin: 0;">Hello ${username},</p>
+            <p style="margin: 16px 0;">You have successfully logged in. To complete your login, please enter the following two-factor authentication code in the application:</p>
+            <h2 style="margin: 20px 0; text-align: center; font-size: 28px; color: #1a73e8;">${authCode}</h2>
+            <p style="margin: 16px 0;">This code is only valid for the next 5 minutes. If you did not perform this action, please ignore this email.</p>
+        </td>
+    </tr>
+    <tr>
+        <td class="footer" style="text-align: center; padding: 10px; font-size: 12px; color: #777777; border-top: 1px solid #dddddd; margin-top: 20px;">
+            <p style="margin: 0;">&copy; 2024 VisualBoost. All rights reserved.</p>
+            <p style="margin: 0;">This email was automatically generated. Please do not reply.</p>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

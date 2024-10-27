@@ -1,0 +1,16 @@
+# Ignore IDE files
+.idea
+
+# Ignore dependencies
+node_modules
+package-lock.json
+
+# Ignore test dir
+test
+
+#Ignore docker files
+Dockerfile
+.dockerignore
+
+#Ignore environment variable
+.env

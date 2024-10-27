@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  replica-setup:
+    image: 'mongo:latest'
+    restart: on-failure
+    networks:
+      - auth_network
+    volumes:
+      - "./.scripts/init_replicaset.sh:/scripts/init_replicaset.sh"
+    entrypoint: [ "bash", "/scripts/init_replicaset.sh" ]
+    env_file:
+      - .env
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_PORT=${MONGO_PORT}
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:latest
+    container_name: auth_database
+    ports:
+      # Listen only to localhost to avoid reaching the database from outside
+      - 127.0.0.1:${MONGO_PORT}:${MONGO_PORT}
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_INITDB_DATABASE=db
+    volumes:
+      - "./home/mongodb/.dbshell:/home/mongodb/.dbshell"
+      - "./data:/data/db"
+      - "./key/mongo_replica_key:/key/mongo_replica_key"
+      - "./.scripts/init_replica_key.sh:/scripts/init_replica_key.sh"
+    entrypoint: [ "bash", "/scripts/init_replica_key.sh" ]
+    command: ["--port", "${MONGO_PORT}", "--auth", "--replSet", "replica_set", "--keyFile", "/key/mongo_replica_key"]
+    networks:
+      - auth_network
+
+networks:
+  auth_network:

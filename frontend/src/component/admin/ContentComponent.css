@@ -1,0 +1,21 @@
+.header {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.content_header {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-content: center;
+}
+
+.content_header > h2 {
+    margin: 0 !important;
+}
+
+.header .ant-divider {
+    margin: 6px 0 20px 0 !important;
+}

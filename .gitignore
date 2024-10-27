@@ -1,0 +1,22 @@
+# Ignore intellij project directories
+**/.idea
+
+# Build
+# node_modules
+**/node_modules
+# react build files
+**/dist
+
+# Database
+**/db/data/*
+
+# log files
+**/logs
+
+# drawio imgages
+**/processes
+
+# Environment files
+/backend/service/.env
+
+

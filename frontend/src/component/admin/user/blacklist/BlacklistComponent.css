@@ -1,0 +1,16 @@
+.black_list {
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+}
+
+.black_list_searchbar {
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.floating_action_btn {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+}

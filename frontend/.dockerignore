@@ -1,0 +1,18 @@
+# Ignore IDE files
+.idea
+
+# Ignore dependencies
+node_modules
+
+# Ignore test dir
+tests
+
+#Ignore docker files
+Dockerfile
+.dockerignore
+
+#Ignore environment variable
+.env.dev
+
+# Ignore build
+dist

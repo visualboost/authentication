@@ -1,0 +1,9 @@
+.role_list {
+}
+
+/**
+ * Override ant-design class
+ */
+.role_list .ant-table-row {
+    cursor: pointer;
+}

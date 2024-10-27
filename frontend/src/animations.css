@@ -1,0 +1,25 @@
+/* Initial hidden state for alert */
+.alert-enter {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+/* Animation when alert enters */
+.alert-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 300ms, transform 300ms;
+}
+
+/* Initial state when alert is exiting */
+.alert-exit {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Animation when alert is exiting */
+.alert-exit-active {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 300ms, transform 300ms;
+}

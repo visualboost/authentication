@@ -1,0 +1,46 @@
+.user_list {
+    position: relative;
+    height: 100%;
+    overflow: auto;
+}
+
+.user_list_searchbar_parent {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.user_list_searchbar {
+    width: calc(100% - 60px) !important;
+    margin-right: 10px;
+}
+
+.user_list_searchbar .ant-space-item {
+    width: 100% !important;
+}
+
+.user_list_searchbar_select {
+    width: 100px !important;
+}
+
+.user_list_searchbar_input {
+    width: calc(100% - 150px) !important;
+}
+
+.user_list_searchbar_btn {
+    width: 50px !important;
+}
+
+.user_list_refresh_btn {
+    width: 50px;
+}
+
+
+/**
+ * Override ant-design class
+ */
+.user_list .ant-table-row {
+    cursor: pointer;
+}

@@ -1,0 +1,106 @@
+version: '3.9'
+
+services:
+  # Service to automatically initialize the replica set
+  replica-setup:
+    image: 'mongo:latest'
+    restart: on-failure
+    networks:
+      - vb_auth_network
+    volumes:
+      - "./.scripts/init_replicaset.sh:/scripts/init_replicaset.sh"
+    entrypoint: [ "bash", "/scripts/init_replicaset.sh" ]
+    secrets:
+      - mongo_port
+      - mongo_user
+      - mongo_password
+    depends_on:
+      - mongodb
+
+  # Database-Service
+  mongodb:
+    image: mongo:latest
+    container_name: auth_database
+    ports:
+      # Listen only to localhost to avoid reaching the database from outside
+      - "127.0.0.1:40901:40901"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/mongo_user
+      - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongo_password
+      - MONGO_INITDB_DATABASE=db
+    volumes:
+      - "./data:/data/db"
+      - "./config/mongo_replica_key.conf:/key/mongo_replica_key"
+      - "./.scripts/init_replica_key.sh:/scripts/init_replica_key.sh"
+      - "./config/mongod.conf:/etc/mongod.conf"
+    entrypoint: [ "bash", "/scripts/init_replica_key.sh" ]
+    command: ["mongod", "--config", "/etc/mongod.conf"]
+    secrets:
+      - mongo_user
+      - mongo_password
+    networks:
+      - vb_auth_network
+
+  backend:
+    image: vb_auth_backend:latest
+    container_name: backend_service
+    command: [ "npm", "run", "start" ]
+    environment:
+      - ENVIRONMENT=TEST
+    configs:
+      - config
+    ports:
+      - "40900:40900"
+    secrets:
+      - encryption_key
+      - auth_token_secret
+      - refresh_token_secret
+      - mail_config
+      - mongo_user
+      - mongo_password
+      - mongo_port
+    networks:
+      - vb_auth_network
+    restart: unless-stopped
+    depends_on:
+      replica-setup:
+        condition: service_completed_successfully
+
+  react:
+    image: vb_auth_react:latest
+    container_name: react_service
+    command: ["nginx", "-g", "daemon off;"]
+    ports:
+      - "80:80"
+    configs:
+      - config
+    volumes:
+      - "./config/nginx.conf:/etc/nginx/conf.d/default.conf"
+    restart: unless-stopped
+    networks:
+      - vb_auth_network
+    depends_on:
+      - backend
+
+configs:
+  config:
+    file: config/configuration.conf
+
+secrets:
+  encryption_key:
+    file: config/secrets/encryption_key.conf
+  auth_token_secret:
+    file: config/secrets/auth_token_secret.conf
+  refresh_token_secret:
+    file: config/secrets/refresh_token_secret.conf
+  mail_config:
+    file: config/secrets/mail_config.conf
+  mongo_port:
+    file: config/secrets/mongo_port.conf
+  mongo_user:
+    file: config/secrets/mongo_user.conf
+  mongo_password:
+    file: config/secrets/mongo_password.conf
+
+networks:
+  vb_auth_network:
