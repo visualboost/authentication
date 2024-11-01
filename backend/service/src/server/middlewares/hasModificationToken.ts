@@ -1,7 +1,7 @@
 import {NextFunction, Request, Response} from "express";
 import ForbiddenError from "../../errors/ForbiddenError.ts";
 import {UserModification} from "../../models/db/UserModification.ts";
-import {getAsset} from "../../util/FileHandler.ts";
+import {getTemplate} from "../../util/FileHandler.ts";
 
 const hasModificationToken = async (req: Request, res: Response, next: NextFunction) => {
     const token = req.query.token as string;
@@ -15,7 +15,7 @@ const hasModificationToken = async (req: Request, res: Response, next: NextFunct
     }
 
     if (!userModificationDoc || userModificationDoc.isExpired() === true) {
-        const asset = await getAsset("modification_expired.html")
+        const asset = await getTemplate("modification_expired.html")
         return res.send(asset)
     }
 

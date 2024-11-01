@@ -39,17 +39,19 @@ for var in PROTOCOL DOMAIN; do
 done
 
 # PORT_BACKEND is optional
-if [[ -n "$PORT_BACKEND" ]]; then
-    printf "  PORT_BACKEND: \"%s\"\n" "$PORT_BACKEND" >> /usr/share/nginx/html/assets/runtime-env.js
+if [[ -n "$PROXY_BACKEND_PORT" ]]; then
+    clean_port=$(echo "$PROXY_BACKEND_PORT" | tr -d '\n\r')
+    printf "  PROXY_BACKEND_PORT: \"%s\",\n" "$clean_port" >> /usr/share/nginx/html/assets/runtime-env.js
 else
-    echo "PORT_BACKEND is not defined and will be ignored."
+    echo "PROXY_BACKEND_PORT is not defined and will be ignored."
 fi
 
-# ROUTE is optional
-if [[ -n "${ROUTE:-}" ]]; then
-    printf "  ROUTE: \"%s\"\n" "$ROUTE" >> /usr/share/nginx/html/assets/runtime-env.js
+# PROXY_BACKEND_ROUTE is optional
+if [[ -n "${PROXY_BACKEND_ROUTE:-}" ]]; then
+    clean_route=$(echo "$PROXY_BACKEND_ROUTE" | tr -d '\n\r')
+    printf "  PROXY_BACKEND_ROUTE: \"%s\"\n" "$clean_route" >> /usr/share/nginx/html/assets/runtime-env.js
 else
-    echo "ROUTE is not defined and will be ignored."
+    echo "PROXY_BACKEND_ROUTE is not defined and will be ignored."
 fi
 
 echo "}" >> /usr/share/nginx/html/assets/runtime-env.js

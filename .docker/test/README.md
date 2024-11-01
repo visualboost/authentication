@@ -43,14 +43,16 @@ Secrets are localed in `./config/secrets`.
 - ``mongo_user.conf``: MongoDB username
 - ``mongo_password.conf``: MongoDB password
 
-#### Configurations
+#### Configurations (Optional)
 
 Configurations are localed in `./config/configuration.conf`.
 
 - ``PROTOCOL`` : `HTTP` or `HTTPS`.
-- ``DOMAIN`` : The domain of the application, e.g. _localhost_ or _mydomain.com_.
+- ``DOMAIN`` : The domain of the application, .e.g. _localhost_ or _mydomain.com_.
 - ``PORT_FRONTEND`` : The port of the react application, .e.g. **80** or **443**. Changes require updates in `docker-compose.yml`, `nginx.conf`, and `configuration.conf`.
 - ``PORT_BACKEND`` : The port of the nodejs application. The default value is **40900**. Changes require updates in `configuration.conf` and `docker-compose.yml`.
+- ``PROXY_BACKEND_ROUTE`` : The route to reach the backend service. The default value is `/api`. Changes require updates in `configuration.conf` and `docker-compose.yml` (Traefik).
+- ``PROXY_BACKEND_PORT`` : The port to reach the backend service, .e.g.  **80** or **443**. The default value is `80`. Changes require updates in `configuration.conf` and `docker-compose.yml` (Traefik).
 
 #### Mongo Replica Key
 

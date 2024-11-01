@@ -53,23 +53,21 @@ export class APIHandler {
     }
 
     getRoute(): string {
-        let route: string;
+        let proxyRoute: string | null = null;
         if(import.meta.env.PROD){
             //@ts-ignore
-            route = window._env_.ROUTE as string;
-        } else {
-            route = import.meta.env.VITE_ROUTE as string;
+            proxyRoute = window._env_.PROXY_BACKEND_ROUTE as string;
         }
 
-        if(!route) return "";
-        return route;
+        if(!proxyRoute) return "";
+        return proxyRoute;
     }
 
     getBackendPort(): string {
         let port: string;
         if(import.meta.env.PROD){
             //@ts-ignore
-            port = window._env_.PORT_BACKEND as string;
+            port = window._env_.PROXY_BACKEND_PORT as string;
         } else {
             port = import.meta.env.VITE_BACKEND_PORT as string;
         }

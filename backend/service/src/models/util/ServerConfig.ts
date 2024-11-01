@@ -8,24 +8,32 @@ export class ServerConfig {
     backendPort: number;
     frontendPort: number;
 
-    constructor(domain: string, backendPort: number, frontendPort: number) {
+    proxyBackendPort: number;
+    proxyBackendRoute: string;
+
+    constructor(domain: string, backendPort: number, frontendPort: number, proxyBackendPort: number, proxyBackendRoute: string) {
         this.domain = domain;
         this.backendPort = backendPort;
         this.frontendPort = frontendPort;
+        this.proxyBackendPort = proxyBackendPort;
+        this.proxyBackendRoute = proxyBackendRoute;
     }
 
     static init(): ServerConfig {
         if(this.instance) return this.instance;
 
         const domain = ServerConfig.getDomain();
-        const backendPort = ServerConfig.getBackendPort();
         const frontendPort = ServerConfig.getFrontendPort();
 
-        if(!domain || !backendPort || !frontendPort){
+        const backendPort = ServerConfig.getBackendPort();
+        const proxyBackendPort = ServerConfig.getProxyBackendPort();
+        const proxyBackendRoute = ServerConfig.getProxyBackendRoute();
+
+        if(!domain || !backendPort || !frontendPort || !proxyBackendPort || !proxyBackendRoute) {
             throw Error("Invalid server configuration");
         }
 
-        this.instance = new ServerConfig(domain, parseInt(backendPort), parseInt(frontendPort));
+        this.instance = new ServerConfig(domain, parseInt(backendPort), parseInt(frontendPort), parseInt(proxyBackendPort), proxyBackendRoute);
         return this.instance;
     }
 
@@ -50,6 +58,34 @@ export class ServerConfig {
             return process.env.PORT_FRONTEND;
         }else {
             return getDockerConfig("PORT_FRONTEND");
+        }
+    }
+
+    /**
+     * The proxy port of the backend service.
+     *
+     * Default value is '/api'.
+     * During development and without docker and traefik it the port should be equal to {@link ServerConfig.backendPort}.
+     */
+    static getProxyBackendPort(): string{
+        if(isDevEnvironment()){
+            return process.env.PROXY_BACKEND_PORT;
+        }else {
+            return getDockerConfig("PROXY_BACKEND_PORT");
+        }
+    }
+
+    /**
+     * The proxy path of the backend service.
+     *
+     * Default value is '/api'.
+     * During development and without docker and traefik it can be '/'.
+     */
+    static getProxyBackendRoute(): string{
+        if(isDevEnvironment()){
+            return process.env.PROXY_BACKEND_ROUTE;
+        }else {
+            return getDockerConfig("PROXY_BACKEND_ROUTE");
         }
     }
 }

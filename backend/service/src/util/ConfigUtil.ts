@@ -1,4 +1,7 @@
+import {initConfig} from "../env/config.ts";
 import fs from "fs";
+
+initConfig();
 
 const isDevEnvironment = (): boolean => {
     return process.env.ENVIRONMENT === "DEVELOPMENT"

@@ -1,17 +1,5 @@
 import mongoose from "mongoose";
 import {initConfig} from "../../../src/env/config.ts";
-import {User} from "../../../src/models/db/User.ts";
-import {EmailCredentialsModel} from "../../../src/models/db/credentials/EMailCredentials.ts";
-import {NGram} from "../../../src/models/db/NGram.ts";
-import {UserModification} from "../../../src/models/db/UserModification.ts";
-import {Settings} from "../../../src/models/db/Settings.ts";
-import {validatePassword} from "../../../src/util/PasswordUtil.ts";
-import {encrypt, encryptEmailIfAllowedBySystem} from "../../../src/util/EncryptionUtil.ts";
-import bcrypt from "bcrypt";
-import {faker} from "@faker-js/faker";
-import {SystemRoles} from "../../../src/constants/SystemRoles.ts";
-import {UserState} from "../../../src/constants/UserState.ts";
-import {TimeUtil} from "../../../src/util/TimeUtil.ts";
 import {TestDataHandler} from "../../data/TestDataHandler.ts";
 import {Blacklist} from "../../../src/models/db/Blacklist.ts";
 import {DatabaseConfig} from "../../../src/models/util/DatabaseConfig.ts";
@@ -24,7 +12,7 @@ export class TestDatabase {
     static connectToDb = async () => {
         const dbConfig = DatabaseConfig.init();
         const connectionString = `mongodb://localhost:${dbConfig.port}/${TestDatabase.DB_NAME}?directConnection=true`;
-        return mongoose.connect(connectionString, { authSource: "admin", user: dbConfig.user, pass: dbConfig.password});
+        return mongoose.connect(connectionString, {authSource: "admin", user: dbConfig.user, pass: dbConfig.password});
     }
 
     static isConnected = (): boolean => {

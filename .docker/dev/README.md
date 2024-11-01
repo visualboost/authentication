@@ -1,6 +1,6 @@
 
 
-# Setup Guide for Docker Environment with MongoDB and Secrets (Development)
+# Setup Guide (Development)
 
 This guide provides the steps to set up the authentication service for development.
 
@@ -21,7 +21,7 @@ The application is nearly fully preconfigured and ready for use. However, to ens
 - **Email User**: Enter the email account username in the `MAIL_USER` variable.
 - **Password**: Input the associated password in the `MAIL_PW` variable.
 
-This configuration will enable the application to send emails.
+This configuration will enable the application to send emails. Sending emails is required in order to work register new user and sign in successfully.
 
 ### 2. Run Docker Containers
 
@@ -31,6 +31,10 @@ Start the application with the following command:
   docker-compose up 
 ````
 
-After the application starts successfully, the console will display: `HTTP: Listening on port 40900`.<br> 
-The application can be accessed at http://localhost:80.<br> 
-By default, the backend application runs on port `40900`, and the MongoDB instance runs on port `40901`.
+After the application starts successfully, the console will display: `HTTP: Listening on port 40900`.<br>
+
+### 3. Access application
+
+The react application can be accessed at http://localhost:80.<br> 
+The backend service runs on http://localhost/api.<br>
+The MongoDB instance runs on port `40901`.

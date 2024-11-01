@@ -1,0 +1,66 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ "test" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.AUTH_SERVICE_ACTION_ACCESS_TOKEN }}
+      - name: Run mongodb
+        run: |
+          cd ./backend/db
+          docker-compose up
+      - name: Sleep until database is running
+        run: sleep 20
+      - name: Print docker container
+        run: docker container ps
+      - name: Create backend .env file
+        run: |
+          cd ./backend
+          echo "ENVIRONMENT=DEVELOPMENT" >> .env
+          echo "PROTOCOL=HTTP" >> .env
+          echo "DOMAIN=localhost" >> .env
+          echo "PORT_BACKEND=40900" >> .env
+          echo "PORT_FRONTEND=80" >> .env
+          echo "PROXY_BACKEND_ROUTE=/api" >> .env
+          echo "PROXY_BACKEND_PORT=80" >> .env
+          echo "MONGO_DOMAIN=localhost" >> .env
+          echo "MONGO_PORT=40901" >> .env
+          echo "MONGO_USER=Admin" >> .env
+          echo "MONGO_PASSWORD=xdU14ctORGv0Xo8zuagdXb3JmFhyEX5wIJukmqQ7gZVAPs2sZPR60PeY2HWT" >> .env
+          echo "MAIL_HOST=test_host" >> .env
+          echo "MAIL_PORT=test_port" >> .env
+          echo "MAIL_USER=test_email@test.de" >> .env
+          echo "MAIL_PW=test_email_pw" >> .env
+          echo "AUTH_TOKEN_SECRET=AUTH_TOKEN_SECRET" >> .env
+          echo "REFRESH_TOKEN_SECRET=REFRESH_TOKEN_SECRET" >> .env
+          echo "DEV_ENCRYPTION_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX_XXXXXXXXXXXXXXXX" >> .env
+          cat .env
+
+      - name: Install dependencies
+        run: |
+          cd ./backend/service
+          npm install
+      - name: Run tests
+        run: |
+          cd ./backend
+          npm run test
+#      - name: Merge into main branch
+#        run: |
+#          git config user.name ${{ secrets.USER }}
+#          git config user.email ${{ secrets.EMAIL }}
+#          git fetch --unshallow
+#          git checkout main
+#          git pull
+#          git merge --no-ff develop -m "Auto-merge: ${{ github.event.head_commit.message }} [BUILD IMAGE]"
+#          git push

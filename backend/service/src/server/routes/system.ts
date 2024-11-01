@@ -7,6 +7,7 @@ import crypto from "node:crypto";
 import {hasXsrfTokenMiddleware} from "../middlewares/hasXsrfTokenMiddleware.ts";
 import {ServerConfig} from "../../models/util/ServerConfig.ts";
 import {CookieOptions} from "express-serve-static-core";
+import {isDevEnvironment} from "../../util/ConfigUtil.ts";
 
 const router = express.Router();
 
@@ -28,7 +29,7 @@ router.get(
         const cookieOptions: CookieOptions = {
                 httpOnly: false,
                 sameSite: true,
-                secure: false,
+                secure: !isDevEnvironment(),
         }
 
         //localhost is not allowed for domain
