@@ -2,9 +2,8 @@ import {mockUseNavigate} from "../util/mock/MockHooksUtil";
 
 import {beforeEach, describe, expect, Mock, test} from 'vitest'
 import {MockApiUtil} from "../util/mock/MockApiUtil";
-import {render, waitFor, screen, fireEvent} from "@testing-library/react";
+import {fireEvent, render, screen, waitFor} from "@testing-library/react";
 import {Routes} from "../../src/models/Routes";
-import {MemoryRouter} from "react-router-dom";
 import UserRegistrationComponent from "../../src/component/authentication/UserRegistrationComponent";
 import NotFoundError from "../../src/models/errors/NotFoundError";
 import {PrivacyPolicyOptions} from "../../src/models/system/PrivacyPolicyOptions";
@@ -12,6 +11,7 @@ import userEvent from "@testing-library/user-event";
 import {createToken} from "../util/JwtTestUtil";
 import {SystemRoles} from "../../src/models/user/SystemRoles";
 import {UserState} from "../../src/models/auth/UserState";
+import TestMemoryRouter from "../util/TestMemoryRouter";
 
 describe('User Registration', () => {
     let mockNavigate: Mock;
@@ -24,9 +24,9 @@ describe('User Registration', () => {
         MockApiUtil.SystemService.mockGetAllowRegistrationView(false);
 
         render(
-            <MemoryRouter initialEntries={[Routes.Authentication.REGISTRATION]}>
+            <TestMemoryRouter initialEntries={[Routes.Authentication.REGISTRATION]}>
                 <UserRegistrationComponent/>
-            </MemoryRouter>
+            </TestMemoryRouter>
         );
 
         await waitFor(() => {
@@ -39,9 +39,9 @@ describe('User Registration', () => {
         MockApiUtil.SystemService.mockGetPrivacyPolicy(new NotFoundError());
 
         render(
-            <MemoryRouter initialEntries={[Routes.Authentication.REGISTRATION]}>
+            <TestMemoryRouter initialEntries={[Routes.Authentication.REGISTRATION]}>
                 <UserRegistrationComponent/>
-            </MemoryRouter>
+            </TestMemoryRouter>
         );
 
         const notificationTitle = await screen.findByText("Missing privacy policy");
@@ -53,9 +53,9 @@ describe('User Registration', () => {
         MockApiUtil.SystemService.mockGetPrivacyPolicy(new Error("test error"));
 
         render(
-            <MemoryRouter initialEntries={[Routes.Authentication.REGISTRATION]}>
+            <TestMemoryRouter initialEntries={[Routes.Authentication.REGISTRATION]}>
                 <UserRegistrationComponent/>
-            </MemoryRouter>
+            </TestMemoryRouter>
         );
 
         const notificationTitle = await screen.findByText("test error");
@@ -67,9 +67,9 @@ describe('User Registration', () => {
         MockApiUtil.SystemService.mockGetPrivacyPolicy(new PrivacyPolicyOptions(true, "myPrivacyPolicyLink"));
 
         render(
-            <MemoryRouter initialEntries={[Routes.Authentication.REGISTRATION]}>
+            <TestMemoryRouter initialEntries={[Routes.Authentication.REGISTRATION]}>
                 <UserRegistrationComponent/>
-            </MemoryRouter>
+            </TestMemoryRouter>
         );
 
         const privacyPolicyCheckbox = await screen.findByLabelText("Registration Privacy Policy Link")
@@ -84,9 +84,9 @@ describe('User Registration', () => {
         MockApiUtil.SystemService.mockGetPrivacyPolicy(new PrivacyPolicyOptions(true, "myPrivacyPolicyLink"));
 
         render(
-            <MemoryRouter initialEntries={[Routes.Authentication.REGISTRATION]}>
+            <TestMemoryRouter initialEntries={[Routes.Authentication.REGISTRATION]}>
                 <UserRegistrationComponent/>
-            </MemoryRouter>
+            </TestMemoryRouter>
         );
 
         const usernameInput = await screen.findByLabelText('Registration Username Input');
@@ -108,9 +108,9 @@ describe('User Registration', () => {
         MockApiUtil.SystemService.mockGetPrivacyPolicy(new PrivacyPolicyOptions(true, "myPrivacyPolicyLink"));
 
         render(
-            <MemoryRouter initialEntries={[Routes.Authentication.REGISTRATION]}>
+            <TestMemoryRouter initialEntries={[Routes.Authentication.REGISTRATION]}>
                 <UserRegistrationComponent/>
-            </MemoryRouter>
+            </TestMemoryRouter>
         );
 
         const usernameInput = await screen.findByLabelText('Registration Username Input');
@@ -135,13 +135,13 @@ describe('User Registration', () => {
         MockApiUtil.SystemService.mockGetAllowRegistrationView(true);
         MockApiUtil.SystemService.mockGetPrivacyPolicy(new PrivacyPolicyOptions(true, "myPrivacyPolicyLink"));
 
-        const token = createToken("userId", SystemRoles.USER, UserState.ACTIVE, null)
+        const token = createToken("userId", SystemRoles.USER, UserState.ACTIVE)
         MockApiUtil.AuthenticationService.mockCreateUser(token);
 
         render(
-            <MemoryRouter initialEntries={[Routes.Authentication.REGISTRATION]}>
+            <TestMemoryRouter initialEntries={[Routes.Authentication.REGISTRATION]}>
                 <UserRegistrationComponent/>
-            </MemoryRouter>
+            </TestMemoryRouter>
         );
 
         const usernameInput = await screen.findByLabelText('Registration Username Input');

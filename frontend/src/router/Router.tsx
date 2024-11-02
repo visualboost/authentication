@@ -21,7 +21,7 @@ import InvitedUserRegistrationComponent from "../component/authentication/Invite
 import CredentialsSettingsComponent from "../component/settings/CredentialsSettingsComponent.tsx";
 import ConfirmationComponent from "../component/authentication/cofirmation/ConfirmationComponent.tsx";
 import ConfirmEmailComponent from "../component/authentication/ConfirmEmailComponent.tsx";
-import VerificationComponent from "../component/authentication/VerificationComponent.tsx";
+import AuthenticationComponent from "../component/authentication/AuthenticationComponent.tsx";
 import ErrorComponent from "../component/errorpages/ErrorComponent.tsx";
 import LoginConfirmedComponent from "../component/authentication/cofirmation/LoginConfirmedComponent.tsx";
 import RegistrationConfirmedComponent from "../component/authentication/cofirmation/RegistrationConfirmedComponent.tsx";
@@ -38,7 +38,7 @@ const routerConfig = [
     },
     {
         path: Routes.AUTHENTICATION,
-        element: <VerificationComponent/>,
+        element: <AuthenticationComponent/>,
         children: [
             {
                 index: true,

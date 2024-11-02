@@ -1,10 +1,10 @@
-import {afterEach, beforeEach, describe, expect, Mock, test, vi} from 'vitest'
-import {mockUseNavigate, mockLocationReplace} from "./util/mock/MockHooksUtil";
+import {afterEach, beforeEach, describe, expect, Mock, test} from 'vitest'
+import {mockLocationReplace, mockUseNavigate} from "./util/mock/MockHooksUtil";
 import {MockApiUtil} from "./util/mock/MockApiUtil";
-import {mockGetJwt, mockGetJwtDecoded} from "./util/mock/MockCookieHandlerUtil";
+import {mockGetAuthToken, mockGetJwtDecoded} from "./util/mock/MockCookieHandlerUtil";
 
 import {cleanup, fireEvent, render, screen, waitFor} from "@testing-library/react";
-import {createMemoryRouter, MemoryRouter, RouterProvider} from "react-router-dom";
+import {createMemoryRouter} from "react-router-dom";
 import App from "../src/App";
 import {Routes} from "../src/models/Routes";
 import {SystemState} from "../src/models/SystemState";
@@ -13,64 +13,81 @@ import {SystemRoles} from "../src/models/user/SystemRoles";
 import {UserState} from "../src/models/auth/UserState";
 import ConfirmEmailComponent from "../src/component/authentication/ConfirmEmailComponent";
 import {routerConfig} from "../src/router/Router";
+import TestMemoryRouter from "./util/TestMemoryRouter";
+import AuthenticationComponent from "../src/component/authentication/AuthenticationComponent";
+import TestRouterProvider from "./util/TestRouterProvider";
 
 let mockNavigate: Mock;
 
 beforeEach(() => {
     mockNavigate = mockUseNavigate();
+    MockApiUtil.SystemService.mockGetXsfrToken();
 })
 
 afterEach(() => {
-    vi.restoreAllMocks()
+    MockApiUtil.restore();
 })
 
 describe('Routing', () => {
 
     describe(`Root (${Routes.ROOT})`, () => {
 
-        test('Navigate to Admin Registration form if system is not initialized (Means no admin exist)', async () => {
+        test('Navigate to Authentication Component if system is not initialized (Means no admin exist)', async () => {
             MockApiUtil.SystemService.mockSystemState(SystemState.NOT_INITIALIZED);
 
             render(
-                <MemoryRouter initialEntries={[Routes.ROOT]}>
+                <TestMemoryRouter initialEntries={[Routes.ROOT]}>
                     <App/>
-                </MemoryRouter>
+                </TestMemoryRouter>
             );
 
-            // Wait for the async navigation logic to complete
+            await waitFor(() => {
+                expect(mockNavigate).toHaveBeenCalledWith(Routes.AUTHENTICATION);
+            });
+        });
+    });
+
+    describe(`Authentication (${Routes.AUTHENTICATION})`, () => {
+
+        test('Navigate to Admin Registration Component if the system is not initialized (admin does not exist)', async () => {
+            MockApiUtil.SystemService.mockSystemState(SystemState.NOT_INITIALIZED);
+
+            render(
+                <TestMemoryRouter initialEntries={[Routes.AUTHENTICATION]}>
+                    <AuthenticationComponent/>
+                </TestMemoryRouter>
+            );
+
             await waitFor(() => {
                 expect(mockNavigate).toHaveBeenCalledWith(Routes.Authentication.REGISTRATION_ADMIN);
             });
         });
 
-
-        test('Navigate to Login Component if the system is initialized (admin already exist) and no jwt cookie exist', async () => {
+        test('Navigate to Login Component if the system is initialized (admin does exist) and no auth token exists', async () => {
             MockApiUtil.SystemService.mockSystemState(SystemState.INITIALIZED);
-            mockGetJwt(null);
+            mockGetAuthToken(null);
 
             render(
-                <MemoryRouter initialEntries={[Routes.ROOT]}>
-                    <App/>
-                </MemoryRouter>
+                <TestMemoryRouter initialEntries={[Routes.AUTHENTICATION]}>
+                    <AuthenticationComponent/>
+                </TestMemoryRouter>
             );
 
-            // Wait for the async navigation logic to complete
             await waitFor(() => {
                 expect(mockNavigate).toHaveBeenCalledWith(Routes.Authentication.LOGIN);
             });
         });
 
-
-        test('Navigate to Confirm registration component if the system is initialized, and the user state from jwt is PENDING', async () => {
-            const token = createToken("userId", SystemRoles.USER, UserState.PENDING, "my_hook")
+        test('Navigate to Confirm registration component if the system is initialized, and the user state is PENDING', async () => {
+            const token = createToken("userId", SystemRoles.USER, UserState.PENDING)
             MockApiUtil.SystemService.mockSystemState(SystemState.INITIALIZED);
-            mockGetJwt(token);
+            mockGetAuthToken(token);
             mockGetJwtDecoded(token);
 
             render(
-                <MemoryRouter initialEntries={[Routes.ROOT]}>
-                    <App/>
-                </MemoryRouter>
+                <TestMemoryRouter initialEntries={[Routes.AUTHENTICATION]}>
+                    <AuthenticationComponent/>
+                </TestMemoryRouter>
             );
 
             await waitFor(() => {
@@ -79,15 +96,15 @@ describe('Routing', () => {
         });
 
         test('Navigate to the admin dashboard if the userstate is ACTIVE and the role is ADMIN', async () => {
-            const token = createToken("userId", SystemRoles.ADMIN, UserState.ACTIVE, "my_hook")
+            const token = createToken("userId", SystemRoles.ADMIN, UserState.ACTIVE)
             MockApiUtil.SystemService.mockSystemState(SystemState.INITIALIZED);
-            mockGetJwt(token);
+            mockGetAuthToken(token);
             mockGetJwtDecoded(token);
 
             render(
-                <MemoryRouter initialEntries={[Routes.ROOT]}>
-                    <App/>
-                </MemoryRouter>
+                <TestMemoryRouter initialEntries={[Routes.AUTHENTICATION]}>
+                    <AuthenticationComponent/>
+                </TestMemoryRouter>
             );
 
             await waitFor(() => {
@@ -97,16 +114,22 @@ describe('Routing', () => {
 
         test('Navigate to the authentication hook if exists', async () => {
             const authenticationHook = "http://localhost/test";
-            const token = createToken("userId", SystemRoles.USER, UserState.ACTIVE, authenticationHook)
+            const token = createToken("userId", SystemRoles.USER, UserState.ACTIVE)
+            MockApiUtil.SystemService.mockGetHooks({
+                AUTHENTICATION: authenticationHook,
+                EMAIL_CHANGE: "",
+                PASSWORD_CHANGE: "",
+                PASSWORD_RESET: ""
+            })
             MockApiUtil.SystemService.mockSystemState(SystemState.INITIALIZED);
-            mockGetJwt(token);
+            mockGetAuthToken(token);
             mockGetJwtDecoded(token);
             const mockedReplaceFun = mockLocationReplace()
 
             render(
-                <MemoryRouter initialEntries={[Routes.ROOT]}>
-                    <App/>
-                </MemoryRouter>
+                <TestMemoryRouter initialEntries={[Routes.AUTHENTICATION]}>
+                    <AuthenticationComponent/>
+                </TestMemoryRouter>
             );
 
             await waitFor(() => {
@@ -115,15 +138,21 @@ describe('Routing', () => {
         });
 
         test('Navigate to the default login success component if not authentication hook exists', async () => {
-            const token = createToken("userId", SystemRoles.USER, UserState.ACTIVE, null)
+            const token = createToken("userId", SystemRoles.USER, UserState.ACTIVE)
             MockApiUtil.SystemService.mockSystemState(SystemState.INITIALIZED);
-            mockGetJwt(token);
+            MockApiUtil.SystemService.mockGetHooks({
+                AUTHENTICATION: "",
+                EMAIL_CHANGE: "",
+                PASSWORD_CHANGE: "",
+                PASSWORD_RESET: ""
+            })
+            mockGetAuthToken(token);
             mockGetJwtDecoded(token);
 
             render(
-                <MemoryRouter initialEntries={[Routes.ROOT]}>
-                    <App/>
-                </MemoryRouter>
+                <TestMemoryRouter initialEntries={[Routes.AUTHENTICATION]}>
+                    <AuthenticationComponent/>
+                </TestMemoryRouter>
             );
 
             await waitFor(() => {
@@ -135,16 +164,16 @@ describe('Routing', () => {
             MockApiUtil.SystemService.mockSystemState(new Error("failed"));
 
             render(
-                <MemoryRouter initialEntries={[Routes.ROOT]}>
-                    <App/>
-                </MemoryRouter>
+                <TestMemoryRouter initialEntries={[Routes.AUTHENTICATION]}>
+                    <AuthenticationComponent/>
+                </TestMemoryRouter>
             );
 
-            // Wait for the async navigation logic to complete
             await waitFor(() => {
                 expect(mockNavigate).toHaveBeenCalledWith(Routes.Error.getErrorRoute(503));
             });
         });
+
     });
 
     describe(`Login (${Routes.Authentication.LOGIN})`, () => {
@@ -163,7 +192,7 @@ describe('Routing', () => {
             });
 
             render(
-                <RouterProvider router={testRouter}/>
+                <TestRouterProvider router={testRouter}/>
             );
 
             const linkToForgotPassword = screen.queryByLabelText("Forgot Password Link")
@@ -179,25 +208,7 @@ describe('Routing', () => {
             });
 
             render(
-                <RouterProvider router={testRouter}/>
-            );
-
-            const linkToRegistrationView = await screen.findByLabelText("Registration Link")
-            expect(linkToRegistrationView).not.toBeNull();
-            fireEvent.click(linkToRegistrationView as HTMLElement);
-
-            await waitFor(() => {
-                expect(testRouter.state.location.pathname).toBe(Routes.Authentication.REGISTRATION);
-            })
-        });
-
-        test('Navigate to registration component if "Register here" is clicked', async () => {
-            const testRouter = createMemoryRouter(routerConfig, {
-                initialEntries: [Routes.Authentication.LOGIN],
-            });
-
-            render(
-                <RouterProvider router={testRouter}/>
+                <TestRouterProvider router={testRouter}/>
             );
 
             const linkToRegistrationView = await screen.findByLabelText("Registration Link")
@@ -217,14 +228,14 @@ describe('Routing', () => {
             MockApiUtil.SystemService.mockSystemState(SystemState.INITIALIZED);
         })
 
-        test('Navigate to Admin dashboard if user is active and has userrole ADMIN', async () => {
-            const token = createToken("userId", SystemRoles.ADMIN, UserState.ACTIVE, "some_hook")
+        test('Navigate to Admin dashboard if user is active and has user role ADMIN', async () => {
+            const token = createToken("userId", SystemRoles.ADMIN, UserState.ACTIVE)
             MockApiUtil.AuthenticationService.mockRefetchToken(token);
 
             render(
-                <MemoryRouter initialEntries={[Routes.Authentication.CONFIRM_REGISTRATION]}>
+                <TestMemoryRouter initialEntries={[Routes.Authentication.CONFIRM_REGISTRATION]}>
                     <ConfirmEmailComponent/>
-                </MemoryRouter>
+                </TestMemoryRouter>
             );
 
             // Wait for the async navigation logic to complete
@@ -233,16 +244,23 @@ describe('Routing', () => {
             });
         });
 
-        test('Navigate to the authentication hook if exists and userrole is not ADMIN', async () => {
+        test('Navigate to the authentication hook if exists and user role is not ADMIN', async () => {
             const authenticationHook = "http://localhost/test";
-            const token = createToken("userId", SystemRoles.USER, UserState.ACTIVE, authenticationHook)
+            MockApiUtil.SystemService.mockGetHooks({
+                AUTHENTICATION: authenticationHook,
+                EMAIL_CHANGE: "",
+                PASSWORD_CHANGE: "",
+                PASSWORD_RESET: ""
+            })
+
+            const token = createToken("userId", SystemRoles.USER, UserState.ACTIVE)
             MockApiUtil.AuthenticationService.mockRefetchToken(token);
             const mockedReplaceFun = mockLocationReplace()
 
             render(
-                <MemoryRouter initialEntries={[Routes.Authentication.CONFIRM_REGISTRATION]}>
+                <TestMemoryRouter initialEntries={[Routes.Authentication.CONFIRM_REGISTRATION]}>
                     <ConfirmEmailComponent/>
-                </MemoryRouter>
+                </TestMemoryRouter>
             );
 
             await waitFor(() => {
@@ -251,13 +269,19 @@ describe('Routing', () => {
         });
 
         test('Navigate to the default login success component if not authentication hook exists', async () => {
-            const token = createToken("userId", SystemRoles.USER, UserState.ACTIVE, null)
+            const token = createToken("userId", SystemRoles.USER, UserState.ACTIVE)
             MockApiUtil.AuthenticationService.mockRefetchToken(token);
+            MockApiUtil.SystemService.mockGetHooks({
+                AUTHENTICATION: null,
+                EMAIL_CHANGE: "",
+                PASSWORD_CHANGE: "",
+                PASSWORD_RESET: ""
+            })
 
             render(
-                <MemoryRouter initialEntries={[Routes.Authentication.CONFIRM_REGISTRATION]}>
+                <TestMemoryRouter initialEntries={[Routes.Authentication.CONFIRM_REGISTRATION]}>
                     <ConfirmEmailComponent/>
-                </MemoryRouter>
+                </TestMemoryRouter>
             );
 
             await waitFor(() => {
@@ -269,12 +293,11 @@ describe('Routing', () => {
             MockApiUtil.AuthenticationService.mockRefetchToken(new Error("failed"));
 
             render(
-                <MemoryRouter initialEntries={[Routes.Authentication.CONFIRM_REGISTRATION]}>
+                <TestMemoryRouter initialEntries={[Routes.Authentication.CONFIRM_REGISTRATION]}>
                     <ConfirmEmailComponent/>
-                </MemoryRouter>
+                </TestMemoryRouter>
             );
 
-            // Wait for the async navigation logic to complete
             await waitFor(() => {
                 expect(mockNavigate).toHaveBeenCalledWith(Routes.Error.getErrorRoute(503));
             });

@@ -4,18 +4,20 @@ import {beforeEach, describe, expect, Mock, test} from 'vitest'
 import {MockApiUtil} from "../util/mock/MockApiUtil";
 import {fireEvent, render, screen, waitFor} from "@testing-library/react";
 import {Routes} from "../../src/models/Routes";
-import {MemoryRouter} from "react-router-dom";
 import LoginComponent from "../../src/component/authentication/LoginComponent";
 import {SigninResponseBody} from "../../src/models/auth/SigninResponseBody";
 import userEvent from '@testing-library/user-event';
 import {createToken} from "../util/JwtTestUtil";
 import {SystemRoles} from "../../src/models/user/SystemRoles";
 import {UserState} from "../../src/models/auth/UserState";
+import TestMemoryRouter from "../util/TestMemoryRouter";
 
 describe('Login', () => {
     let mockNavigate: Mock;
 
     beforeEach(() => {
+        MockApiUtil.restore();
+        MockApiUtil.AuthenticationService.mockLogout();
         mockNavigate = mockUseNavigate();
     })
 
@@ -23,9 +25,9 @@ describe('Login', () => {
         MockApiUtil.SystemService.mockGetAllowRegistrationView(false);
 
         render(
-            <MemoryRouter initialEntries={[Routes.Authentication.LOGIN]}>
+            <TestMemoryRouter initialEntries={[Routes.Authentication.LOGIN]}>
                 <LoginComponent/>
-            </MemoryRouter>
+            </TestMemoryRouter>
         );
 
         const linkToRegistrationVIew = screen.queryByLabelText("Registration Link")
@@ -39,9 +41,9 @@ describe('Login', () => {
         MockApiUtil.SystemService.mockGetAllowRegistrationView(true);
 
         render(
-            <MemoryRouter initialEntries={[Routes.Authentication.LOGIN]}>
+            <TestMemoryRouter initialEntries={[Routes.Authentication.LOGIN]}>
                 <LoginComponent/>
-            </MemoryRouter>
+            </TestMemoryRouter>
         );
 
         const linkToRegistrationVIew = await screen.findByLabelText("Registration Link")
@@ -54,12 +56,11 @@ describe('Login', () => {
     test('Navigate to 2 factor auth component if "signin" returns twoFactorAuthId', async () => {
         MockApiUtil.SystemService.mockGetAllowRegistrationView(true);
         MockApiUtil.AuthenticationService.mockSignin(new SigninResponseBody("null", "randomTwoFactorAuthId"));
-        // const mockNavigate = mockUseNavigate();
 
         render(
-            <MemoryRouter initialEntries={[Routes.Authentication.LOGIN]}>
+            <TestMemoryRouter initialEntries={[Routes.Authentication.LOGIN]}>
                 <LoginComponent/>
-            </MemoryRouter>
+            </TestMemoryRouter>
         );
 
         const emailInput = screen.getByLabelText('Login Email Input');
@@ -78,12 +79,12 @@ describe('Login', () => {
 
     test('Navigate to confirm registration view if sign in was successful but userstate is PENDING', async () => {
         MockApiUtil.SystemService.mockGetAllowRegistrationView(true);
-        MockApiUtil.AuthenticationService.mockSignin(new SigninResponseBody(createToken("id", SystemRoles.ADMIN, UserState.PENDING, null), null));
+        MockApiUtil.AuthenticationService.mockSignin(new SigninResponseBody(createToken("id", SystemRoles.ADMIN, UserState.PENDING), null));
 
         render(
-            <MemoryRouter initialEntries={[Routes.Authentication.LOGIN]}>
+            <TestMemoryRouter initialEntries={[Routes.Authentication.LOGIN]}>
                 <LoginComponent/>
-            </MemoryRouter>
+            </TestMemoryRouter>
         );
 
         const emailInput = screen.getByLabelText('Login Email Input');
@@ -102,12 +103,12 @@ describe('Login', () => {
 
     test('Navigate to Admin dashboard if sign in was successful, twoFactorAuthId is null and user role is ADMIN', async () => {
         MockApiUtil.SystemService.mockGetAllowRegistrationView(true);
-        MockApiUtil.AuthenticationService.mockSignin(new SigninResponseBody(createToken("id", SystemRoles.ADMIN, UserState.ACTIVE, null), null));
+        MockApiUtil.AuthenticationService.mockSignin(new SigninResponseBody(createToken("id", SystemRoles.ADMIN, UserState.ACTIVE), null));
 
         render(
-            <MemoryRouter initialEntries={[Routes.Authentication.LOGIN]}>
+            <TestMemoryRouter initialEntries={[Routes.Authentication.LOGIN]}>
                 <LoginComponent/>
-            </MemoryRouter>
+            </TestMemoryRouter>
         );
 
         const emailInput = screen.getByLabelText('Login Email Input');
@@ -126,15 +127,16 @@ describe('Login', () => {
 
     test('Navigate to authentication hook if sign in was successful, twoFactorAuthId is null, user role is not ADMIN and authentication hook is defined', async () => {
         const authenticationHook = "http://localhost/test";
-        const token = createToken("userId", SystemRoles.USER, UserState.ACTIVE, authenticationHook)
+        const token = createToken("userId", SystemRoles.USER, UserState.ACTIVE)
         MockApiUtil.SystemService.mockGetAllowRegistrationView(true);
         MockApiUtil.AuthenticationService.mockSignin(new SigninResponseBody(token, null));
+        MockApiUtil.SystemService.mockGetHooks({ AUTHENTICATION: authenticationHook, EMAIL_CHANGE: "", PASSWORD_CHANGE: "", PASSWORD_RESET: "" })
         const mockedReplaceFun = mockLocationReplace()
 
         render(
-            <MemoryRouter initialEntries={[Routes.Authentication.LOGIN]}>
+            <TestMemoryRouter initialEntries={[Routes.Authentication.LOGIN]}>
                 <LoginComponent/>
-            </MemoryRouter>
+            </TestMemoryRouter>
         );
 
         const emailInput = screen.getByLabelText('Login Email Input');
@@ -153,12 +155,13 @@ describe('Login', () => {
 
     test('Navigate to confirm login view if sign in was successful, twoFactorAuthId is null and user role is not ADMIN and authentication hook is not defined', async () => {
         MockApiUtil.SystemService.mockGetAllowRegistrationView(true);
-        MockApiUtil.AuthenticationService.mockSignin(new SigninResponseBody(createToken("id", SystemRoles.USER, UserState.ACTIVE, null), null));
+        MockApiUtil.SystemService.mockGetHooks({ AUTHENTICATION: "", EMAIL_CHANGE: "", PASSWORD_CHANGE: "", PASSWORD_RESET: "" })
+        MockApiUtil.AuthenticationService.mockSignin(new SigninResponseBody(createToken("id", SystemRoles.USER, UserState.ACTIVE), null));
 
         render(
-            <MemoryRouter initialEntries={[Routes.Authentication.LOGIN]}>
+            <TestMemoryRouter initialEntries={[Routes.Authentication.LOGIN]}>
                 <LoginComponent/>
-            </MemoryRouter>
+            </TestMemoryRouter>
         );
 
         const emailInput = screen.getByLabelText('Login Email Input');

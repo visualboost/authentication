@@ -2,10 +2,10 @@ name: Run Tests
 
 on:
   push:
-    branches: [ "test" ]
+    branches: [ "develop" ]
 
 jobs:
-  build:
+  run_backend_tests:
     runs-on: ubuntu-latest
 
     strategy:
@@ -19,14 +19,14 @@ jobs:
       - name: Run mongodb
         run: |
           cd ./backend/db
-          docker-compose up
+          docker compose up -d
       - name: Sleep until database is running
-        run: sleep 20
+        run: sleep 10
       - name: Print docker container
         run: docker container ps
       - name: Create backend .env file
         run: |
-          cd ./backend
+          cd ./backend/service
           echo "ENVIRONMENT=DEVELOPMENT" >> .env
           echo "PROTOCOL=HTTP" >> .env
           echo "DOMAIN=localhost" >> .env
@@ -39,7 +39,7 @@ jobs:
           echo "MONGO_USER=Admin" >> .env
           echo "MONGO_PASSWORD=xdU14ctORGv0Xo8zuagdXb3JmFhyEX5wIJukmqQ7gZVAPs2sZPR60PeY2HWT" >> .env
           echo "MAIL_HOST=test_host" >> .env
-          echo "MAIL_PORT=test_port" >> .env
+          echo "MAIL_PORT=999" >> .env
           echo "MAIL_USER=test_email@test.de" >> .env
           echo "MAIL_PW=test_email_pw" >> .env
           echo "AUTH_TOKEN_SECRET=AUTH_TOKEN_SECRET" >> .env
@@ -53,14 +53,41 @@ jobs:
           npm install
       - name: Run tests
         run: |
-          cd ./backend
+          cd ./backend/service
           npm run test
-#      - name: Merge into main branch
-#        run: |
-#          git config user.name ${{ secrets.USER }}
-#          git config user.email ${{ secrets.EMAIL }}
-#          git fetch --unshallow
-#          git checkout main
-#          git pull
-#          git merge --no-ff develop -m "Auto-merge: ${{ github.event.head_commit.message }} [BUILD IMAGE]"
-#          git push
+          
+
+  run_react_tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [ 20.x ]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.AUTH_SERVICE_ACTION_ACCESS_TOKEN }}
+
+      - name: Install dependencies
+        run: |
+          cd ./frontend
+          npm install
+      - name: Run tests
+        run: |
+          cd ./frontend
+          npm run test
+
+  merge:
+    runs-on: ubuntu-latest
+    needs: [ run_backend_tests, run_react_tests ]
+    steps:
+      - name: Merge changes into main branch
+        run: |
+          git config user.name ${{ secrets.USER }}
+          git config user.email ${{ secrets.EMAIL }}
+          git fetch --unshallow
+          git checkout main
+          git pull
+          git merge --no-ff develop -m "Auto-merge: ${{ github.event.head_commit.message }}"
+          git push
