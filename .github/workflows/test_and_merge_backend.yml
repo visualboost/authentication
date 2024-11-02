@@ -89,12 +89,18 @@ jobs:
           token: ${{ secrets.AUTH_SERVICE_ACTION_ACCESS_TOKEN }}
           fetch-depth: 0
 
-      - name: Merge changes into main branch
+      - name: Set up Git user
         run: |
           git config user.name ${{ secrets.USER }}
           git config user.email ${{ secrets.EMAIL }}
-          git fetch --unshallow
-          git checkout main
-          git pull
-          git merge --no-ff develop -m "Auto-merge: ${{ github.event.head_commit.message }}"
-          git push
+
+      - name: Pull latest changes for main
+        run: git checkout main && git pull origin main
+
+      - name: Merge develop into main
+        run: |
+          git merge develop -m "Auto-merge: ${{ github.event.head_commit.message }}"
+
+      - name: Push changes to main
+        run: |
+          git push origin main
