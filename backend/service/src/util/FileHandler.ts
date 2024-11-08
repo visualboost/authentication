@@ -1,6 +1,15 @@
 import fsPromise from "fs/promises";
 import fs from "fs";
 import path from "path";
+import {Role} from "../models/util/Role.ts";
+
+const getRoleDir = (): string => {
+    return path.join(process.cwd(), "roles");
+}
+
+const getRoleFilePath = (): string => {
+    return path.join(getRoleDir(), "roles.json");
+}
 
 const getAssetDir = (): string => {
     return path.join(process.cwd(), "assets");
@@ -57,8 +66,37 @@ const replacePlaceHolders = (fileContent: string, placeHolders: object) => {
     return fileContent;
 }
 
+const getRolesByFile = async ():Promise<Array<Role>> => {
+    const roleFile = getRoleFilePath();
+
+    if (fs.existsSync(roleFile) === false) {
+        return [];
+    }
+
+    const roleContent = await fsPromise.readFile(roleFile, 'utf8');
+    if (roleContent.length === 0) return [];
+
+    let roleContentAsJson;
+    try {
+        roleContentAsJson = JSON.parse(roleContent);
+    } catch (e) {
+        throw Error("Invalid role file: " + roleFile);
+    }
+
+    if (!Array.isArray(roleContentAsJson)) {
+        throw Error("Role file: " + roleFile + " is not an array");
+    }
+
+    const roleObjDoesNotContainNameAttribute = roleContentAsJson.some(roleObj => !roleObj.name)
+    if (roleObjDoesNotContainNameAttribute) throw Error("Missing attribute name in role file: " + roleFile);
+
+    return roleContentAsJson.map(role => new Role(role.name));
+}
+
 
 export {
     initAssets,
-    getTemplate
+    getTemplate,
+    getRolesByFile,
+    getRoleFilePath
 }

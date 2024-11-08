@@ -16,7 +16,12 @@
 # drawio imgages
 **/processes
 
+## Backend
+# -----------------------------
 # Environment files
 /backend/service/.env
+
+#Templates
+/backend/service/templates
 
 

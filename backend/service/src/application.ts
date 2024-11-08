@@ -80,7 +80,7 @@ const startApplication = async () => {
         console.log("Validate replica set ...");
         await waitForReplicaSetSetup();
 
-        const initializedRoles = await Role.initRoles([])
+        const initializedRoles = await Role.initRolesByFile();
         console.log("initialized roles: " + JSON.stringify(initializedRoles));
 
         initHttpServer();

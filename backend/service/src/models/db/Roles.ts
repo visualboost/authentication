@@ -1,14 +1,34 @@
-import mongoose from "mongoose";
+import mongoose, {Model} from "mongoose";
 import {SystemRoles} from "../../constants/SystemRoles.ts";
 import {User} from "./User.ts";
 import {Settings} from "./Settings.ts";
+import {getRolesByFile} from "../../util/FileHandler.ts";
 
 const Schema = mongoose.Schema;
 
-const RoleSchema = new Schema({
+export interface IRole extends Document {
+    name: string;
+    description?: string;
+    createdAt: Date;
+}
+
+export interface IRoleModel extends Model<IRole> {
+    initRolesByFile(): Promise<string[]>;
+    initRoles(roles: string[]): Promise<string[]>;
+    initSystemRoles(): Promise<string[]>;
+    roleExists(roleName: string): Promise<boolean>;
+    deleteRole(role: string): Promise<void>;
+}
+
+const RoleSchema = new Schema<IRole, IRoleModel>({
     name: {type: String, required: true, unique: true},
     description: {type: String},
 }, {timestamps: true});
+
+RoleSchema.statics.initRolesByFile = async function () {
+    const roles = await getRolesByFile();
+    return await this.initRoles(roles.map((role) => role.name));
+}
 
 RoleSchema.statics.initRoles = async function (roles: Array<string>) {
     //@ts-ignore
@@ -53,7 +73,7 @@ RoleSchema.statics.deleteRole = async function (role: string) {
 }
 
 
-const Role = mongoose.model('Role', RoleSchema);
+const Role = mongoose.model<IRole, IRoleModel>('Role', RoleSchema);
 
 export {
     Role

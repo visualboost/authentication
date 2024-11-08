@@ -1,13 +1,8 @@
 import express from "express";
 import BadRequestError from "../../../errors/BadRequestError.ts";
-import {User} from "../../../models/db/User.ts";
 import ConflictError from "../../../errors/ConflictError.ts";
 import NotFoundError from "../../../errors/NotFoundError.ts";
 import {Role} from "../../../models/db/Roles.ts";
-import {Blacklist} from "../../../models/db/Blacklist.ts";
-import {Success} from "../../../models/api/Success.ts";
-import {UserListItem} from "../../../models/api/UserListItem.ts";
-import {UserState} from "../../../constants/UserState.ts";
 import {RoleResponse} from "../../../models/api/RoleResponse.ts";
 
 const router = express.Router();
