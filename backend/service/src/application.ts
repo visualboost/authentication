@@ -11,6 +11,7 @@ import {DatabaseConfig} from "./models/util/DatabaseConfig.ts";
 import {ServerUtil} from "./util/ServerUtil.ts";
 import {ServerConfig} from "./models/util/ServerConfig.ts";
 import {initAssets} from "./util/FileHandler.ts";
+import {logDebug, logError, logInfo} from "./server/middlewares/log/Logger.ts";
 
 initConfig();
 /**
@@ -21,7 +22,7 @@ const initHttpServer = () => {
     const serverConfig = ServerConfig.init();
     const port = serverConfig.backendPort || '3000';
     this.server.listen(port, () => {
-        console.log('HTTP: Listen to port ' + port);
+        logInfo('HTTP: Listen to port ' + port);
     });
 }
 
@@ -58,7 +59,7 @@ async function waitForReplicaSetSetup(retries = 5, delay = 5000) {
             return;
         }
 
-        console.log('Primary node is not setup. Wait for ' + delay + " milliseconds and try again.");
+        logInfo('Primary node is not setup. Wait for ' + delay + " milliseconds and try again.");
         await new Promise((resolve) => setTimeout(resolve, delay));
     }
 
@@ -73,30 +74,31 @@ const startApplication = async () => {
          */
         validateSecrets();
 
-        console.log("Connection to database ...");
-        await connectToDb();
-        console.log("database connection successfully established.");
+        logInfo("Connection to database ...")
 
-        console.log("Validate replica set ...");
+        await connectToDb();
+        logInfo("Database connection successfully established.")
+
+        logInfo("Validate replica set ...");
         await waitForReplicaSetSetup();
 
         const initializedRoles = await Role.initRolesByFile();
-        console.log("initialized roles: " + JSON.stringify(initializedRoles));
+        logInfo("initialized roles: " + JSON.stringify(initializedRoles));
 
         initHttpServer();
     } catch (e) {
-        console.log(e);
+        logError(e.message)
         process.exit(1);
     }
 }
 
 const stopApplication = async () => {
     this.server?.close(() => {
-        console.log("Server shutdown")
+        logInfo("Server shutdown")
     });
 
     await mongoose.disconnect();
-    console.log("DB connections closed")
+    logInfo("DB connections closed")
 }
 
 export {

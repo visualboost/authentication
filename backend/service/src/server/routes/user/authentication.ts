@@ -47,7 +47,7 @@ router.post(
             await MailHandler.sendRegistrationMail(email, admin._id.toString(), admin.userName);
 
             JwtHandler.setRefreshTokenCookie(admin.getRefreshToken(), res)
-            res.json(new Success());
+            res.status(201).json(new Success());
         } catch (e) {
             next(e);
         }
@@ -74,19 +74,17 @@ router.post(
                 throw new ForbiddenError();
             }
 
-            //@ts-ignore
-            const userAlreadyExist = await User.userExists(username, email);
+            const userAlreadyExist = await User.userExists(email);
             if (userAlreadyExist) {
                 throw new ConflictError();
             }
 
-            //@ts-ignore
             const user = await User.createNewUser(username, email, password);
             await user.updateLastLogin(res.locals.ip);
             await MailHandler.sendRegistrationMail(email, user._id.toString(), user.userName)
 
             JwtHandler.setRefreshTokenCookie(user.getRefreshToken(), res)
-            res.json(new Success());
+            res.status(201).json(new Success());
         } catch (e) {
             next(e);
         }

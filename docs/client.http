@@ -1,0 +1,142 @@
+### Get an xsfr token to avoid CSRF attacks. This should be your very first API call.
+GET http://localhost:80/api/system/xsfr
+
+> {% client.test("Store xsfr token", function() {
+        const xsfrCookie = response.headers.valueOf("Set-Cookie");
+        const xsfrToken = xsfrCookie.split(";")[0].split("=")[1];
+        client.global.set("xsfr", xsfrToken);
+    }) %}
+
+### Get privacy policy settings
+GET http://localhost:80/api/system/privacypolicy
+x-xsrf-token: {{xsfr}}
+
+> {% client.test("Check privacy policy", function() {
+        const responseBody = JSON.parse(response.body);
+        client.global.set("privacyPolicyUrl", responseBody.privacyPolicyUrl);
+    }) %}
+
+### Get system initialization state
+GET http://localhost:80/api/system/state
+x-xsrf-token: {{xsfr}}
+
+> {% client.test("Check system state", function() {
+        const responseBody = JSON.parse(response.body);
+        client.global.set("systemState", responseBody.state);
+    }) %}
+
+### Get system hooks
+GET http://localhost:80/api/system/hooks
+x-xsrf-token: {{xsfr}}
+
+> {% client.test("Store system hooks", function() {
+        const responseBody = JSON.parse(response.body);
+        client.global.set("authenticationHook", responseBody.AUTHENTICATION);
+        client.global.set("passwordResetHook", responseBody.PASSWORD_RESET);
+    }) %}
+
+### Create new user and send a confirmation email to the given email address
+POST http://localhost:80/api/authentication/registration
+x-xsrf-token: {{xsfr}}
+Content-Type: application/json
+
+{
+  "username": "<username>",
+  "email": "<email>",
+  "password": "<password>"
+}
+
+### Sign in
+POST http://localhost:80/api/authentication/signin
+x-xsrf-token: {{xsfr}}
+Content-Type: application/json
+
+{
+  "email": "<email>",
+  "password": "<password>"
+}
+
+> {% client.test("Store auth token", function() {
+        console.log(response.body)
+        const responseBody = response.body;
+        client.global.set("authToken", responseBody.token);
+        client.global.set("twoFactorAuthId", responseBody.twoFactorAuthId);
+
+        const decodedToken = JSON.parse(Window.atob(responseBody.token.split(".")[1]))
+        client.global.set("userId", decodedToken.userId);
+
+    }) %}
+
+### Logout
+POST http://localhost:80/api/authentication/logout
+x-xsrf-token: {{xsfr}}
+Content-Type: application/json
+
+### Confirm registration
+GET http://localhost:80/api/confirm/registration?userId=<userId>
+
+> {% client.test("Confirm registration", function() {
+        client.global.set("userId", "<userId>");
+    }) %}
+
+### Confirm password reset
+GET http://localhost:80/api/confirm/password/reset?token={{resetToken}}
+
+> {% client.test("Validate password reset link", function() {
+        const token = response.url.split("token=")[1];
+        client.global.set("resetToken", token);
+    }) %}
+
+### Confirm two-factor authentication
+POST http://localhost:80/api/confirm/two-factor/{{twoFactorDocId}}
+x-xsrf-token: {{xsfr}}
+Content-Type: application/json
+
+{
+  "code": "<code>"
+}
+
+### Request password reset
+POST http://localhost:80/api/authentication/reset/password
+Content-Type: application/json
+
+{
+  "email": "<email>"
+}
+
+### Refresh authentication token
+PUT http://localhost:80/api/authentication/token
+x-xsrf-token: {{xsfr}}
+Authorization: Bearer {{authToken}}
+
+### Get user details
+GET http://localhost:80/api/user/{{userId}}
+x-xsrf-token: {{xsfr}}
+Authorization: Bearer {{authToken}}
+
+> {% client.test("Store user details", function() {
+        const responseBody = JSON.parse(response.body);
+        client.global.set("username", responseBody.username);
+        client.global.set("email", responseBody.email);
+    }) %}
+
+### Modify user email
+PATCH http://localhost:80/api/user/modify/email
+x-xsrf-token: {{xsfr}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "email": "<newemail@example.com>"
+}
+
+### Modify user password
+PATCH http://localhost:80/api/user/modify/password
+x-xsrf-token: {{xsfr}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "<currentPassword>",
+  "newPassword": "<newPassword>"
+}

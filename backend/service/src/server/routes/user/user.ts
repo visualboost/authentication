@@ -128,56 +128,6 @@ router.patch(
     }
 );
 
-
-/**
- * Creates a password modification object that allows the user to change the password address.
- */
-router.patch(
-    '/modify/password',
-    async (req, res, next) => {
-        try {
-            const authToken = res.locals.authToken as JwtContent;
-            const userId = authToken.getUserId();
-
-            const currentPassword = req.body.currentPassword;
-            const newPassword = req.body.newPassword;
-
-            if (!userId || !newPassword || !currentPassword) {
-                throw new BadRequestError();
-            }
-
-            //Check if new password is valid
-            const violations = validatePassword(newPassword);
-            //@ts-ignore
-            if (violations.length > 0) {
-                throw new BadRequestError();
-            }
-
-            const user = await User.findById(userId);
-            if(!user){
-                throw new NotFoundError();
-            }
-
-            const credentials = await user.getCredentials();
-
-            //Check if current password is the right one
-            const passwordIsValid = await credentials.validatePassword(currentPassword);
-            if (!passwordIsValid) {
-                throw new ForbiddenError();
-            }
-
-            const passwordModification = await UserModification.createPasswordModification(userId, newPassword)
-            const currentUserMail = credentials.email;
-            const token = await passwordModification.createToken();
-
-            const mailResponse = await MailHandler.sendPasswordModificationMail(currentUserMail, token, user.userName)
-            res.json(new Success());
-        } catch (e) {
-            next(e);
-        }
-    }
-);
-
 export {
     router
 }

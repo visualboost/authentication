@@ -31,10 +31,11 @@ RoleSchema.statics.initRolesByFile = async function () {
 }
 
 RoleSchema.statics.initRoles = async function (roles: Array<string>) {
-    //@ts-ignore
     const systemRoles = await Role.initSystemRoles();
 
-    const customRoles = await Promise.all(roles.map(async role => {
+    //Ignore ADMIN and USER
+    const rolesWithoutDefaultRoles = roles.filter(role => role !== SystemRoles.ADMIN && role !== SystemRoles.USER);
+    const customRoles = await Promise.all(rolesWithoutDefaultRoles.map(async role => {
         return Role.findOneAndUpdate({name: role}, {name: role}, {new: true, upsert: true});
     }))
 

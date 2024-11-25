@@ -81,8 +81,7 @@ router.post(
                 throw new BadRequestError();
             }
 
-            //@ts-ignore
-            const userAlreadyExist = await User.userExists(username, email);
+            const userAlreadyExist = await User.userExists(email);
             if (userAlreadyExist) {
                 throw new ConflictError();
             }

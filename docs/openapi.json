@@ -1,0 +1,879 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Authentication and User Management API",
+    "version": "1.0.0",
+    "description": "This API provides endpoints for managing user authentication, authorization, and profile operations. It includes features like user registration, login, two-factor authentication, password and email updates, and various system-level functionalities such as retrieving hooks and states. Designed to support secure and scalable authentication workflows."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:80"
+    }
+  ],
+  "tags": [
+    {
+      "name": "System",
+      "description": "System-related endpoints, such as XSRF token retrieval."
+    },
+    {
+      "name": "Authentication",
+      "description": "Endpoints related to user authentication, such as registration, login, logout, and two-factor authentication."
+    },
+    {
+      "name": "Confirmation",
+      "description": "Endpoints related to confirmation processes, such as registration confirmation and password reset confirmation."
+    }
+  ],
+  "paths": {
+    "/api/system/xsfr": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Get an XSRF token",
+        "description": "Retrieve an XSRF token to avoid CSRF attacks. This should be your first API call.",
+        "responses": {
+          "200": {
+            "description": "XSRF token retrieved successfully",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Contains the XSRF token",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/system/privacypolicy": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Get privacy policy settings",
+        "description": "Returns whether the privacy policy is displayed and its URL if available.",
+        "responses": {
+          "200": {
+            "description": "Privacy policy settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "showPrivacyPolicy": {
+                      "type": "boolean",
+                      "description": "Indicates if privacy policy is shown.",
+                      "example": true
+                    },
+                    "privacyPolicyUrl": {
+                      "type": "string",
+                      "description": "URL of the privacy policy.",
+                      "example": "https://example.com/privacy"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Privacy policy not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/system/state": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Get system initialization state",
+        "description": "Checks if the system has been initialized by verifying whether an admin user exists. Returns `INITIALIZED` if the admin user exists, or `NOT_INITIALIZED` otherwise.",
+        "responses": {
+          "200": {
+            "description": "System initialization state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "string",
+                      "enum": ["INITIALIZED", "NOT_INITIALIZED"],
+                      "description": "Initialization state of the system.",
+                      "example": "INITIALIZED"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/system/hooks": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Get system hooks",
+        "description": "Retrieve all hooks configured in the system. The response contains keys representing hook types and their corresponding URLs.",
+        "parameters": [
+          {
+            "name": "x-xsrf-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "XSRF token obtained from the `/api/system/xsfr` endpoint"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of system hooks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "AUTHENTICATION": {
+                      "type": "string",
+                      "description": "URL for authentication-related actions",
+                      "example": "https://example.com/authentication"
+                    },
+                    "PASSWORD_RESET": {
+                      "type": "string",
+                      "description": "URL for resetting passwords",
+                      "example": "https://example.com/password-reset"
+                    },
+                    "PASSWORD_CHANGE": {
+                      "type": "string",
+                      "description": "URL for changing passwords",
+                      "example": "https://example.com/password-change"
+                    },
+                    "EMAIL_CHANGE": {
+                      "type": "string",
+                      "description": "URL for changing email addresses",
+                      "example": "https://example.com/email-change"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/authentication/registration": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Create a new user",
+        "description": "Register a new user and send a confirmation email to the provided email address.",
+        "parameters": [
+          {
+            "name": "x-xsrf-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "XSRF token obtained from the `/api/system/xsfr` endpoint"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "The username of the new user",
+                    "example": "johndoe"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The email address of the new user",
+                    "example": "johndoe@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "description": "The password for the new user",
+                    "example": "mypassword123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User successfully registered"
+          },
+          "400": {
+            "description": "Invalid input data"
+          },
+          "403": {
+            "description": "Admin isn't created yet"
+          },
+          "409": {
+            "description": "User with the same email address does already exist"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/authentication/signin": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Sign in",
+        "description": "Authenticate a user with their email and password.",
+        "parameters": [
+          {
+            "name": "x-xsrf-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "XSRF token obtained from the `/api/system/xsfr` endpoint"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The email address of the user",
+                    "example": "johndoe@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "description": "The password for the user",
+                    "example": "mypassword123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully signed in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "description": "The authentication token. It is only present if two-factor authentication is not enabled.",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    },
+                    "hook": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "A hook set by the admin that can be used to redirect the user after a successful authentication.",
+                      "example": "http://example.com/dashboard"
+                    },
+                    "twoFactorAuthId": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "If two-factor authentication is enabled, this field will be populated with an identifier for the two-factor authentication process.",
+                      "example": "5f8d0d55b54764421b7156fe"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/authentication/logout": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Logout",
+        "description": "Logs out the authenticated user.",
+        "parameters": [
+          {
+            "name": "x-xsrf-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "XSRF token obtained from the `/api/system/xsfr` endpoint"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User successfully logged out"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/confirm/two-factor/{twoFactorDocId}": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Confirm two-factor authentication",
+        "description": "Validate the two-factor authentication code to complete the login process.",
+        "parameters": [
+          {
+            "name": "x-xsrf-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "XSRF token obtained from the `/api/system/xsfr` endpoint"
+          },
+          {
+            "name": "twoFactorDocId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the two-factor authentication document."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "description": "The two-factor authentication code provided by the user.",
+                    "example": "123456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Two-factor authentication successfully validated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "description": "The authentication token provided upon successful validation.",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    },
+                    "hook": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "A hook set by the admin that can be used to redirect the user after a successful authentication.",
+                      "example": "http://example.com/dashboard"
+                    },
+                    "twoFactorAuthId": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Will be null since the two-factor process is successfully completed.",
+                      "example": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g., missing `twoFactorDocId`."
+          },
+          "404": {
+            "description": "Two-factor authentication document or user not found."
+          },
+          "409": {
+            "description": "The provided two-factor authentication code is incorrect."
+          },
+          "410": {
+            "description": "The two-factor authentication code is expired."
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/confirm/registration": {
+      "get": {
+        "tags": [
+          "Confirmation"
+        ],
+        "summary": "Confirm registration",
+        "description": "Triggered when the registration confirmation email button is clicked. The user will be redirected to a 'confirmed' view showing successful registration.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the user being confirmed."
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirects the user to a confirmation view or to a custom hook URL if defined.",
+            "headers": {
+              "Location": {
+                "description": "The URL where the user will be redirected to.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g., missing `userId`."
+          },
+          "404": {
+            "description": "User not found."
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/confirm/password/reset": {
+      "get": {
+        "tags": [
+          "Confirmation"
+        ],
+        "summary": "Confirm password reset",
+        "description": "Triggered if the reset password link in the 'Confirm reset password' email is clicked. Validates if a valid password reset modification object exists and redirects the user accordingly.",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The token obtained after requesting a password reset."
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirects the user to either a custom hook or to the reset password path.",
+            "headers": {
+              "Location": {
+                "description": "The URL where the user will be redirected, with an appended token.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The user modification is not a password reset."
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/authentication/reset/password": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Request password reset",
+        "description": "Initiates the password reset process by sending a reset password email to the user's email address.",
+        "parameters": [
+          {
+            "name": "x-xsrf-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "XSRF token obtained from the `/api/system/xsfr` endpoint"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The email address of the user requesting a password reset.",
+                    "example": "johndoe@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset request processed successfully. If the user exists, an email is sent."
+          },
+          "400": {
+            "description": "Invalid input data, e.g., missing email."
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/authentication/token": {
+      "put": {
+        "tags": ["Authentication"],
+        "summary": "Refresh authentication token",
+        "description": "Creates a new authentication token and sets a new refresh token as an HttpOnly cookie. Requires a valid refresh token sent as a cookie.",
+        "parameters": [
+          {
+            "name": "x-xsrf-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "XSRF token obtained from the `/api/system/xsfr` endpoint"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authentication token successfully refreshed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "description": "The new authentication token.",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Set-Cookie": {
+                "description": "Contains the new refresh token.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden. Refresh token is missing or invalid."
+          },
+          "404": {
+            "description": "User not found for the provided refresh token."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      }
+    },
+    "/api/user/{userId}": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Get user details",
+        "description": "Retrieves details of a user by their ID. Only admins or the user themselves can access this endpoint. The Bearer token required for authorization can be obtained by calling `/api/authentication/signin`.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the user to retrieve."
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authentication, obtained from `/api/authentication/signin`."
+          },
+          {
+            "name": "x-xsrf-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "XSRF token obtained from the `/api/system/xsfr` endpoint"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "string",
+                      "description": "Unique identifier of the user.",
+                      "example": "5f8d0d55b54764421b7156fe"
+                    },
+                    "ip": {
+                      "type": "string",
+                      "description": "The IP address of the user.",
+                      "example": "192.168.1.1"
+                    },
+                    "username": {
+                      "type": "string",
+                      "description": "The username of the user.",
+                      "example": "johndoe"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "description": "The email address of the user.",
+                      "example": "johndoe@example.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "description": "The role of the user (e.g., ADMIN, USER).",
+                      "example": "user"
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "The current state of the user. (.e.g. `ACTIVE`, `PENDING`, `BLOCKED`)",
+                      "example": "ACTIVE"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The timestamp when the user was created.",
+                      "example": "2023-01-01T12:00:00Z"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The timestamp when the user was last updated.",
+                      "example": "2023-06-01T12:00:00Z"
+                    },
+                    "lastLogin": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The timestamp of the user's last login.",
+                      "example": "2023-07-01T10:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing parameter `userId`"
+          },
+          "403": {
+            "description": "The user is not authorized to access this resource."
+          },
+          "404": {
+            "description": "User not found."
+          },
+          "406": {
+            "description": "User is not ACTIVE."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      }
+    },
+    "/api/user/modify/email": {
+      "patch": {
+        "tags": ["User"],
+        "summary": "Modify user email",
+        "description": "Creates an email modification object that allows the user to change their email address. An email is sent to confirm the change. The Bearer token required for authorization can be obtained by calling `/api/authentication/signin`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The new email address to set.",
+                    "example": "newemail@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authentication, obtained from `/api/authentication/signin`."
+          },
+          {
+            "name": "x-xsrf-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "XSRF token obtained from the `/api/system/xsfr` endpoint"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Email modification object created successfully. A confirmation email has been sent."
+          },
+          "400": {
+            "description": "Missing / invalid email or invalid authentication token."
+          },
+          "403": {
+            "description": "The user is not authorized to access this resource."
+          },
+          "404": {
+            "description": "User not found."
+          },
+          "409": {
+            "description": "Conflict. Email address already exists."
+          },
+          "406": {
+            "description": "User is not ACTIVE."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      }
+    },
+    "/api/user/modify/password": {
+      "patch": {
+        "tags": ["User"],
+        "summary": "Modify user password",
+        "description": "Creates a password modification object that allows the user to change their password. An email is sent to confirm the change. The Bearer token required for authorization can be obtained by calling `/api/authentication/signin`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "currentPassword": {
+                    "type": "string",
+                    "description": "The current password of the user.",
+                    "example": "oldpassword123"
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "description": "The new password to set.",
+                    "example": "newpassword456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authentication, obtained from `/api/authentication/signin`."
+          },
+          {
+            "name": "x-xsrf-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "XSRF token obtained from the `/api/system/xsfr` endpoint"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Password modification object created successfully. A confirmation email has been sent."
+          },
+          "400": {
+            "description": "Missing or invalid currentPassword or newPassword or invalid authentication token."
+          },
+          "403": {
+            "description": "The user is not authorized to access this resource or the current password is incorrect."
+          },
+          "404": {
+            "description": "User not found."
+          },
+          "406": {
+            "description": "User is not ACTIVE."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      }
+    }
+
+  }
+}

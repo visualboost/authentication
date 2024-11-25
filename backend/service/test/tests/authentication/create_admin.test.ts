@@ -67,7 +67,7 @@ describe('POST /authentication/registration/admin', () => {
             .send(requestBody);
 
         // Assert
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(201);
         expect(response.body).toEqual(new Success());
         //@ts-ignore
         expect(mockedUser.adminExists).toHaveBeenCalledTimes(1);
@@ -226,7 +226,7 @@ describe('POST /authentication/registration/admin', () => {
             .send(requestBody);
 
         // Assert
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(201);
         expect(mockAdmin.updateLastLogin).toHaveBeenCalledWith('127.0.0.1');
     });
 

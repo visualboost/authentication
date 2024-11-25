@@ -102,10 +102,9 @@ router.get(
     hasXsrfTokenMiddleware,
     async (req, res, next) => {
         const settings = await Settings.load();
-        const result: object = {};
+        const result: any = {};
 
         settings.hooks.forEach(hook => {
-            //@ts-ignore
             result[hook.type] = hook.url;
         });
         return res.json(result);

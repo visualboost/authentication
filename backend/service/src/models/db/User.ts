@@ -58,7 +58,7 @@ export interface IUserModel extends Model<IUser> {
 
     getByEmail(email: string): Promise<IUser | null>;
 
-    createNewUser(username: string, email: string, password: string, role: SystemRoles): Promise<IUser>;
+    createNewUser(username: string, email: string, password: string, role?: SystemRoles): Promise<IUser>;
 
     createAdmin(username: string, email: string, password: string): Promise<IUser>;
 
@@ -70,6 +70,8 @@ export interface IUserModel extends Model<IUser> {
     getDetails(_id: ObjectId | string): Promise<UserDetails | null>
     activate(_id: ObjectId | string): Promise<IUser>,
     getByIP(ip: string, populate: boolean): Promise<IUser | null>
+
+    userExists(email: string): Promise<boolean>
 }
 
 const UserSchema = new Schema<IUser, IUserModel>({
@@ -264,6 +266,14 @@ const UserSchema = new Schema<IUser, IUserModel>({
                     user = await User.findOne({ip: ip});
                 }
                 return user;
+            },
+            userExists: async function (email: string): Promise<boolean> {
+                const credentialsWithEmail = await EmailCredentialsModel.findOne({email: email}).lean();
+                if (credentialsWithEmail != null) {
+                    return true;
+                }
+
+                return false;
             }
         }
     });
@@ -273,21 +283,6 @@ UserSchema.statics.adminExists = async function () {
     const admin = await User.findOne({role: SystemRoles.ADMIN}).lean();
     return admin != null;
 }
-
-UserSchema.statics.userExists = async function (username: string, email: string): Promise<boolean> {
-    const userWithUsername = await User.findOne({userName: username}).lean();
-    if (userWithUsername != null) {
-        return true;
-    }
-
-    const credentialsWithEmail = await EmailCredentialsModel.findOne({email: email}).lean();
-    if (credentialsWithEmail != null) {
-        return true;
-    }
-
-    return false;
-}
-
 
 UserSchema.methods.hasPendingState = async function () {
     return this.confirmation.state === UserState.PENDING;

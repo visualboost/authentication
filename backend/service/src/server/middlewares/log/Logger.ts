@@ -49,9 +49,14 @@ const logDebug = (msg: string) => {
     logger.debug(msg);
 }
 
+const logInfo = (msg: string) => {
+    logger.info(msg);
+}
+
 export {
     logger,
     logError,
-    logDebug
+    logDebug,
+    logInfo
 }
 
