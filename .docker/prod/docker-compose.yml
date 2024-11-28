@@ -67,7 +67,7 @@ services:
       - auth_database
 
   backend:
-    image: vb_auth_backend:latest
+    image: visualboost/vb_auth_backend:latest
     command: [ "npm", "run", "start" ]
     environment:
       - ENVIRONMENT=TEST
@@ -112,7 +112,7 @@ services:
       - replica-setup
 
   react:
-    image: vb_auth_react:latest
+    image: visualboost/vb_auth_react:latest
     command: ["nginx", "-g", "daemon off;"]
     configs:
       - config

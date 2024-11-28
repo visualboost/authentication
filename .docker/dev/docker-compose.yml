@@ -54,7 +54,7 @@ services:
       - mongodb
 
   backend:
-    image: vb_auth_backend:latest
+    image: visualboost/vb_auth_backend:latest
     container_name: backend_service
     command: [ "npm", "run", "start" ]
     restart: unless-stopped
@@ -93,7 +93,7 @@ services:
         condition: service_completed_successfully
 
   react:
-    image: vb_auth_react:latest
+    image: visualboost/vb_auth_react:latest
     container_name: react_service
     command: ["nginx", "-g", "daemon off;"]
     restart: unless-stopped
