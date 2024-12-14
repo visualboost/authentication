@@ -1,5 +1,18 @@
 # Versions:
 
+## 1.0.3 (14.12.2024)
+
+---
+
+### Docs:
+- Adapted openapi description
+
+### Backend:
+- No changes
+
+### Frontend:
+- No changes
+
 ## 1.0.2 (25.11.2024)
 
 ---

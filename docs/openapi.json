@@ -32,6 +32,7 @@
         ],
         "summary": "Get an XSRF token",
         "description": "Retrieve an XSRF token to avoid CSRF attacks. This should be your first API call.",
+        "operationId": "fetchXSFRToken",
         "responses": {
           "200": {
             "description": "XSRF token retrieved successfully",
@@ -55,6 +56,7 @@
         "tags": ["System"],
         "summary": "Get privacy policy settings",
         "description": "Returns whether the privacy policy is displayed and its URL if available.",
+        "operationId": "getPrivacyPolicy",
         "responses": {
           "200": {
             "description": "Privacy policy settings",
@@ -92,6 +94,7 @@
         "tags": ["System"],
         "summary": "Get system initialization state",
         "description": "Checks if the system has been initialized by verifying whether an admin user exists. Returns `INITIALIZED` if the admin user exists, or `NOT_INITIALIZED` otherwise.",
+        "operationId": "getSystemState",
         "responses": {
           "200": {
             "description": "System initialization state",
@@ -122,6 +125,7 @@
         "tags": ["System"],
         "summary": "Get system hooks",
         "description": "Retrieve all hooks configured in the system. The response contains keys representing hook types and their corresponding URLs.",
+        "operationId": "getSystemHooks",
         "parameters": [
           {
             "name": "x-xsrf-token",
@@ -179,6 +183,7 @@
         ],
         "summary": "Create a new user",
         "description": "Register a new user and send a confirmation email to the provided email address.",
+        "operationId": "register",
         "parameters": [
           {
             "name": "x-xsrf-token",
@@ -245,6 +250,7 @@
         ],
         "summary": "Sign in",
         "description": "Authenticate a user with their email and password.",
+        "operationId": "signin",
         "parameters": [
           {
             "name": "x-xsrf-token",
@@ -326,6 +332,7 @@
         ],
         "summary": "Logout",
         "description": "Logs out the authenticated user.",
+        "operationId": "signout",
         "parameters": [
           {
             "name": "x-xsrf-token",
@@ -354,6 +361,7 @@
         ],
         "summary": "Confirm two-factor authentication",
         "description": "Validate the two-factor authentication code to complete the login process.",
+        "operationId": "confirmTwoFactorAuthentication",
         "parameters": [
           {
             "name": "x-xsrf-token",
@@ -446,6 +454,7 @@
         ],
         "summary": "Confirm registration",
         "description": "Triggered when the registration confirmation email button is clicked. The user will be redirected to a 'confirmed' view showing successful registration.",
+        "operationId": "confirmRegistration",
         "parameters": [
           {
             "name": "userId",
@@ -488,6 +497,7 @@
         ],
         "summary": "Confirm password reset",
         "description": "Triggered if the reset password link in the 'Confirm reset password' email is clicked. Validates if a valid password reset modification object exists and redirects the user accordingly.",
+        "operationId": "confirmPasswordReset",
         "parameters": [
           {
             "name": "token",
@@ -527,6 +537,7 @@
         ],
         "summary": "Request password reset",
         "description": "Initiates the password reset process by sending a reset password email to the user's email address.",
+        "operationId": "requestPasswordReset",
         "parameters": [
           {
             "name": "x-xsrf-token",
@@ -574,6 +585,7 @@
         "tags": ["Authentication"],
         "summary": "Refresh authentication token",
         "description": "Creates a new authentication token and sets a new refresh token as an HttpOnly cookie. Requires a valid refresh token sent as a cookie.",
+        "operationId": "fetchToken",
         "parameters": [
           {
             "name": "x-xsrf-token",
@@ -628,6 +640,7 @@
         "tags": ["User"],
         "summary": "Get user details",
         "description": "Retrieves details of a user by their ID. Only admins or the user themselves can access this endpoint. The Bearer token required for authorization can be obtained by calling `/api/authentication/signin`.",
+        "operationId": "getUserDetails",
         "parameters": [
           {
             "name": "userId",
@@ -742,6 +755,7 @@
         "tags": ["User"],
         "summary": "Modify user email",
         "description": "Creates an email modification object that allows the user to change their email address. An email is sent to confirm the change. The Bearer token required for authorization can be obtained by calling `/api/authentication/signin`.",
+        "operationId": "modifyEmail",
         "requestBody": {
           "required": true,
           "content": {
@@ -810,6 +824,7 @@
         "tags": ["User"],
         "summary": "Modify user password",
         "description": "Creates a password modification object that allows the user to change their password. An email is sent to confirm the change. The Bearer token required for authorization can be obtained by calling `/api/authentication/signin`.",
+        "operationId": "modifyPassword",
         "requestBody": {
           "required": true,
           "content": {
