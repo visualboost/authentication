@@ -74,6 +74,36 @@ const SettingsComponent = () => {
         await updateSettings();
     }
 
+    const setAuthTokenExpirationTime = async (expirationTime?: string) => {
+        if (!settings) return;
+        if(!expirationTimeIsValid(expirationTime)) return;
+
+        settings.tokenExpiration.authenticationToken = parseInt(expirationTime as string);
+        await updateSettings();
+    }
+
+    const setRefreshTokenExpirationTime = async (expirationTime?: string) => {
+        if (!settings) return;
+        if(!expirationTimeIsValid(expirationTime)) return;
+        settings.tokenExpiration.refreshToken = parseInt(expirationTime as string);
+        await updateSettings();
+    }
+
+    const expirationTimeIsValid = (expirationTime?: string) => {
+        if(!expirationTime || expirationTime === ""){
+            NotificationHandler.showErrorNotification("Invalid expiration Time", "Please enter a valid expiration time (> 0)", 5);
+            return false;
+        }
+
+        const expTime = parseInt(expirationTime);
+        if(expTime <= 0){
+            NotificationHandler.showErrorNotification("Invalid expiration Time", "Please enter a valid expiration time (> 0)", 5);
+            return false;
+        }
+
+        return true
+    }
+
     const setDefaultRole = async (role: string) => {
         if (!settings) return;
         settings.defaultRole = role;
@@ -163,6 +193,26 @@ const SettingsComponent = () => {
         </div>
     }
 
+    const renderTokenExpirationTimeSettings = () => {
+        return <div>
+            <Title level={5} style={{marginBottom: '10px'}}>Token Expiration</Title>
+            <Space size={0} direction={"vertical"} style={{width: '100%'}}>
+                <SaveInputComponent
+                    type={"number"}
+                    addonBefore={<div style={{textAlign: 'start', width: '140px'}}>Authentication Token</div>}
+                    defaultValue={settings?.tokenExpiration.authenticationToken?.toString()}
+                    placeholder={"Enter the expiration time of the authentication token in minutes"}
+                    onSave={setAuthTokenExpirationTime}/>
+                <SaveInputComponent
+                    type={"number"}
+                    addonBefore={<div style={{textAlign: 'start', width: '140px'}}>Refresh Token</div>}
+                    defaultValue={settings?.tokenExpiration.refreshToken?.toString()}
+                    placeholder={"Enter the expiration time of the authentication token in minutes"}
+                    onSave={setRefreshTokenExpirationTime}/>
+            </Space>
+        </div>
+    }
+
     const showEncryptEmailModal = (encryptEmail: boolean) => {
         confirm({
             title: 'Encrypt email addresses?',
@@ -202,6 +252,7 @@ const SettingsComponent = () => {
                                     </Text>
                                 </Space>
                                 {render2FactorAuthorization()}
+                                {renderTokenExpirationTimeSettings()}
                             </Space>
                         </Card>,
                     },

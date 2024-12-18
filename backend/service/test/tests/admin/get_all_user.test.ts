@@ -41,7 +41,7 @@ jest.mock('../../../src/server/middlewares/hasXsrfTokenMiddleware.ts', () => ({
     }),
 }));
 
-describe('GET /user', () => {
+describe('GET /admin/user', () => {
     const endpoint = '/admin/user';
 
     beforeEach(() => {

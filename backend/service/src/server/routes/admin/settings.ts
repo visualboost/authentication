@@ -3,6 +3,7 @@ import {Settings} from "../../../models/db/Settings.ts";
 import BadRequestError from "../../../errors/BadRequestError.ts";
 import {EmailCredentialsModel} from "../../../models/db/credentials/EMailCredentials.ts";
 import {TimeUtil} from "../../../util/TimeUtil.ts";
+import {JwtHandler} from "../../../util/JwtHandler.ts";
 
 const router = express.Router();
 
@@ -24,8 +25,10 @@ router.put(
     async (req, res, next) => {
         try {
             const settings = req.body.settings
-            //@ts-ignore
             const updatedSettings = await Settings.updateSettings(settings);
+
+            JwtHandler.updateAuthenticationTokenExpiration(updatedSettings.tokenExpiration.authenticationToken)
+            JwtHandler.updateRefreshTokenExpiration(updatedSettings.tokenExpiration.refreshToken)
             return res.json(settings);
         } catch (e) {
             next(e);

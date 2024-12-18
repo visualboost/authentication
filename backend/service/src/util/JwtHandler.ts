@@ -13,13 +13,18 @@ import {isDevEnvironment} from "./ConfigUtil.ts";
 
 export class JwtHandler {
 
+    //The expiration time of the authentication token. This parameter will be overridden by the token expiration time defined in the settings
+    private static authenticationTokenExpirationTime: number = 30;
+    //The expiration time of the authentication token. This parameter will be overridden by the token expiration time defined in the settings
+    private static refreshTokenExpirationTime: number = 480;
+
     /**
      * Create an authentication token.
      * This token expires in 5 minutes.
      */
     static createAuthToken(_id: string, role: string, userstate: UserState): string {
         const jwtContent = new JwtContent(_id.toString(), role, userstate);
-        return jwt.sign({...jwtContent}, getAuthenticationTokenSecret(), {expiresIn: "5m"});
+        return jwt.sign({...jwtContent}, getAuthenticationTokenSecret(), {expiresIn: `${this.authenticationTokenExpirationTime}m`});
     }
 
     /**
@@ -27,7 +32,7 @@ export class JwtHandler {
      * This token expires in 4 hours.
      */
     static createRefreshToken(_id: string): string {
-        return jwt.sign({id: _id}, getRefreshTokenSecret(), {expiresIn: "4h"});
+        return jwt.sign({id: _id}, getRefreshTokenSecret(), {expiresIn: `${this.refreshTokenExpirationTime}m`});
     }
 
     static setRefreshTokenCookie(refreshToken: string, res: Response) {
@@ -137,6 +142,14 @@ export class JwtHandler {
     static clearAuthenticationCookies(res: Response){
         res.clearCookie(CookieNames.AUTH_TOKEN);
         res.clearCookie(CookieNames.REFRESH_TOKEN);
+    }
+
+    static updateAuthenticationTokenExpiration(timeInMinutes: number) {
+        this.authenticationTokenExpirationTime = timeInMinutes
+    }
+
+    static updateRefreshTokenExpiration(timeInMinutes: number) {
+        this.refreshTokenExpirationTime = timeInMinutes
     }
 
 }

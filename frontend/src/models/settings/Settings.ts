@@ -10,6 +10,11 @@ export interface TwoFactorAuthorization {
     clients: boolean;
 }
 
+export interface TokenExpiration {
+    authenticationToken: number;
+    refreshToken: number;
+}
+
 export class Settings {
     restrictLoginToAdmin: boolean;
     enableRegistrationView: boolean;
@@ -23,7 +28,9 @@ export class Settings {
     twoFactorAuthorization: TwoFactorAuthorization;
     encryptEmail: boolean;
 
-    constructor(allowLogin: boolean, allowRegistration: boolean, showPrivacyPolicy: boolean, privacyPolicyUrl: string, defaultRole: string, hooks: Hook[] = [], twoFactorAuthorization: TwoFactorAuthorization, encryptEmail: boolean) {
+    tokenExpiration: TokenExpiration;
+
+    constructor(allowLogin: boolean, allowRegistration: boolean, showPrivacyPolicy: boolean, privacyPolicyUrl: string, defaultRole: string, hooks: Hook[] = [], twoFactorAuthorization: TwoFactorAuthorization, encryptEmail: boolean, tokenExpiration: TokenExpiration) {
         this.restrictLoginToAdmin = allowLogin;
         this.enableRegistrationView = allowRegistration;
 
@@ -35,6 +42,7 @@ export class Settings {
 
         this.twoFactorAuthorization = twoFactorAuthorization;
         this.encryptEmail = encryptEmail;
+        this.tokenExpiration = tokenExpiration;
     }
 
     setHook(type: Hooks, url: string | null) {
@@ -66,7 +74,8 @@ export class Settings {
                 }
             }),
             {admin: json.twoFactorAuthorization.admin, clients: json.twoFactorAuthorization.clients},
-            json.encryptEmail
+            json.encryptEmail,
+            json.tokenExpiration
         )
     }
 }

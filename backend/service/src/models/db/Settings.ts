@@ -16,6 +16,12 @@ export interface TwoFactorAuthorization {
     clients: boolean;
 }
 
+export interface TokenExpiration {
+    authenticationToken: number;
+    refreshToken: number;
+}
+
+
 interface ISettings extends mongoose.Document {
     _id: ObjectId;
     ID: string;
@@ -34,6 +40,7 @@ interface ISettings extends mongoose.Document {
 
     encryptEmail: boolean;
 
+    tokenExpiration: TokenExpiration;
 }
 
 interface ISettingsModel extends Model<ISettings> {
@@ -68,6 +75,12 @@ const SettingsSchema = new Schema<ISettings, ISettingsModel>({
         clients: {type: Boolean, required: true, default: false}
     },
     encryptEmail: {type: Boolean, required: true, default: false},
+    tokenExpiration: {
+        //Default is 30 minutes
+        authenticationToken: {type: Number, required: true, default: 30},
+        //Default is 8h
+        refreshToken: {type: Number, required: true, default: 480}
+    }
 }, {
     statics: {
         load: async function (): Promise<ISettings> {

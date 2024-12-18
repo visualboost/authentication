@@ -1,5 +1,16 @@
 # Versions:
 
+## 1.0.4 (18.12.2024)
+
+---
+
+### Backend:
+- Allow the user to change the expiration time of the authentication token and the refresh token
+  - Added: ``tokenExpiration.authenticationToken`` and ``tokenExpiration.refreshToken`` to ``Settings``.
+
+### Frontend:
+- Added a component to the ``Login`` settings to allow modification of the authentication token and refresh token expiration time.
+
 ## 1.0.3 (14.12.2024)
 
 ---
