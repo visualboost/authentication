@@ -5,10 +5,11 @@ import {app} from '../../../src/server/server.ts';
 import {NextFunction, Request, Response} from "express";
 import {decryptEmailIfAllowedBySystem} from "../../../src/util/EncryptionUtil.ts";
 import {JwtHandler} from "../../../src/util/JwtHandler.ts";
-import {SystemRoles} from "../../../src/constants/SystemRoles.ts";
+import {SystemRoles} from "../../../src/constants/role/SystemRoles.ts";
 import {UserState} from "../../../src/constants/UserState.ts";
 import {hasXsrfTokenMiddleware} from "../../../src/server/middlewares/hasXsrfTokenMiddleware.ts";
 import {hasJwtMiddleware} from "../../../src/server/middlewares/hasJwt.ts";
+import {createDefaultRoleToken} from "../../util/JwtUtil.ts";
 
 jest.mock('../../../src/models/db/User.ts');
 jest.mock('../../../src/util/MailHandler.ts');
@@ -114,7 +115,7 @@ describe('POST /registration/resend', () => {
     describe('Middleware Tests', () => {
         it('should call hasJwtMiddleware', async () => {
             const res = await request(app).post(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken("userId123", SystemRoles.USER, UserState.ACTIVE))
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken())
 
             expect(hasJwtMiddleware).toHaveBeenCalled();
         });
@@ -122,7 +123,7 @@ describe('POST /registration/resend', () => {
         it('should call hasXsrfTokenMiddleware', async () => {
             const res = await request(app)
                 .post(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken("userId123", SystemRoles.USER, UserState.ACTIVE))
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken())
             expect(hasXsrfTokenMiddleware).toHaveBeenCalled();
         });
     });

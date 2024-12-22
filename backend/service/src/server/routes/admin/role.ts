@@ -4,11 +4,48 @@ import ConflictError from "../../../errors/ConflictError.ts";
 import NotFoundError from "../../../errors/NotFoundError.ts";
 import {Role} from "../../../models/db/Roles.ts";
 import {RoleResponse} from "../../../models/api/RoleResponse.ts";
+import {hasReadRoleScope, hasWriteRoleScope} from "../../middlewares/scope/hasRoleScopesMiddleware.ts";
 
 const router = express.Router();
 
+router.get(
+    '/role/:id',
+    hasReadRoleScope,
+    async (req, res, next) => {
+        try {
+            const roleId = req.params.id;
+            if (!roleId) {
+                throw new BadRequestError();
+            }
+
+            const role = await Role.findOne({_id: roleId}).lean();
+            return res.json(new RoleResponse(role._id.toString(), role.name, role.description, role.createdAt));
+        } catch (e) {
+            next(e);
+        }
+    }
+);
+
+router.get(
+    '/roles',
+    hasReadRoleScope,
+    async (req, res, next) => {
+        try {
+            const roles = await Role.find().sort({name: 'asc'}).lean();
+            return res.json(roles.map(role => new RoleResponse(role._id.toString(), role.name, role.description, role.createdAt)));
+        } catch (e) {
+            next(e);
+        }
+    }
+);
+
+
+/**
+ * Create a new role
+ */
 router.post(
     '/role',
+    hasWriteRoleScope,
     async (req, res, next) => {
         try {
             const roleName = req.body.name;
@@ -33,37 +70,12 @@ router.post(
     }
 );
 
-router.get(
-    '/role/:id',
-    async (req, res, next) => {
-        try {
-            const roleId = req.params.id;
-            if (!roleId) {
-                throw new BadRequestError();
-            }
-
-            const role = await Role.findOne({_id: roleId}).lean();
-            return res.json(new RoleResponse(role._id.toString(), role.name, role.description, role.createdAt));
-        } catch (e) {
-            next(e);
-        }
-    }
-);
-
-router.get(
-    '/roles',
-    async (req, res, next) => {
-        try {
-            const roles = await Role.find().sort({name: 'asc'}).lean();
-            return res.json(roles.map(role => new RoleResponse(role._id.toString(), role.name, role.description, role.createdAt)));
-        } catch (e) {
-            next(e);
-        }
-    }
-);
-
+/**
+ * Update a role
+ */
 router.put(
     '/role/:id',
+    hasWriteRoleScope,
     async (req, res, next) => {
         try {
             const roleId = req.params.id;
@@ -92,6 +104,7 @@ router.put(
 
 router.delete(
     '/role/:id',
+    hasWriteRoleScope,
     async (req, res, next) => {
         try {
             const roleId = req.params.id;

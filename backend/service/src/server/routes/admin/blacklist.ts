@@ -1,43 +1,38 @@
 import express from "express";
 import BadRequestError from "../../../errors/BadRequestError.ts";
-import {IUser, User} from "../../../models/db/User.ts";
-import ConflictError from "../../../errors/ConflictError.ts";
-import NotFoundError from "../../../errors/NotFoundError.ts";
-import {Role} from "../../../models/db/Roles.ts";
+import {User} from "../../../models/db/User.ts";
 import {Blacklist} from "../../../models/db/Blacklist.ts";
 import {Success} from "../../../models/api/Success.ts";
-import {UserListItem} from "../../../models/api/UserListItem.ts";
-import {UserState} from "../../../constants/UserState.ts";
 import {BlackListItem} from "../../../models/api/BlackListItem.ts";
 import {Settings} from "../../../models/db/Settings.ts";
-import {UserSearchCriterias} from "../../../constants/UserSearchCriterias.ts";
-import {EmailCredentialsModel} from "../../../models/db/credentials/EMailCredentials.ts";
 import {decrypt, encrypt} from "../../../util/EncryptionUtil.ts";
+import {hasBlackListReadScope, hasBlackListWriteScope} from "../../middlewares/scope/hasBlacklistScopesMiddleware.ts";
 
 const router = express.Router();
 
 router.get(
     '/',
+    hasBlackListReadScope,
     async (req, res, next) => {
         try {
             const emailSearchQuery = req.query.email as string;
             const emailsAreEncrypted = await Settings.getEmailEncryptionEnabled();
 
             let blackListEntries: Array<BlackListItem> = [];
-            if(emailSearchQuery){
+            if (emailSearchQuery) {
 
-                if(emailsAreEncrypted){
+                if (emailsAreEncrypted) {
                     blackListEntries = await Blacklist.find({email: encrypt(emailSearchQuery)}).lean() as Array<BlackListItem>;
-                }else{
+                } else {
                     blackListEntries = await Blacklist.find({email: new RegExp(emailSearchQuery, 'i')}).lean() as Array<BlackListItem>;
                 }
-            }else{
+            } else {
                 blackListEntries = await Blacklist.find().lean() as Array<BlackListItem>;
             }
 
             const blacklistItems = blackListEntries.map(entry => {
                 let email = entry.email
-                if(emailsAreEncrypted){
+                if (emailsAreEncrypted) {
                     email = decrypt(email);
                 }
                 return new BlackListItem(entry.ip, email, entry.createdAt)
@@ -52,6 +47,7 @@ router.get(
 
 router.post(
     '/email',
+    hasBlackListWriteScope,
     async (req, res, next) => {
         try {
             const email = req.body.email;
@@ -61,7 +57,7 @@ router.post(
 
             //@ts-ignore
             const user = await User.getByEmail(email);
-            if(user && user.isAdmin()){
+            if (user && user.isAdmin()) {
                 throw new BadRequestError();
             }
 
@@ -75,6 +71,7 @@ router.post(
 
 router.delete(
     '/email',
+    hasBlackListWriteScope,
     async (req, res, next) => {
         try {
             const email = req.query.email;
@@ -93,6 +90,7 @@ router.delete(
 
 router.post(
     '/ip',
+    hasBlackListWriteScope,
     async (req, res, next) => {
         try {
             const ip = req.body.ip;
@@ -101,7 +99,7 @@ router.post(
             }
 
             const user = await User.getByIP(ip, false);
-            if(user && user.isAdmin()){
+            if (user && user.isAdmin()) {
                 throw new BadRequestError();
             }
 
@@ -115,6 +113,7 @@ router.post(
 
 router.delete(
     '/ip',
+    hasBlackListWriteScope,
     async (req, res, next) => {
         try {
             const ip = req.query.ip as string;
@@ -122,24 +121,6 @@ router.delete(
                 throw new BadRequestError();
             }
 
-            await Blacklist.deleteIP(ip);
-            return res.json(new Success())
-        } catch (e) {
-            next(e);
-        }
-    }
-);
-
-router.delete(
-    '/block/ip',
-    async (req, res, next) => {
-        try {
-            const ip = req.body.ip;
-            if (!ip) {
-                throw new BadRequestError();
-            }
-
-            //@ts-ignore
             await Blacklist.deleteIP(ip);
             return res.json(new Success())
         } catch (e) {

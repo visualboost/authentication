@@ -1,5 +1,5 @@
 import mongoose, {Model, ObjectId} from "mongoose";
-import {SystemRoles} from "../../constants/SystemRoles.ts";
+import {SystemRoles} from "../../constants/role/SystemRoles.ts";
 import {Hooks} from "../../constants/Hooks.ts";
 import {EmailCredentialsModel} from "./credentials/EMailCredentials.ts";
 import {Blacklist} from "./Blacklist.ts";

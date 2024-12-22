@@ -8,13 +8,14 @@ import BadRequestError from '../../../src/errors/BadRequestError';
 import ForbiddenError from '../../../src/errors/ForbiddenError';
 import NotFoundError from '../../../src/errors/NotFoundError';
 import {JwtHandler} from '../../../src/util/JwtHandler';
-import {SystemRoles} from '../../../src/constants/SystemRoles';
+import {SystemRoles} from '../../../src/constants/role/SystemRoles.ts';
 import {UserState} from '../../../src/constants/UserState';
 import {validatePassword} from "../../../src/util/PasswordUtil.ts";
 import {NextFunction, Request, Response} from "express";
 import {hasXsrfTokenMiddleware} from "../../../src/server/middlewares/hasXsrfTokenMiddleware.ts";
 import {hasJwtMiddleware} from "../../../src/server/middlewares/hasJwt.ts";
 import * as EncryptionUtil from "../../../src/util/EncryptionUtil.ts"
+import {createDefaultRoleToken} from "../../util/JwtUtil.ts";
 
 jest.mock('../../../src/models/db/User');
 jest.mock('../../../src/models/db/UserModification');
@@ -69,7 +70,7 @@ describe('PATCH /user/modify/password', () => {
             // Perform request
             const res = await request(app)
                 .patch(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken(userId, SystemRoles.USER, UserState.ACTIVE))
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken(userId))
                 .send({currentPassword, newPassword});
 
             // Assertions
@@ -87,7 +88,7 @@ describe('PATCH /user/modify/password', () => {
 
             const res = await request(app)
                 .patch(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken('', SystemRoles.USER, UserState.ACTIVE)) // Add headers if needed
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken(""))
                 .send({currentPassword: 'password123', newPassword: 'Test12345'});
 
             expect(res.status).toBe(new BadRequestError().status);
@@ -99,7 +100,7 @@ describe('PATCH /user/modify/password', () => {
 
             const res = await request(app)
                 .patch(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken('userId', SystemRoles.USER, UserState.ACTIVE)) // Add headers if needed
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken())
                 .send({currentPassword: '', newPassword: 'Test12345'});
 
             expect(res.status).toBe(new BadRequestError().status);
@@ -111,7 +112,7 @@ describe('PATCH /user/modify/password', () => {
 
             const res = await request(app)
                 .patch(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken('userId', SystemRoles.USER, UserState.ACTIVE)) // Add headers if needed
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken())
                 .send({currentPassword: 'Test12345', newPassword: ''});
 
             expect(res.status).toBe(new BadRequestError().status);
@@ -128,7 +129,7 @@ describe('PATCH /user/modify/password', () => {
 
             const res = await request(app)
                 .patch(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken(userId, SystemRoles.USER, UserState.ACTIVE))
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken())
                 .send({currentPassword, newPassword});
 
             expect(res.status).toBe(new BadRequestError().status);
@@ -151,7 +152,7 @@ describe('PATCH /user/modify/password', () => {
 
             const res = await request(app)
                 .patch(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken(userId, SystemRoles.USER, UserState.ACTIVE))
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken())
                 .send({currentPassword, newPassword});
 
             expect(res.status).toBe(new ForbiddenError().status);
@@ -169,7 +170,7 @@ describe('PATCH /user/modify/password', () => {
 
             const res = await request(app)
                 .patch(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken(userId, SystemRoles.USER, UserState.ACTIVE))
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken())
                 .send({currentPassword, newPassword});
 
             expect(res.status).toBe(new NotFoundError().status);
@@ -186,7 +187,7 @@ describe('PATCH /user/modify/password', () => {
 
             const res = await request(app)
                 .patch(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken(userId, SystemRoles.USER, UserState.ACTIVE))
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken())
                 .send({currentPassword, newPassword});
 
             expect(res.status).toBe(500);
@@ -203,7 +204,7 @@ describe('PATCH /user/modify/password', () => {
         it('should call hasXsrfTokenMiddleware', async () => {
             const res = await request(app)
                 .patch(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken("userId123", SystemRoles.USER, UserState.ACTIVE))
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken())
             expect(hasXsrfTokenMiddleware).toHaveBeenCalled();
         });
 

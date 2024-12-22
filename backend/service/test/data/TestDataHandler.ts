@@ -3,7 +3,7 @@ import {User} from "../../src/models/db/User";
 import {Role} from "../../src/models/db/Roles";
 import {dv, faker} from '@faker-js/faker';
 import mongoose from "mongoose";
-import {SystemRoles} from "../../src/constants/SystemRoles.ts";
+import {SystemRoles} from "../../src/constants/role/SystemRoles.ts";
 import bcrypt from "bcrypt";
 import {encrypt} from "../../src/util/EncryptionUtil.ts";
 import {UserState} from "../../src/constants/UserState.ts";

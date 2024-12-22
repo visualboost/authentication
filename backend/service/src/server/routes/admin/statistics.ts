@@ -10,11 +10,13 @@ import {FailedLoginAttemptsModel} from "../../../models/db/settings/LoginStatist
 import {SecurityStatistics} from "../../../models/api/statistics/SecurityStatistics.ts";
 import {Role} from "../../../models/db/Roles.ts";
 import {RoleStatistic} from "../../../models/api/statistics/RoleStatistic.ts";
+import { hasStatisticsReadRoleScope} from "../../middlewares/scope/hasStatisticScopeMiddleware.ts";
 
 const router = express.Router();
 
 router.get(
     '/',
+    hasStatisticsReadRoleScope,
     async (req, res, next) => {
         try {
             //@ts-ignore

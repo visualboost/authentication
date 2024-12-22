@@ -1,6 +1,6 @@
 import {TestDatabase} from "../../util/database/TestDatabase.ts";
 import {IUser, User} from "../../../src/models/db/User.ts";
-import {SystemRoles} from "../../../src/constants/SystemRoles.ts";
+import {SystemRoles} from "../../../src/constants/role/SystemRoles.ts";
 import {EmailCredentialsModel} from "../../../src/models/db/credentials/EMailCredentials.ts";
 import mongoose from "mongoose";
 import {Settings} from "../../../src/models/db/Settings.ts";

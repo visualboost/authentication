@@ -8,11 +8,9 @@ import BadRequestError from "../../../src/errors/BadRequestError.ts";
 import ConflictError from "../../../src/errors/ConflictError.ts";
 import NotFoundError from "../../../src/errors/NotFoundError.ts";
 import {Success} from "../../../src/models/api/Success.ts";
-import {JwtHandler} from "../../../src/util/JwtHandler.ts";
-import {SystemRoles} from "../../../src/constants/SystemRoles.ts";
-import {UserState} from "../../../src/constants/UserState.ts";
 import {NextFunction, Request, Response} from "express";
 import {decryptEmailIfAllowedBySystem, getAuthenticationTokenSecret} from '../../../src/util/EncryptionUtil.ts';
+import {createDefaultRoleToken} from "../../util/JwtUtil.ts";
 
 jest.mock('../../../src/models/db/credentials/EMailCredentials');
 jest.mock('../../../src/models/db/UserModification');
@@ -56,7 +54,7 @@ describe('PATCH /user/modify/email', () => {
             // Perform request
             const res = await request(app)
                 .patch(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken(userId, SystemRoles.USER, UserState.ACTIVE))
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken(userId))
                 .send({email: newEmail});
 
             // Assertions
@@ -87,7 +85,7 @@ describe('PATCH /user/modify/email', () => {
             // Perform request
             const res = await request(app)
                 .patch(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken(userId, SystemRoles.USER, UserState.ACTIVE))  // Add headers if needed
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken())  // Add headers if needed
                 .send({email: newEmail});
 
             expect(decryptEmailIfAllowedBySystem).toHaveBeenCalledWith(originEmail);
@@ -103,7 +101,7 @@ describe('PATCH /user/modify/email', () => {
 
             const res = await request(app)
                 .patch(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken('', SystemRoles.USER, UserState.ACTIVE))  // Add headers if needed
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken(""))
                 .send({email: 'new@example.com'});
 
             expect(res.status).toBe(new BadRequestError().status);
@@ -116,7 +114,7 @@ describe('PATCH /user/modify/email', () => {
 
             const res = await request(app)
                 .patch(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken('userId', SystemRoles.USER, UserState.ACTIVE))  // Add headers if needed
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken())
                 .send({email: ''});
 
             expect(res.status).toBe(new BadRequestError().status);
@@ -132,7 +130,7 @@ describe('PATCH /user/modify/email', () => {
 
             const res = await request(app)
                 .patch(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken('userId', SystemRoles.USER, UserState.ACTIVE))  // Add headers if needed
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken())  // Add headers if needed
                 .send({email: newEmail});
 
             expect(res.status).toBe(new ConflictError().status);
@@ -153,7 +151,7 @@ describe('PATCH /user/modify/email', () => {
 
             const res = await request(app)
                 .patch(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken('userId', SystemRoles.USER, UserState.ACTIVE))  // Add headers if needed
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken())  // Add headers if needed
                 .send({email: newEmail});
 
             expect(res.status).toBe(new NotFoundError().status);
@@ -169,7 +167,7 @@ describe('PATCH /user/modify/email', () => {
 
             const res = await request(app)
                 .patch(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken('userId', SystemRoles.USER, UserState.ACTIVE))  // Add headers if needed
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken())  // Add headers if needed
                 .send({email: newEmail});
 
             expect(res.status).toBe(500);

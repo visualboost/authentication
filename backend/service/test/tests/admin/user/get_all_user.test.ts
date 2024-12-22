@@ -1,44 +1,60 @@
 import request from 'supertest';
-import {User} from '../../../src/models/db/User';
-import {Settings} from '../../../src/models/db/Settings';
-import {app} from '../../../src/server/server.ts';
+import {User} from '../../../../src/models/db/User.ts';
+import {Settings} from '../../../../src/models/db/Settings.ts';
+import {app} from '../../../../src/server/server.ts';
 import {NextFunction, Request, Response} from "express";
-import {UserState} from "../../../src/constants/UserState.ts";
-import {IEmailCredentials} from "../../../src/models/db/credentials/EMailCredentials.ts";
-import {UserSearchCriterias} from "../../../src/constants/UserSearchCriterias.ts";
-import {hasJwtMiddleware} from "../../../src/server/middlewares/hasJwt.ts";
-import {JwtHandler} from "../../../src/util/JwtHandler.ts";
-import {SystemRoles} from "../../../src/constants/SystemRoles.ts";
-import {hasXsrfTokenMiddleware} from "../../../src/server/middlewares/hasXsrfTokenMiddleware.ts";
-import {isActiveMiddleware} from "../../../src/server/middlewares/isActive.ts";
-import {isAdminMiddleware} from "../../../src/server/middlewares/isAdmin.ts";
+import {UserState} from "../../../../src/constants/UserState.ts";
+import {IEmailCredentials} from "../../../../src/models/db/credentials/EMailCredentials.ts";
+import {UserSearchCriterias} from "../../../../src/constants/UserSearchCriterias.ts";
+import {hasJwtMiddleware} from "../../../../src/server/middlewares/hasJwt.ts";
+import {JwtHandler} from "../../../../src/util/JwtHandler.ts";
+import {hasXsrfTokenMiddleware} from "../../../../src/server/middlewares/hasXsrfTokenMiddleware.ts";
+import {isActiveMiddleware} from "../../../../src/server/middlewares/isActive.ts";
+import {isAdminMiddleware} from "../../../../src/server/middlewares/isAdmin.ts";
+import {createTestAdminToken} from "../../../util/JwtUtil.ts";
+import {hasReadMultipleUserScope} from "../../../../src/server/middlewares/scope/hasUserScopeMiddleware.ts";
 
-jest.mock('../../../src/models/db/User');
-jest.mock('../../../src/models/db/Settings');
+jest.mock('../../../../src/models/db/User.ts');
+jest.mock('../../../../src/models/db/Settings.ts');
 
-jest.mock('../../../src/server/middlewares/hasJwt.ts', () => ({
+jest.mock('../../../../src/server/middlewares/hasJwt.ts', () => ({
     hasJwtMiddleware: jest.fn((req: Request, res: Response, next: NextFunction) => {
         res.locals.authToken = JwtHandler.fromRequest(req)
         next();
     }),
 }));
 
-jest.mock('../../../src/server/middlewares/isActive.ts', () => ({
+jest.mock('../../../../src/server/middlewares/isActive.ts', () => ({
     isActiveMiddleware: jest.fn((req: Request, res: Response, next: NextFunction) => {
         next();
     }),
 }));
 
-jest.mock('../../../src/server/middlewares/isAdmin.ts', () => ({
+jest.mock('../../../../src/server/middlewares/isAdmin.ts', () => ({
     isAdminMiddleware: jest.fn((req: Request, res: Response, next: NextFunction) => {
         next();
     }),
 }));
 
-jest.mock('../../../src/server/middlewares/hasXsrfTokenMiddleware.ts', () => ({
+jest.mock('../../../../src/server/middlewares/hasXsrfTokenMiddleware.ts', () => ({
     hasXsrfTokenMiddleware: jest.fn((req: Request, res: Response, next: NextFunction) => {
         next();
     }),
+}));
+
+jest.mock('../../../../src/server/middlewares/scope/hasUserScopeMiddleware.ts', () => ({
+    hasReadMultipleUserScope: jest.fn((req: Request, res: Response, next: NextFunction) => {
+        next();
+    }),
+    hasWriteUserScope: jest.fn((req: Request, res: Response, next: NextFunction) => {
+        next();
+    }),
+    hasInviteUserScope: jest.fn((req: Request, res: Response, next: NextFunction) => {
+        next();
+    }),
+    hasChangeUserRoleScope: jest.fn((req: Request, res: Response, next: NextFunction) => {
+        next();
+    })
 }));
 
 describe('GET /admin/user', () => {
@@ -49,6 +65,7 @@ describe('GET /admin/user', () => {
     });
 
     describe('Success', () => {
+
         test('should return all non-blocked users when no query parameters are provided', async () => {
             const mockUsers = [
                 {
@@ -80,7 +97,7 @@ describe('GET /admin/user', () => {
 
             const res = await request(app)
                 .get(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken('userId', SystemRoles.ADMIN, UserState.ACTIVE));
+                .set('Authorization', 'Bearer ' + createTestAdminToken());
 
             expect(res.status).toBe(200);
             expect(res.body).toHaveLength(2);
@@ -104,7 +121,7 @@ describe('GET /admin/user', () => {
 
             const res = await request(app)
                 .get(endpoint).query({value: 'testUser', type: UserSearchCriterias.USERNAME})
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken('userId', SystemRoles.ADMIN, UserState.ACTIVE));
+                .set('Authorization', 'Bearer ' + createTestAdminToken());
 
             expect(res.status).toBe(200);
             expect(res.body).toHaveLength(1);
@@ -128,9 +145,9 @@ describe('GET /admin/user', () => {
 
             const res = await request(app)
                 .get(endpoint).query({
-                value: 'test@example.com',
-                type: UserSearchCriterias.EMAIL
-            }).set('Authorization', 'Bearer ' + JwtHandler.createAuthToken('userId', SystemRoles.ADMIN, UserState.ACTIVE));
+                    value: 'test@example.com',
+                    type: UserSearchCriterias.EMAIL
+                }).set('Authorization', 'Bearer ' + createTestAdminToken());
 
             expect(res.status).toBe(200);
             expect(res.body).toHaveLength(1);
@@ -148,10 +165,10 @@ describe('GET /admin/user', () => {
                 })
             });
 
-            const res = await request(app).get(endpoint).set('Authorization', 'Bearer ' + JwtHandler.createAuthToken('userId', SystemRoles.ADMIN, UserState.ACTIVE));
+            const res = await request(app).get(endpoint).set('Authorization', 'Bearer ' + createTestAdminToken());
 
             expect(res.status).toBe(500);
-            expect(res.body).toEqual( {message: 'Database error'});
+            expect(res.body).toEqual({message: 'Database error'});
         });
     });
 
@@ -165,14 +182,14 @@ describe('GET /admin/user', () => {
         it('should call isActiveMiddleware', async () => {
             await request(app)
                 .get(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken('userId', SystemRoles.ADMIN, UserState.ACTIVE));
+                .set('Authorization', 'Bearer ' + createTestAdminToken());
             expect(isActiveMiddleware).toHaveBeenCalled();
         });
 
         it('should call isAdminMiddleware', async () => {
             await request(app)
                 .get(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken('userId', SystemRoles.ADMIN, UserState.ACTIVE));
+                .set('Authorization', 'Bearer ' + createTestAdminToken());
             expect(isAdminMiddleware).toHaveBeenCalled();
         });
 
@@ -180,9 +197,17 @@ describe('GET /admin/user', () => {
         it('should call hasXsrfTokenMiddleware', async () => {
             const res = await request(app)
                 .get(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken("userId123", SystemRoles.USER, UserState.ACTIVE))
+                .set('Authorization', 'Bearer ' + createTestAdminToken())
             expect(hasXsrfTokenMiddleware).toHaveBeenCalled();
         });
+
+        it('should call has hasReadMultipleUserScope middleware', async () => {
+            const res = await request(app)
+                .get(endpoint)
+                .set('Authorization', 'Bearer ' + createTestAdminToken())
+            expect(hasReadMultipleUserScope).toHaveBeenCalled();
+        });
+
 
     });
 });

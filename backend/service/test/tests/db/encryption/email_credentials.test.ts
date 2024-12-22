@@ -1,6 +1,6 @@
 import {TestDatabase} from "../../../util/database/TestDatabase.ts";
 import {User} from "../../../../src/models/db/User.ts";
-import {SystemRoles} from "../../../../src/constants/SystemRoles.ts";
+import {SystemRoles} from "../../../../src/constants/role/SystemRoles.ts";
 import * as EncryptUtil from "../../../../src/util/EncryptionUtil.ts";
 import bcrypt from "bcrypt";
 import {Settings} from "../../../../src/models/db/Settings.ts";

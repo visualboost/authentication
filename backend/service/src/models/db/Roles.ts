@@ -1,14 +1,18 @@
 import mongoose, {Model} from "mongoose";
-import {SystemRoles} from "../../constants/SystemRoles.ts";
+import {SystemRoles} from "../../constants/role/SystemRoles.ts";
 import {User} from "./User.ts";
 import {Settings} from "./Settings.ts";
 import {getRolesByFile} from "../../util/FileHandler.ts";
+import {Admin} from "../../constants/role/Admin.ts";
+import {ad} from "@faker-js/faker/dist/airline-C5Qwd7_q";
+import {DefaultUser} from "../../constants/role/DefaultUser.ts";
 
 const Schema = mongoose.Schema;
 
 export interface IRole extends Document {
     name: string;
     description?: string;
+    scopes: string[];
     createdAt: Date;
 }
 
@@ -18,11 +22,15 @@ export interface IRoleModel extends Model<IRole> {
     initSystemRoles(): Promise<string[]>;
     roleExists(roleName: string): Promise<boolean>;
     deleteRole(role: string): Promise<void>;
+
+    createAdmin(): Promise<void>;
+    createDefaultRole(): Promise<void>;
 }
 
 const RoleSchema = new Schema<IRole, IRoleModel>({
-    name: {type: String, required: true, unique: true},
+    name: {type: String, required: true, unique: true, indexed: true},
     description: {type: String},
+    scopes: [{type: String}]
 }, {timestamps: true});
 
 RoleSchema.statics.initRolesByFile = async function () {
@@ -48,8 +56,11 @@ RoleSchema.statics.initRoles = async function (roles: Array<string>) {
 }
 
 RoleSchema.statics.initSystemRoles = async function () {
-    await Role.findOneAndUpdate({name:  SystemRoles.ADMIN}, {name:  SystemRoles.ADMIN, description: "The administrator of the user management system. This role has all rights."}, {new: true, upsert: true});
-    await Role.findOneAndUpdate({name:  SystemRoles.USER}, {name:  SystemRoles.USER, description: "The default role of the user management system."}, {new: true, upsert: true});
+    await this.createAdmin();
+    await this.createDefaultRole();
+
+    // await Role.findOneAndUpdate({name:  SystemRoles.ADMIN}, {name:  SystemRoles.ADMIN, description: "The administrator of the user management system. This role has all rights."}, {new: true, upsert: true});
+    // await Role.findOneAndUpdate({name:  SystemRoles.USER}, {name:  SystemRoles.USER, description: "The default role of the user management system."}, {new: true, upsert: true});
 
     return [SystemRoles.ADMIN, SystemRoles.USER]
 }
@@ -73,6 +84,18 @@ RoleSchema.statics.deleteRole = async function (role: string) {
     await Role.deleteOne({name: role});
 }
 
+RoleSchema.statics.createAdmin = async function () {
+    const admin = new Admin();
+    await Role.findOneAndUpdate({name:  admin.name}, {name: admin.name, description: "The administrator of the user management system. This role has all rights.", scopes: admin.scopes}, {new: true, upsert: true});
+}
+
+RoleSchema.statics.createDefaultRole = async function () {
+    const user = new DefaultUser();
+    const defaultRole = await Role.findOne({name: user.name}).lean();
+    if(!defaultRole){
+        await Role.findOneAndUpdate({name:  user.name}, {name: user.name, description: "The default role of the user management system.", scopes: []}, {new: true, upsert: true});
+    }
+}
 
 const Role = mongoose.model<IRole, IRoleModel>('Role', RoleSchema);
 

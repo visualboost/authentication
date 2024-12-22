@@ -1,14 +1,16 @@
 import {UserState} from "../../constants/UserState.ts";
-import {SystemRoles} from "../../constants/SystemRoles.ts";
+import {SystemRoles} from "../../constants/role/SystemRoles.ts";
 
 export class JwtContent {
     private userId: string;
     private role: string;
+    private scopes: string[];
     private state: UserState;
 
-    constructor(userId: string, role: string, state: UserState) {
+    constructor(userId: string, role: string, scopes: string[], state: UserState) {
         this.userId = userId;
         this.role = role;
+        this.scopes = scopes || [];
         this.state = state;
     }
 
@@ -18,6 +20,10 @@ export class JwtContent {
 
     getRole(): string {
         return this.role;
+    }
+
+    getScopes(): string[] {
+        return this.scopes;
     }
 
     getState(): UserState {
@@ -40,6 +46,6 @@ export class JwtContent {
 
 
     isValid(): boolean {
-        return this.getUserId() !== undefined && this.getRole() !== undefined && this.getState() !== undefined;
+        return this.getUserId() !== undefined && this.getRole() !== undefined && this.scopes !== undefined && this.getState() !== undefined;
     }
 }

@@ -6,9 +6,10 @@ import ForbiddenError from "../../../src/errors/ForbiddenError.ts";
 import {CookieNames} from "../../../src/constants/CookieNames.ts";
 import {NextFunction, Request, Response} from "express";
 import {isBlacklistedMiddleware} from "../../../src/server/middlewares/isBlacklisted.ts";
-import {SystemRoles} from "../../../src/constants/SystemRoles.ts";
+import {SystemRoles} from "../../../src/constants/role/SystemRoles.ts";
 import {UserState} from "../../../src/constants/UserState.ts";
 import {hasXsrfTokenMiddleware} from "../../../src/server/middlewares/hasXsrfTokenMiddleware.ts";
+import {createDefaultRoleToken} from "../../util/JwtUtil.ts";
 
 jest.mock('../../../src/models/db/User.ts');
 jest.mock('../../../src/util/JwtHandler.ts');
@@ -98,7 +99,7 @@ describe('PUT /authentication/token', () => {
         it('should call hasXsrfTokenMiddleware', async () => {
             const res = await request(app)
                 .put(endpoint)
-                .set('Authorization', 'Bearer ' + JwtHandler.createAuthToken("userId123", SystemRoles.USER, UserState.ACTIVE))
+                .set('Authorization', 'Bearer ' + createDefaultRoleToken())
             expect(hasXsrfTokenMiddleware).toHaveBeenCalled();
         });
 

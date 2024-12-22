@@ -11,7 +11,7 @@ import {router as authenticationRouter} from "./routes/user/authentication.ts";
 import {router as userRouter} from "./routes/user/user.ts";
 import {router as userModificationRouter} from "./routes/user/modification.ts";
 import {router as confirmationRouter} from "./routes/user/confirmation.ts";
-import {router as adminRouter} from "./routes/admin/admin.ts";
+import {router, router as adminRouter} from "./routes/admin/admin.ts";
 import {router as systemRouter} from "./routes/system.ts";
 import {hasModificationToken} from "./middlewares/hasModificationToken.ts";
 import NotFoundError from "../errors/NotFoundError.ts";
@@ -19,6 +19,10 @@ import {hasXsrfTokenMiddleware} from "./middlewares/hasXsrfTokenMiddleware.ts";
 import {isActiveMiddleware} from "./middlewares/isActive.ts";
 import {ServerConfig} from "../models/util/ServerConfig.ts";
 import HttpError from "../errors/HttpError.ts";
+import {router as roleRouter} from "./routes/admin/role.ts";
+import {router as blacklistRouter} from "./routes/admin/blacklist.ts";
+import {router as settingsRouter} from "./routes/admin/settings.ts";
+import {router as statisticsRouter} from "./routes/admin/statistics.ts";
 
 const app = express();
 
@@ -42,6 +46,8 @@ app.use("/modification", hasModificationToken, userModificationRouter)
 app.use("/confirm", confirmationRouter)
 app.use("/admin", hasJwtMiddleware, isActiveMiddleware, isAdminMiddleware, hasXsrfTokenMiddleware, adminRouter)
 app.use("/system", systemRouter)
+
+
 
 // catch route not found
 app.use(function (req, res, next) {

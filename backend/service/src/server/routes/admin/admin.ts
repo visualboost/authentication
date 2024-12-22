@@ -14,17 +14,22 @@ import {router as statisticsRouter} from "./statistics.ts";
 
 import {UserSearchCriterias} from "../../../constants/UserSearchCriterias.ts";
 import {EmailCredentialsModel, IEmailCredentials} from "../../../models/db/credentials/EMailCredentials.ts";
-import {SystemRoles} from "../../../constants/SystemRoles.ts";
+import {SystemRoles} from "../../../constants/role/SystemRoles.ts";
 import {JwtHandler} from "../../../util/JwtHandler.ts";
 import {MailHandler} from "../../../util/MailHandler.ts";
 import {UserInvitation} from "../../../models/db/UserInvitation.ts";
 import FailedDependencyError from "../../../errors/FailedDependencyError.ts";
 import {Settings} from "../../../models/db/Settings.ts";
 import {decrypt} from "../../../util/EncryptionUtil.ts";
+import {
+    hasChangeUserRoleScope,
+    hasInviteUserScope,
+    hasReadMultipleUserScope,
+    hasWriteUserScope
+} from "../../middlewares/scope/hasUserScopeMiddleware.ts";
 
 const router = express.Router();
 
-//Add roles
 router.use("/", roleRouter)
 router.use("/blacklist", blacklistRouter)
 router.use("/settings", settingsRouter)
@@ -36,6 +41,7 @@ router.use("/statistics", statisticsRouter)
  */
 router.get(
     '/user',
+    hasReadMultipleUserScope,
     async (req, res, next) => {
         try {
             const value = req.query.value as string;
@@ -70,6 +76,7 @@ router.get(
 
 router.post(
     '/user/add',
+    hasWriteUserScope,
     async (req, res, next) => {
         try {
             const username = req.body.username;
@@ -105,6 +112,7 @@ router.post(
 
 router.post(
     '/user/invite',
+    hasInviteUserScope,
     async (req, res, next) => {
         try {
             const name = req.body.name;
@@ -148,6 +156,7 @@ router.post(
 
 router.delete(
     '/user/:userId',
+    hasWriteUserScope,
     async (req, res, next) => {
         try {
             const userId = req.params.userId;
@@ -169,6 +178,7 @@ router.delete(
 
 router.patch(
     '/user/:userId/role',
+    hasChangeUserRoleScope,
     async (req, res, next) => {
         try {
             const userId = req.params.userId;

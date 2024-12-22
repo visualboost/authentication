@@ -22,8 +22,8 @@ export class JwtHandler {
      * Create an authentication token.
      * This token expires in 5 minutes.
      */
-    static createAuthToken(_id: string, role: string, userstate: UserState): string {
-        const jwtContent = new JwtContent(_id.toString(), role, userstate);
+    static createAuthToken(_id: string, role: string, scopes: string[], userstate: UserState): string {
+        const jwtContent = new JwtContent(_id.toString(), role, scopes, userstate);
         return jwt.sign({...jwtContent}, getAuthenticationTokenSecret(), {expiresIn: `${this.authenticationTokenExpirationTime}m`});
     }
 
@@ -80,7 +80,7 @@ export class JwtHandler {
     static decodeAuthToken(token: string): JwtContent | null {
         try {
             const decodedToken = jwt.verify(token, getAuthenticationTokenSecret()) as JwtPayload;
-            const jwtContent = new JwtContent(decodedToken.userId, decodedToken.role, decodedToken.state)
+            const jwtContent = new JwtContent(decodedToken.userId, decodedToken.role, decodedToken.scopes, decodedToken.state)
 
             if (jwtContent.isValid() !== true) return null;
             return jwtContent;
@@ -93,8 +93,8 @@ export class JwtHandler {
         }
     }
 
-    static createAuthTokenBody(_id: string, role: string, userstate: UserState): JwtBody {
-        return new JwtBody(this.createAuthToken(_id, role, userstate));
+    static createAuthTokenBody(_id: string, role: string, scopes: string[], userstate: UserState): JwtBody {
+        return new JwtBody(this.createAuthToken(_id, role, scopes, userstate));
     }
 
     /**

@@ -1,5 +1,5 @@
 import mongoose, {model, Model, ObjectId} from "mongoose";
-import {SystemRoles} from "../../constants/SystemRoles.ts";
+import {SystemRoles} from "../../constants/role/SystemRoles.ts";
 import {UserState} from "../../constants/UserState.ts";
 import {JwtHandler} from "../../util/JwtHandler.ts";
 import {JwtBody} from "../api/JwtBody.ts";
@@ -10,6 +10,7 @@ import {TimeUtil} from "../../util/TimeUtil.ts";
 import {Settings} from "./Settings.ts";
 import {decrypt, encrypt, encryptEmailIfAllowedBySystem} from "../../util/EncryptionUtil.ts";
 import {compare} from "bcrypt";
+import {Role} from "./Roles.ts";
 
 const Schema = mongoose.Schema;
 
@@ -97,7 +98,11 @@ const UserSchema = new Schema<IUser, IUserModel>({
         timestamps: true,
         methods: {
             getAuthToken: async function (): Promise<JwtBody> {
-                return JwtHandler.createAuthTokenBody(this._id.toString(), this.role, this.confirmation.state);
+                const role = await Role.findOne({name: this.role});
+                if(!role) {
+                    throw new Error("Can't find role: " + this.role);
+                }
+                return JwtHandler.createAuthTokenBody(this._id.toString(), role.name, role.scopes, this.confirmation.state);
             },
             getRefreshToken: function (metadata: object | undefined): string {
                 return JwtHandler.createRefreshToken(this._id.toString());

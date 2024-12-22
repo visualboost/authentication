@@ -10,10 +10,13 @@ import {validatePassword} from "../../../util/PasswordUtil.ts";
 import ForbiddenError from "../../../errors/ForbiddenError.ts";
 import {EmailCredentialsModel} from "../../../models/db/credentials/EMailCredentials.ts";
 import ConflictError from "../../../errors/ConflictError.ts";
-import {decrypt, decryptEmailIfAllowedBySystem, encrypt} from "../../../util/EncryptionUtil.ts";
+import {decryptEmailIfAllowedBySystem} from "../../../util/EncryptionUtil.ts";
 
 const router = express.Router();
 
+/**
+ *
+ */
 router.get(
     '/:userId',
     async (req, res, next) => {

@@ -1,14 +1,15 @@
 import express from "express";
 import {Settings} from "../../../models/db/Settings.ts";
 import BadRequestError from "../../../errors/BadRequestError.ts";
-import {EmailCredentialsModel} from "../../../models/db/credentials/EMailCredentials.ts";
 import {TimeUtil} from "../../../util/TimeUtil.ts";
 import {JwtHandler} from "../../../util/JwtHandler.ts";
+import {hasSettingsReadRoleScope, hasSettingsWriteRoleScope} from "../../middlewares/scope/hasSettingsScopesMiddleware.ts";
 
 const router = express.Router();
 
 router.get(
     '/',
+    hasSettingsReadRoleScope,
     async (req, res, next) => {
         try {
             //@ts-ignore
@@ -22,6 +23,7 @@ router.get(
 
 router.put(
     '/',
+    hasSettingsWriteRoleScope,
     async (req, res, next) => {
         try {
             const settings = req.body.settings
@@ -38,6 +40,7 @@ router.put(
 
 router.post(
     '/encrypt/emails',
+    hasSettingsWriteRoleScope,
     async (req, res, next) => {
         req.setTimeout(TimeUtil.minutesToMillis(5));
 
