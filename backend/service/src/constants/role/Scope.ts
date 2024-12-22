@@ -9,7 +9,7 @@ class Scope {
         static readonly SETTINGS = "settings"
         static readonly STATISTICS = "statistics"
         static readonly BLACKLIST = "blacklist"
-
+        static readonly SCOPE = "scope"
     }
 
     static createId(...paths: string[]): string {
@@ -21,6 +21,30 @@ class Scope {
      */
     static getAllScopes(): string[] {
         return [Scope.READ, Scope.WRITE]
+    }
+
+    static Scopes = class {
+
+        /**
+         * Read scopes of a rule
+         * Endpoints:
+         *  - /admin/role/:id (GET)
+         *  - /admin/roles (GET)
+         */
+        static readonly READ = Scope.createId(Scope.Resources.SCOPE, Scope.READ)
+
+        /**
+         * Read scopes of a rule
+         * Endpoints:
+         *  - /admin/role (POST)
+         *  - /admin/role/:id (PUT)
+         *  - /admin/role/:id (DELETE)
+         */
+        static readonly WRITE = Scope.createId(Scope.Resources.SCOPE, Scope.WRITE)
+
+        static getAllScopes(): string[] {
+            return [Scope.Scopes.READ, Scope.Scopes.WRITE]
+        }
     }
 
     static User = class {
@@ -63,7 +87,7 @@ class Scope {
         static readonly CHANGE_ROLE = Scope.createId(Scope.Resources.USER, Scope.WRITE) + ":role"
 
 
-        static getAllScopes(): string[]{
+        static getAllScopes(): string[] {
             return [Scope.User.READ_MULTIPLE, Scope.User.WRITE, Scope.User.INVITE, Scope.User.CHANGE_EMAIL, Scope.User.CHANGE_ROLE]
         }
     }
@@ -89,7 +113,7 @@ class Scope {
          */
         static readonly WRITE = Scope.createId(Scope.Resources.USER, Scope.Resources.ROLE, Scope.WRITE)
 
-        static getAllScopes(): string[]{
+        static getAllScopes(): string[] {
             return [Scope.Role.READ, Scope.Role.WRITE]
         }
     }
@@ -113,7 +137,7 @@ class Scope {
          */
         static readonly WRITE = Scope.createId(Scope.Resources.BLACKLIST, Scope.WRITE)
 
-        static getAllScopes(): string[]{
+        static getAllScopes(): string[] {
             return [Scope.Blacklist.READ, Scope.Blacklist.WRITE]
         }
     }
@@ -135,7 +159,7 @@ class Scope {
          */
         static readonly WRITE = Scope.createId(Scope.Resources.SETTINGS, Scope.WRITE)
 
-        static getAllScopes(): string[]{
+        static getAllScopes(): string[] {
             return [Scope.Settings.READ, Scope.Settings.WRITE]
         }
 
@@ -150,7 +174,7 @@ class Scope {
          */
         static readonly READ = Scope.createId(Scope.Resources.STATISTICS, Scope.READ)
 
-        static getAllScopes(): string[]{
+        static getAllScopes(): string[] {
             return [Scope.Statistics.READ]
         }
 
