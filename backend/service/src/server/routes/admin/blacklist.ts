@@ -55,7 +55,7 @@ router.post(
                 throw new BadRequestError();
             }
 
-            //@ts-ignore
+            //Can't set ADMIN to blacklist
             const user = await User.getByEmail(email);
             if (user && user.isAdmin()) {
                 throw new BadRequestError();
@@ -74,12 +74,11 @@ router.delete(
     hasBlackListWriteScope,
     async (req, res, next) => {
         try {
-            const email = req.query.email;
+            const email = req.query.email as string;
             if (!email) {
                 throw new BadRequestError();
             }
 
-            //@ts-ignore
             await Blacklist.deleteEmail(email);
             return res.json(new Success())
         } catch (e) {
@@ -99,6 +98,8 @@ router.post(
             }
 
             const user = await User.getByIP(ip, false);
+
+            //Can't set ADMIN to blacklist
             if (user && user.isAdmin()) {
                 throw new BadRequestError();
             }

@@ -10,7 +10,6 @@ import {hasJwtMiddleware} from "../../../../src/server/middlewares/hasJwt.ts";
 import {JwtHandler} from "../../../../src/util/JwtHandler.ts";
 import {hasXsrfTokenMiddleware} from "../../../../src/server/middlewares/hasXsrfTokenMiddleware.ts";
 import {isActiveMiddleware} from "../../../../src/server/middlewares/isActive.ts";
-import {isAdminMiddleware} from "../../../../src/server/middlewares/isAdmin.ts";
 import {createTestAdminToken} from "../../../util/JwtUtil.ts";
 import {hasReadMultipleUserScope} from "../../../../src/server/middlewares/scope/hasUserScopeMiddleware.ts";
 
@@ -26,12 +25,6 @@ jest.mock('../../../../src/server/middlewares/hasJwt.ts', () => ({
 
 jest.mock('../../../../src/server/middlewares/isActive.ts', () => ({
     isActiveMiddleware: jest.fn((req: Request, res: Response, next: NextFunction) => {
-        next();
-    }),
-}));
-
-jest.mock('../../../../src/server/middlewares/isAdmin.ts', () => ({
-    isAdminMiddleware: jest.fn((req: Request, res: Response, next: NextFunction) => {
         next();
     }),
 }));
@@ -185,14 +178,6 @@ describe('GET /admin/user', () => {
                 .set('Authorization', 'Bearer ' + createTestAdminToken());
             expect(isActiveMiddleware).toHaveBeenCalled();
         });
-
-        it('should call isAdminMiddleware', async () => {
-            await request(app)
-                .get(endpoint)
-                .set('Authorization', 'Bearer ' + createTestAdminToken());
-            expect(isAdminMiddleware).toHaveBeenCalled();
-        });
-
 
         it('should call hasXsrfTokenMiddleware', async () => {
             const res = await request(app)

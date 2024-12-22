@@ -23,12 +23,6 @@ jest.mock('../../../../src/server/middlewares/isActive.ts', () => ({
     }),
 }));
 
-jest.mock('../../../../src/server/middlewares/isAdmin.ts', () => ({
-    isAdminMiddleware: jest.fn((req: Request, res: Response, next: NextFunction) => {
-        next();
-    }),
-}));
-
 jest.mock('../../../../src/server/middlewares/scope/hasSettingsScopesMiddleware.ts', () => ({
     hasSettingsReadRoleScope: jest.fn((req: Request, res: Response, next: NextFunction) => {
         next();

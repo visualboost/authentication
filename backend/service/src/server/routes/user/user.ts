@@ -11,6 +11,7 @@ import ForbiddenError from "../../../errors/ForbiddenError.ts";
 import {EmailCredentialsModel} from "../../../models/db/credentials/EMailCredentials.ts";
 import ConflictError from "../../../errors/ConflictError.ts";
 import {decryptEmailIfAllowedBySystem} from "../../../util/EncryptionUtil.ts";
+import Scope from "../../../constants/role/Scope.ts";
 
 const router = express.Router();
 
@@ -29,8 +30,8 @@ router.get(
                 throw new BadRequestError();
             }
 
-            //Only the admin can request user details of other users
-            if (!jwt.isAdmin() && paramId !== userId) {
+            //Only with scope Scope.User.READ can request user details of other users
+            if (paramId !== userId && !jwt.containsScopes(Scope.User.READ) ) {
                 throw new ForbiddenError();
             }
 

@@ -1,7 +1,6 @@
 import {NextFunction, Request, Response} from "express";
 import ForbiddenError from "../../../errors/ForbiddenError.ts";
 import {JwtContent} from "../../../models/api/JwtContent.ts";
-import Scope from "../../../constants/role/Scope.ts";
 
 function handleScopes(scopes: string[], req: Request, res: Response, next: NextFunction) {
     const jwtContent = res.locals.authToken as JwtContent;
@@ -10,9 +9,9 @@ function handleScopes(scopes: string[], req: Request, res: Response, next: NextF
         throw new ForbiddenError()
     }
 
-    const authTokenContainScope = scopes.some(scope => jwtContent.getScopes().includes(scope));
+    const authTokenContainScopes = jwtContent.containsScopes(...scopes)
 
-    if (!authTokenContainScope) {
+    if (!authTokenContainScopes) {
         throw new ForbiddenError()
     }
 

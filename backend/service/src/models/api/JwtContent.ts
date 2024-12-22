@@ -44,6 +44,15 @@ export class JwtContent {
         return parseInt(this.getState() || UserState.UNKNOWN) === UserState.ACTIVE
     }
 
+    /**
+     * Check if the jwt token contains one of the
+     * @param scopes
+     */
+    containsScopes(...scopes: string[]): boolean {
+        if(scopes.length === 0) return false;
+        return scopes.every(scope => this.getScopes().includes(scope));
+    }
+
 
     isValid(): boolean {
         return this.getUserId() !== undefined && this.getRole() !== undefined && this.scopes !== undefined && this.getState() !== undefined;

@@ -29,6 +29,12 @@ class Scope {
          * Read multiple users
          * Endpoint: /admin/user
          */
+        static readonly READ = Scope.createId(Scope.Resources.USER, Scope.READ)
+
+        /**
+         * Read multiple users
+         * Endpoint: /admin/user
+         */
         static readonly READ_MULTIPLE = Scope.createId(Scope.Resources.USER, Scope.READ) + ":all"
 
         /**
@@ -65,10 +71,11 @@ class Scope {
     static Role = class {
 
         /**
-         * Read role details
+         * Read role details.
+         * The scope is only required if the user ID of the current auth token differs from the user ID in the path.
+         *
          * Endpoints:
-         *  - /admin/role/:id (GET)
-         *  - /admin/roles (GET)
+         *  - /user/:id (GET)
          */
         static readonly READ = Scope.createId(Scope.Resources.USER, Scope.Resources.ROLE, Scope.READ)
 

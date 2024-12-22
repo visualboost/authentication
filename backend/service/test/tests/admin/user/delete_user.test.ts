@@ -21,12 +21,6 @@ jest.mock('../../../../src/server/middlewares/isActive.ts', () => ({
     }),
 }));
 
-jest.mock('../../../../src/server/middlewares/isAdmin.ts', () => ({
-    isAdminMiddleware: jest.fn((req: Request, res: Response, next: NextFunction) => {
-        next();
-    }),
-}));
-
 jest.mock('../../../../src/server/middlewares/hasXsrfTokenMiddleware.ts', () => ({
     hasXsrfTokenMiddleware: jest.fn((req: Request, res: Response, next: NextFunction) => {
         next();
