@@ -101,7 +101,6 @@ describe(`GET /user/:userId`, () => {
                 (req: Request, res: Response, next: NextFunction) => {
                     res.locals.authToken = {
                         getUserId: jest.fn().mockReturnValue(currentUserId),
-                        // user hat kein passendes Scope
                         containsScopes: jest.fn().mockReturnValue(false),
                     };
                     next();

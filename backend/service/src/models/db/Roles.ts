@@ -14,6 +14,8 @@ export interface IRole extends Document {
     description?: string;
     scopes: string[];
     createdAt: Date;
+
+    isAdmin(): boolean;
 }
 
 export interface IRoleModel extends Model<IRole> {
@@ -32,6 +34,10 @@ const RoleSchema = new Schema<IRole, IRoleModel>({
     description: {type: String},
     scopes: [{type: String}]
 }, {timestamps: true});
+
+RoleSchema.methods.isAdmin = function () {
+    return this.name === SystemRoles.ADMIN;
+}
 
 RoleSchema.statics.initRolesByFile = async function () {
     const roles = await getRolesByFile();

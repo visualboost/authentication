@@ -10,6 +10,7 @@ import {JwtHandler} from '../../../../src/util/JwtHandler.ts';
 import BadRequestError from '../../../../src/errors/BadRequestError.ts';
 import ConflictError from '../../../../src/errors/ConflictError.ts';
 import Scope from "../../../../src/constants/role/Scope.ts";
+import {ensureReadScopesForWriteScopes} from "../../../../src/util/ScopeUtil.ts";
 
 jest.mock('../../../../src/models/db/Roles.ts');
 
@@ -41,6 +42,10 @@ jest.mock('../../../../src/server/middlewares/scope/hasRoleScopesMiddleware.ts',
     }),
 }));
 
+jest.mock('../../../../src/util/ScopeUtil.ts', () => ({
+    ensureReadScopesForWriteScopes: jest.fn((scopes: string[]) => scopes),
+}));
+
 describe('POST /admin/role', () => {
     const endpoint = '/admin/role';
 
@@ -48,7 +53,38 @@ describe('POST /admin/role', () => {
         jest.clearAllMocks();
     });
 
+    it('should call ensureReadScopesForWriteScopes when user has WRITE scope', async () => {
+        const roleName = 'NewRole';
+        const roleDescription = 'Test role';
+        const testScopes = ['TEST_SCOPE'];
+
+        (hasWriteRoleScope as jest.Mock).mockImplementationOnce(
+            (req: Request, res: Response, next: NextFunction) => {
+                res.locals.authToken = {
+                    containsScopes: (scope: string) => scope === Scope.Scopes.WRITE,
+                };
+                next();
+            }
+        );
+
+        (Role.roleExists as jest.Mock).mockResolvedValueOnce(false);
+        (Role.prototype.save as jest.Mock).mockResolvedValueOnce(true);
+        (Role.prototype.constructor as jest.Mock).mockImplementation(function (this: any, data: any) {
+            Object.assign(this, data);
+            this._id = 'generatedId';
+            this.createdAt = '2024-12-24';
+        });
+
+        await request(app)
+            .post(endpoint)
+            .set('Authorization', 'Bearer ' + createTestAdminToken('userWithWrite'))
+            .send({ name: roleName, description: roleDescription, scopes: testScopes });
+
+        expect(ensureReadScopesForWriteScopes).toHaveBeenCalledWith(testScopes);
+    });
+
     describe('Success', () => {
+
         it('should return 200 and role with scopes when user has WRITE and READ scopes', async () => {
             const roleName = 'NewRole';
             const roleDescription = 'Test role';

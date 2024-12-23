@@ -10,7 +10,8 @@ import { JwtHandler } from '../../../../src/util/JwtHandler.ts';
 import BadRequestError from '../../../../src/errors/BadRequestError.ts';
 import NotFoundError from '../../../../src/errors/NotFoundError.ts';
 import Scope from '../../../../src/constants/role/Scope.ts';
-import { RoleResponse } from '../../../../src/models/api/RoleResponse'; // adjust if needed
+import { RoleResponse } from '../../../../src/models/api/RoleResponse';
+import {ensureReadScopesForWriteScopes} from "../../../../src/util/ScopeUtil.ts"; // adjust if needed
 
 jest.mock('../../../../src/models/db/Roles.ts');
 
@@ -42,11 +43,52 @@ jest.mock('../../../../src/server/middlewares/scope/hasRoleScopesMiddleware.ts',
     }),
 }));
 
+jest.mock('../../../../src/util/ScopeUtil.ts', () => ({
+    ensureReadScopesForWriteScopes: jest.fn(),
+}));
+
 describe('PUT /admin/role/:id', () => {
     const endpoint = '/admin/role';
 
     beforeEach(() => {
         jest.clearAllMocks();
+    });
+
+    it('should call ensureReadScopesForWriteScopes when user has WRITE scope', async () => {
+        const updatedName = 'UpdatedRole';
+        const updatedDescription = 'Updated role description';
+        const testScopes = ['TEST_SCOPE'];
+
+        (hasWriteRoleScope as jest.Mock).mockImplementationOnce(
+            (req: Request, res: Response, next: NextFunction) => {
+                res.locals.authToken = {
+                    containsScopes: (scope: string) => scope === Scope.Scopes.WRITE,
+                };
+                next();
+            }
+        );
+
+        (Role.findOne as jest.Mock).mockResolvedValueOnce({
+            _id: 'roleId123',
+            name: 'ExistingRole',
+            description: 'Existing description',
+            scopes: ['EXISTING_SCOPE'],
+        });
+
+        (Role.findOneAndUpdate as jest.Mock).mockResolvedValueOnce({
+            _id: 'roleId123',
+            name: updatedName,
+            description: updatedDescription,
+            createdAt: '2024-12-24',
+            scopes: ['TEST_SCOPE'],
+        });
+
+        await request(app)
+            .put(`${endpoint}/roleId123`)
+            .set('Authorization', 'Bearer ' + createTestAdminToken('userWithWrite'))
+            .send({ name: updatedName, description: updatedDescription, scopes: testScopes });
+
+        expect(ensureReadScopesForWriteScopes).toHaveBeenCalledWith(testScopes);
     });
 
     describe('Success', () => {

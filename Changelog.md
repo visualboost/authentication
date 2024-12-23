@@ -1,5 +1,13 @@
 # Versions:
 
+## 1.0.4 (23.12.2024)
+
+### Backend:
+- Allow the user to specify scopes for different roles
+  - Add ``scopes`` to `Role`
+  - Adapted ``/admin/role/*`` endpoints to create and read scopes
+  - Added middlesware to ensure that endpoints can only be called if the authentication token contains the relevant scopes
+
 ## 1.0.4 (18.12.2024)
 
 ---

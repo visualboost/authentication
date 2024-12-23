@@ -83,6 +83,7 @@ router.post(
             const email = req.body.email;
             const password = req.body.password;
             const role = req.body.role;
+            const activateUser = req.body.activateUser || false;
 
             if (!username || !email || !password) {
                 throw new BadRequestError();
@@ -95,10 +96,15 @@ router.post(
 
             //@ts-ignore
             const user = await User.createNewUser(username, email, password, role);
-            const result = await MailHandler.sendRegistrationMail(email, user._id.toString(), user.userName)
-            const emailRejected = result.rejected.includes(email);
-            if (emailRejected === true) {
-                throw new FailedDependencyError();
+
+            if(activateUser) {
+                await User.activate(user._id);
+            }else{
+                const result = await MailHandler.sendRegistrationMail(email, user._id.toString(), user.userName)
+                const emailRejected = result.rejected.includes(email);
+                if (emailRejected === true) {
+                    throw new FailedDependencyError();
+                }
             }
 
             //@ts-ignore

@@ -7,6 +7,9 @@ import {RoleResponse} from "../../../models/api/RoleResponse.ts";
 import {hasReadRoleScope, hasWriteRoleScope} from "../../middlewares/scope/hasRoleScopesMiddleware.ts";
 import {JwtContent} from "../../../models/api/JwtContent.ts";
 import Scope from "../../../constants/role/Scope.ts";
+import {en} from "@faker-js/faker";
+import {ensureReadScopesForWriteScopes} from "../../../util/ScopeUtil.ts";
+import ForbiddenError from "../../../errors/ForbiddenError.ts";
 
 const router = express.Router();
 
@@ -74,7 +77,9 @@ router.post(
              * Set scopes is only allowed if user has the scope
              */
             let scopes = req.body.scopes;
-            if (!authToken.containsScopes(Scope.Scopes.WRITE)) {
+            if (authToken.containsScopes(Scope.Scopes.WRITE)) {
+                scopes = ensureReadScopesForWriteScopes(scopes);
+            }else{
                 scopes = [];
             }
 
@@ -115,7 +120,7 @@ router.put(
             const roleId = req.params.id;
             const newName = req.body.name;
             const newDescription = req.body.description || "";
-            let scopes = req.body.scopes;
+            const scopes = req.body.scopes;
 
             if (!roleId || !newName) {
                 throw new BadRequestError();
@@ -124,6 +129,10 @@ router.put(
             const role = await Role.findOne({_id: roleId})
             if (!role) {
                 throw new NotFoundError();
+            }
+
+            if (role.isAdmin()) {
+                throw new ForbiddenError();
             }
 
             const updateBody = {
@@ -136,7 +145,7 @@ router.put(
              */
             if (authToken.containsScopes(Scope.Scopes.WRITE)) {
                 //@ts-ignore
-                updateBody["scopes"] = scopes;
+                updateBody["scopes"] = ensureReadScopesForWriteScopes(scopes);
             }
 
             const updatedRole = await Role.findOneAndUpdate({_id: roleId}, updateBody, {new: true});
@@ -182,6 +191,7 @@ router.delete(
         }
     }
 );
+
 
 export {
     router

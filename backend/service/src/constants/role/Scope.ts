@@ -108,7 +108,7 @@ class Scope {
          * Endpoints:
          *  - /admin/role (POST)
          *  - /admin/role/:id (PUT)
-         * - /admin/role/:id (DELETE)
+         *  - /admin/role/:id (DELETE)
          *
          */
         static readonly WRITE = Scope.createId(Scope.Resources.USER, Scope.Resources.ROLE, Scope.WRITE)
