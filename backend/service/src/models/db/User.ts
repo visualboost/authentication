@@ -59,7 +59,7 @@ export interface IUserModel extends Model<IUser> {
 
     getByEmail(email: string): Promise<IUser | null>;
 
-    createNewUser(username: string, email: string, password: string, role?: SystemRoles): Promise<IUser>;
+    createNewUser(username: string, email: string, password: string, role?: string): Promise<IUser>;
 
     createAdmin(username: string, email: string, password: string): Promise<IUser>;
 
@@ -203,7 +203,7 @@ const UserSchema = new Schema<IUser, IUserModel>({
 
                 return await query.exec() as Array<IUser>;
             },
-            createNewUser: async function (username: string, email: string, password: string, role: SystemRoles = SystemRoles.USER): Promise<IUser> {
+            createNewUser: async function (username: string, email: string, password: string, role: string = SystemRoles.USER): Promise<IUser> {
                 const credentials = await EmailCredentialsModel.newCredentials(email.toLowerCase(), password);
 
                 const newUser = new this({

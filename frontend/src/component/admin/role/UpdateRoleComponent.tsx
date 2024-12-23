@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Button, Form, Input, Modal, Space} from 'antd';
+import {Button, Collapse, Flex, Form, Input, Modal, Space} from 'antd';
 import {AdminService} from "../../../api/AdminService.tsx";
 import {useNavigate, useParams} from "react-router-dom";
 import {Routes} from "../../../models/Routes.tsx";
@@ -7,6 +7,7 @@ import {MdDelete, MdSave} from "react-icons/md";
 import {NotificationHandler} from "../../../util/NotificationHandler.tsx";
 import AdminDetailSectionComponent from "../AdminDetailSectionComponent.tsx";
 import {useLoader} from "../../common/LoaderProvider.tsx";
+import ScopeComponent from "./scopes/ScopeComponent.tsx";
 
 const UpdateRoleComponent = () => {
     const navigate = useNavigate();
@@ -18,13 +19,14 @@ const UpdateRoleComponent = () => {
     const [updating, isUpdating] = useState(false);
     const [deleting, isDeleting] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [scopes, setScopes] = useState<string[]>([]);
 
     //@ts-ignore
     const handleSubmit = async (values) => {
         try {
             isUpdating(true);
             if (!roleId) return;
-            await AdminService.Role.updateRole(roleId, values.name, values.description);
+            await AdminService.Role.updateRole(roleId, values.name, values.description, scopes);
             navigate(Routes.Admin.RoleSection.LIST);
         } catch (e) {
             NotificationHandler.showErrorNotificationFromError(e as Error);
@@ -50,6 +52,7 @@ const UpdateRoleComponent = () => {
                 description: role.description,
             });
 
+            setScopes(role.scopes);
             isEnabled(!role.isSystemRole)
         } catch (e) {
             NotificationHandler.showErrorNotificationFromError(e as Error);
@@ -96,16 +99,27 @@ const UpdateRoleComponent = () => {
                         rows={4}
                     />
                 </Form.Item>
+                <Collapse items={[
+                    {
+                        key: '1',
+                        label: 'Scopes',
+                        children: <ScopeComponent onScopesSelected={setScopes} scopes={scopes}/>
+                    }
+                ]}>
+                </Collapse>
                 <Form.Item>
-                    {enabled && <Space>
-                        <Button type="primary" htmlType="submit" loading={updating} icon={<MdSave/>}>
-                            Update
-                        </Button>
-                        <Button type="primary" danger loading={deleting} icon={<MdDelete/>}
-                                onClick={callShowDeleteDialog}>
-                            Delete
-                        </Button>
-                    </Space>
+                    {enabled &&
+                        <Flex justify={"flex-end"} align={"flex-end"} style={{marginTop: '20px'}}>
+                            <Space>
+                                <Button type="primary" htmlType="submit" loading={updating} icon={<MdSave/>}>
+                                    Update
+                                </Button>
+                                <Button type="primary" danger loading={deleting} icon={<MdDelete/>}
+                                        onClick={callShowDeleteDialog}>
+                                    Delete
+                                </Button>
+                            </Space>
+                        </Flex>
                     }
                 </Form.Item>
             </Form>

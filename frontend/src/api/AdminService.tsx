@@ -99,39 +99,41 @@ export class AdminService extends APIHandler {
     static Role = class {
         static PREFIX = "/role"
 
-        static async createRole(name: string, description: string): Promise<RoleResponse> {
+        static async createRole(name: string, description: string, scopes: string[]): Promise<RoleResponse> {
             //@ts-ignore
             return AdminService.instance.post<RoleResponse>(AdminService.PREFIX + this.PREFIX + "/", {
                     name: name,
-                    description: description
+                    description: description,
+                    scopes: scopes || []
                 },
                 //@ts-ignore
-                jsonResponse => new RoleResponse(jsonResponse.id, jsonResponse.name, jsonResponse.description, new Date(jsonResponse.createdAt)))
+                jsonResponse => new RoleResponse(jsonResponse.id, jsonResponse.name, jsonResponse.description, new Date(jsonResponse.createdAt), jsonResponse.scopes))
         }
 
         static async getRole(id: string): Promise<RoleResponse> {
             //@ts-ignore
-            return AdminService.instance.get<RoleResponse>(AdminService.PREFIX + this.PREFIX + "/" + id, jsonResponse => new RoleResponse(jsonResponse.id, jsonResponse.name, jsonResponse.description, new Date(jsonResponse.createdAt)));
+            return AdminService.instance.get<RoleResponse>(AdminService.PREFIX + this.PREFIX + "/" + id, jsonResponse => new RoleResponse(jsonResponse.id, jsonResponse.name, jsonResponse.description, new Date(jsonResponse.createdAt), jsonResponse.scopes));
         }
 
         static async getAllRoles(): Promise<Array<RoleResponse>> {
             //@ts-ignore
-            return AdminService.instance.get<Array<RoleResponse>>(AdminService.PREFIX + "/roles/", jsonResponse => jsonResponse.map(r => new RoleResponse(r.id, r.name, r.description, new Date(r.createdAt))));
+            return AdminService.instance.get<Array<RoleResponse>>(AdminService.PREFIX + "/roles/", jsonResponse => jsonResponse.map(r => new RoleResponse(r.id, r.name, r.description, new Date(r.createdAt), jsonResponse.scopes)));
         }
 
-        static async updateRole(id: string, name: string, description: string): Promise<Array<RoleResponse>> {
+        static async updateRole(id: string, name: string, description: string, scopes: string[]): Promise<Array<RoleResponse>> {
             //@ts-ignore
             return AdminService.instance.put<RoleResponse>(AdminService.PREFIX + this.PREFIX + "/" + id, {
                     name: name,
-                    description: description
+                    description: description,
+                    scopes: scopes || []
                 },
                 //@ts-ignore
-                jsonResponse => new RoleResponse(jsonResponse.id, jsonResponse.name, jsonResponse.description, new Date(jsonResponse.createdAt)));
+                jsonResponse => new RoleResponse(jsonResponse.id, jsonResponse.name, jsonResponse.description, new Date(jsonResponse.createdAt), jsonResponse.scopes));
         }
 
         static async deleteRole(id: string): Promise<Array<RoleResponse>> {
             //@ts-ignore
-            return AdminService.instance.delete<RoleResponse>(AdminService.PREFIX + this.PREFIX + "/" + id, jsonResponse => new RoleResponse(jsonResponse.id, jsonResponse.name, jsonResponse.description, new Date(jsonResponse.createdAt)));
+            return AdminService.instance.delete<RoleResponse>(AdminService.PREFIX + this.PREFIX + "/" + id, jsonResponse => new RoleResponse(jsonResponse.id, jsonResponse.name, jsonResponse.description, new Date(jsonResponse.createdAt), jsonResponse.scopes));
         }
     }
 

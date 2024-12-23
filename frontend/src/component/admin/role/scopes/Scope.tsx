@@ -50,8 +50,8 @@ class Scope {
     static User = class {
 
         /**
-         * Read another user
-         * Endpoint: /user/:userId
+         * Read multiple users
+         * Endpoint: /admin/user
          */
         static readonly READ = Scope.createId(Scope.Resources.USER, Scope.READ)
 
@@ -88,7 +88,7 @@ class Scope {
 
 
         static getAllScopes(): string[] {
-            return [Scope.User.READ, Scope.User.READ_MULTIPLE, Scope.User.WRITE, Scope.User.INVITE, Scope.User.CHANGE_EMAIL, Scope.User.CHANGE_ROLE]
+            return [Scope.User.READ_MULTIPLE, Scope.User.WRITE, Scope.User.INVITE, Scope.User.CHANGE_EMAIL, Scope.User.CHANGE_ROLE]
         }
     }
 

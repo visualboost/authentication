@@ -11,7 +11,8 @@ import BadRequestError from '../../../../src/errors/BadRequestError.ts';
 import NotFoundError from '../../../../src/errors/NotFoundError.ts';
 import Scope from '../../../../src/constants/role/Scope.ts';
 import { RoleResponse } from '../../../../src/models/api/RoleResponse';
-import {ensureReadScopesForWriteScopes} from "../../../../src/util/ScopeUtil.ts"; // adjust if needed
+import {ensureReadScopesForWriteScopes} from "../../../../src/util/ScopeUtil.ts";
+import ForbiddenError from "../../../../src/errors/ForbiddenError.ts"; // adjust if needed
 
 jest.mock('../../../../src/models/db/Roles.ts');
 
@@ -73,6 +74,7 @@ describe('PUT /admin/role/:id', () => {
             name: 'ExistingRole',
             description: 'Existing description',
             scopes: ['EXISTING_SCOPE'],
+            isAdmin: () => false
         });
 
         (Role.findOneAndUpdate as jest.Mock).mockResolvedValueOnce({
@@ -81,6 +83,7 @@ describe('PUT /admin/role/:id', () => {
             description: updatedDescription,
             createdAt: '2024-12-24',
             scopes: ['TEST_SCOPE'],
+
         });
 
         await request(app)
@@ -108,6 +111,7 @@ describe('PUT /admin/role/:id', () => {
                 description: 'Old description',
                 createdAt: '2024-12-24',
                 scopes: ['OLD_SCOPE'],
+                isAdmin: () => false
             };
             (Role.findOne as jest.Mock).mockResolvedValueOnce(existingRole);
             const updatedRole = {
@@ -148,6 +152,7 @@ describe('PUT /admin/role/:id', () => {
                 description: 'Another old desc',
                 createdAt: '2024-12-25',
                 scopes: ['OLD_SCOPE'],
+                isAdmin: () => false
             };
             (Role.findOne as jest.Mock).mockResolvedValueOnce(existingRole);
             const updatedRole = {
@@ -181,6 +186,36 @@ describe('PUT /admin/role/:id', () => {
                 .send({ description: 'No name' });
             expect(res.status).toBe(new BadRequestError().status);
             expect(res.body).toEqual({ message: new BadRequestError().message });
+        });
+
+
+        it('should return 403 when role is not found', async () => {
+            (hasWriteRoleScope as jest.Mock).mockImplementationOnce(
+                (req: Request, res: Response, next: NextFunction) => {
+                    res.locals.authToken = {
+                        containsScopes: (scope: string) => scope === Scope.Scopes.WRITE || scope === Scope.Scopes.READ,
+                    };
+                    next();
+                },
+            );
+            const roleId = '123';
+            const existingRole = {
+                _id: roleId,
+                name: 'OldRole',
+                description: 'Old description',
+                createdAt: '2024-12-24',
+                scopes: ['OLD_SCOPE'],
+                isAdmin: () => true
+            };
+            (Role.findOne as jest.Mock).mockResolvedValueOnce(existingRole);
+
+            const res = await request(app)
+                .put(`${endpoint}/${roleId}`)
+                .set('Authorization', 'Bearer ' + createTestAdminToken('userWithWriteAndRead'))
+                .send({ name: 'NewRole', description: 'New description', scopes: ['NEW_SCOPE'] });
+
+            expect(res.status).toBe(new ForbiddenError().status);
+            expect(res.body).toEqual({ message: new ForbiddenError().message });
         });
 
         it('should return 404 when role is not found', async () => {

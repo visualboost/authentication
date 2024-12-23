@@ -54,6 +54,7 @@ interface ISettingsModel extends Model<ISettings> {
     setEmailEncryption(enable: boolean): Promise<ISettings>;
     encryptAllEmails(): Promise<void>;
     decryptAllEmails(): Promise<void>;
+    getDefaultRole(): Promise<string>;
 }
 
 const SettingsSchema = new Schema<ISettings, ISettingsModel>({
@@ -160,6 +161,10 @@ const SettingsSchema = new Schema<ISettings, ISettingsModel>({
             await s.save();
 
             return s;
+        },
+        getDefaultRole: async function(){
+            const s: ISettings = await Settings.load();
+            return s.defaultRole;
         },
         /**
          * Encrypts all emails of {@EmailCredentialsModel} and {@Blacklist}.

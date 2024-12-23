@@ -79,7 +79,8 @@ router.post(
                 throw new ConflictError();
             }
 
-            const user = await User.createNewUser(username, email, password);
+            const defaultRole = await Settings.getDefaultRole()
+            const user = await User.createNewUser(username, email, password, defaultRole);
             await user.updateLastLogin(res.locals.ip);
             await MailHandler.sendRegistrationMail(email, user._id.toString(), user.userName)
 

@@ -1,12 +1,20 @@
 # Versions:
 
-## 1.0.4 (23.12.2024)
+## 1.0.5 (23.12.2024)
 
 ### Backend:
 - Allow the user to specify scopes for different roles
   - Add ``scopes`` to `Role`
   - Adapted ``/admin/role/*`` endpoints to create and read scopes
-  - Added middlesware to ensure that endpoints can only be called if the authentication token contains the relevant scopes
+  - Added middlewares to ensure that endpoints can only be called if the authentication token contains the relevant scopes
+- Fixed: Set default role from settings during `createNewUser` in `/registration`.
+
+### Backend:
+- Allow the user to specify scopes for different roles in ``Create Role`` and ``Role Detail`` components
+  - Added ``ScopeComponent`` to ``CreateRole`` and ``UpdateRole`` components
+
+### Docs:
+- Added new endpoints to openapi description
 
 ## 1.0.4 (18.12.2024)
 

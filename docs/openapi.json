@@ -53,7 +53,9 @@
     },
     "/api/system/privacypolicy": {
       "get": {
-        "tags": ["System"],
+        "tags": [
+          "System"
+        ],
         "summary": "Get privacy policy settings",
         "description": "Returns whether the privacy policy is displayed and its URL if available.",
         "operationId": "getPrivacyPolicy",
@@ -91,7 +93,9 @@
     },
     "/api/system/state": {
       "get": {
-        "tags": ["System"],
+        "tags": [
+          "System"
+        ],
         "summary": "Get system initialization state",
         "description": "Checks if the system has been initialized by verifying whether an admin user exists. Returns `INITIALIZED` if the admin user exists, or `NOT_INITIALIZED` otherwise.",
         "operationId": "getSystemState",
@@ -105,7 +109,10 @@
                   "properties": {
                     "state": {
                       "type": "string",
-                      "enum": ["INITIALIZED", "NOT_INITIALIZED"],
+                      "enum": [
+                        "INITIALIZED",
+                        "NOT_INITIALIZED"
+                      ],
                       "description": "Initialization state of the system.",
                       "example": "INITIALIZED"
                     }
@@ -122,7 +129,9 @@
     },
     "/api/system/hooks": {
       "get": {
-        "tags": ["System"],
+        "tags": [
+          "System"
+        ],
         "summary": "Get system hooks",
         "description": "Retrieve all hooks configured in the system. The response contains keys representing hook types and their corresponding URLs.",
         "operationId": "getSystemHooks",
@@ -184,6 +193,11 @@
         "summary": "Create a new user",
         "description": "Register a new user and send a confirmation email to the provided email address.",
         "operationId": "register",
+        "security": [
+          {
+            "XSFR": []
+          }
+        ],
         "parameters": [
           {
             "name": "x-xsrf-token",
@@ -251,6 +265,11 @@
         "summary": "Sign in",
         "description": "Authenticate a user with their email and password.",
         "operationId": "signin",
+        "security": [
+          {
+            "XSFR": []
+          }
+        ],
         "parameters": [
           {
             "name": "x-xsrf-token",
@@ -333,6 +352,11 @@
         "summary": "Logout",
         "description": "Logs out the authenticated user.",
         "operationId": "signout",
+        "security": [
+          {
+            "XSFR": []
+          }
+        ],
         "parameters": [
           {
             "name": "x-xsrf-token",
@@ -582,7 +606,9 @@
     },
     "/api/authentication/token": {
       "put": {
-        "tags": ["Authentication"],
+        "tags": [
+          "Authentication"
+        ],
         "summary": "Refresh authentication token",
         "description": "Creates a new authentication token and sets a new refresh token as an HttpOnly cookie. Requires a valid refresh token sent as a cookie.",
         "operationId": "fetchToken",
@@ -637,9 +663,11 @@
     },
     "/api/user/{userId}": {
       "get": {
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "summary": "Get user details",
-        "description": "Retrieves details of a user by their ID. Only admins or the user themselves can access this endpoint. The Bearer token required for authorization can be obtained by calling `/api/authentication/signin`.",
+        "description": "Retrieves details of a user by their ID. The Bearer token required for authorization can be obtained by calling `/api/authentication/signin`. Scope `user.read` is required to access user details other users",
         "operationId": "getUserDetails",
         "parameters": [
           {
@@ -752,7 +780,9 @@
     },
     "/api/user/modify/email": {
       "patch": {
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "summary": "Modify user email",
         "description": "Creates an email modification object that allows the user to change their email address. An email is sent to confirm the change. The Bearer token required for authorization can be obtained by calling `/api/authentication/signin`.",
         "operationId": "modifyEmail",
@@ -821,7 +851,9 @@
     },
     "/api/user/modify/password": {
       "patch": {
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "summary": "Modify user password",
         "description": "Creates a password modification object that allows the user to change their password. An email is sent to confirm the change. The Bearer token required for authorization can be obtained by calling `/api/authentication/signin`.",
         "operationId": "modifyPassword",
@@ -888,7 +920,1576 @@
           }
         }
       }
+    },
+    "/api/admin/user": {
+      "get": {
+        "summary": "Retrieve all non-blocked users",
+        "description": "Returns a list of all non-blocked users. Results can be filtered by username or email using the query parameters `value` and `type`.<br/>Required scope: `user.read:all`",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "BearerAuth": [],
+            "XSFR": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "value",
+            "in": "query",
+            "description": "The value to search for (username or email).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "The type of search to perform (`username` or `email`).",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "username",
+                "email"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of non-blocked users matching the search criteria.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "The unique identifier of the user.",
+                        "example": "12345abcde"
+                      },
+                      "username": {
+                        "type": "string",
+                        "description": "The username of the user.",
+                        "example": "johndoe"
+                      },
+                      "email": {
+                        "type": "string",
+                        "description": "The email address of the user.",
+                        "example": "johndoe@example.com"
+                      },
+                      "state": {
+                        "type": "string",
+                        "description": "The current state of the user (e.g., active, blocked, etc.).",
+                        "example": "active"
+                      },
+                      "role": {
+                        "type": "string",
+                        "description": "The role assigned to the user.",
+                        "example": "admin"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The date and time when the user was created.",
+                        "example": "2023-01-01T12:00:00Z"
+                      },
+                      "lastLogin": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The date and time of the user's last login.",
+                        "example": "2023-05-01T14:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized access, missing XSRF token, or insufficient scope."
+          },
+          "406": {
+            "description": "User state is not `ACTIVE`"
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/api/admin/user/add": {
+      "post": {
+        "summary": "Create a new user",
+        "description": "Creates a new user in the system. The user can optionally be activated immediately or sent an activation email.<br/>Required scope: `user.write`",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "BearerAuth": [],
+            "XSFR": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "The username of the new user.",
+                    "example": "johndoe"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The email address of the new user.",
+                    "example": "johndoe@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "description": "The password for the new user.",
+                    "example": "P@ssw0rd123"
+                  },
+                  "role": {
+                    "type": "string",
+                    "description": "The role to assign to the new user.",
+                    "example": "USER"
+                  },
+                  "activateUser": {
+                    "type": "boolean",
+                    "description": "Whether to activate the user immediately. If false, an activation email will be sent.",
+                    "default": false,
+                    "example": true
+                  }
+                },
+                "required": [
+                  "username",
+                  "email",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The newly created user details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The unique identifier of the user.",
+                      "example": "12345abcde"
+                    },
+                    "username": {
+                      "type": "string",
+                      "description": "The username of the user.",
+                      "example": "johndoe"
+                    },
+                    "email": {
+                      "type": "string",
+                      "description": "The email address of the user.",
+                      "example": "johndoe@example.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "description": "The role assigned to the user.",
+                      "example": "USER"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The date and time when the user was created.",
+                      "example": "2023-01-01T12:00:00Z"
+                    },
+                    "lastLogin": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The date and time of the user's last login.",
+                      "example": "2023-05-01T14:30:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. Required fields are missing or invalid."
+          },
+          "403": {
+            "description": "Unauthorized access, missing XSRF token, or insufficient scope."
+          },
+          "406": {
+            "description": "User state is not `ACTIVE`"
+          },
+          "409": {
+            "description": "Conflict. A user with the given email already exists."
+          },
+          "424": {
+            "description": "Failed dependency. The activation email could not be sent."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/api/admin/user/invite": {
+      "post": {
+        "summary": "Invite a new user",
+        "description": "Invites a new user by sending an invitation email. The user will be assigned a specific role upon accepting the invitation.<br/>>Required scope: `user.write:invite`.",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "BearerAuth": [],
+            "XSFR": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the user being invited.",
+                    "example": "Jane Doe"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The email address of the user being invited.",
+                    "example": "jane.doe@example.com"
+                  },
+                  "role": {
+                    "type": "string",
+                    "description": "The role to assign to the invited user. Admin roles cannot be assigned through this endpoint.",
+                    "example": "editor"
+                  }
+                },
+                "required": [
+                  "name",
+                  "email",
+                  "role"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The invitation was sent successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "The status of the operation.",
+                      "example": "success"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. The 'name', 'email', or 'role' field is missing or invalid."
+          },
+          "403": {
+            "description": "Unauthorized access, missing XSRF token, or insufficient scope."
+          },
+          "406": {
+            "description": "User state is not `ACTIVE`"
+          },
+          "409": {
+            "description": "Conflict. Either the email already exists or the role is `ADMIN` or does not exist"
+          },
+          "424": {
+            "description": "Failed dependency. The invitation email could not be sent."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/api/admin/user/{userId}": {
+      "delete": {
+        "summary": "Delete a user",
+        "description": "Deletes a user by their user ID.<br/>Required scope: `user.write`.",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "BearerAuth": [],
+            "XSFR": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the user to delete.",
+            "schema": {
+              "type": "string",
+              "example": "12345abcde"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of the deleted user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The unique identifier of the user.",
+                      "example": "12345abcde"
+                    },
+                    "username": {
+                      "type": "string",
+                      "description": "The username of the deleted user.",
+                      "example": "johndoe"
+                    },
+                    "email": {
+                      "type": "string",
+                      "description": "The email address of the deleted user.",
+                      "example": "johndoe@example.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "description": "The role of the deleted user.",
+                      "example": "editor"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The date and time when the user was created.",
+                      "example": "2023-01-01T12:00:00Z"
+                    },
+                    "lastLogin": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The date and time of the user's last login.",
+                      "example": "2023-05-01T14:30:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. The 'userId' parameter is missing or invalid."
+          },
+          "403": {
+            "description": "Unauthorized access, missing XSRF token, or insufficient scope."
+          },
+          "406": {
+            "description": "User state is not `ACTIVE`."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/api/admin/user/{userId}/role": {
+      "patch": {
+        "summary": "Update a user's role",
+        "description": "Updates the role of a user by their user ID.<br/>Required scope: `user.write:role`.",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "BearerAuth": [],
+            "XSFR": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the user whose role will be updated.",
+            "schema": {
+              "type": "string",
+              "example": "12345abcde"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "role": {
+                    "type": "string",
+                    "description": "The new role to assign to the user.",
+                    "example": "editor"
+                  }
+                },
+                "required": [
+                  "role"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Details of the user with the updated role.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The unique identifier of the user.",
+                      "example": "12345abcde"
+                    },
+                    "username": {
+                      "type": "string",
+                      "description": "The username of the user.",
+                      "example": "johndoe"
+                    },
+                    "email": {
+                      "type": "string",
+                      "description": "The email address of the user.",
+                      "example": "johndoe@example.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "description": "The updated role of the user.",
+                      "example": "editor"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The date and time when the user was created.",
+                      "example": "2023-01-01T12:00:00Z"
+                    },
+                    "lastLogin": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The date and time of the user's last login.",
+                      "example": "2023-05-01T14:30:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. The 'userId' parameter or 'role' field is missing or invalid."
+          },
+          "403": {
+            "description": "Unauthorized access, missing XSRF token, or insufficient scope."
+          },
+          "406": {
+            "description": "User state is not `ACTIVE`."
+          },
+          "404": {
+            "description": "Not found. The user with the specified ID does not exist."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/api/admin/role/{id}": {
+      "get": {
+        "summary": "Retrieve a role by ID",
+        "description": "Fetches the details of a specific role by its ID.<br/>Required scopes: `user.role.read` `scope.read`.",
+        "tags": [
+          "Role"
+        ],
+        "security": [
+          {
+            "BearerAuth": [],
+            "XSFR": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the role to retrieve.",
+            "schema": {
+              "type": "string",
+              "example": "12345abcde"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The details of the role.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "12345abcde"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "editor"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "Can edit content."
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "scopes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "The scopes of the role. Required scope: `scope.read`"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. The 'id' parameter is missing or invalid."
+          },
+          "403": {
+            "description": "Unauthorized access, missing XSRF token, or insufficient scope."
+          },
+          "404": {
+            "description": "Not found. The role with the specified ID does not exist."
+          },
+          "406": {
+            "description": "User state is not `ACTIVE`."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a role",
+        "description": "Updates the details of an existing role by its ID.<br/>Required scopes: `user.role.write` `scope.read` `scope.write`.",
+        "tags": [
+          "Role"
+        ],
+        "security": [
+          {
+            "BearerAuth": [],
+            "XSFR": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the role to update.",
+            "schema": {
+              "type": "string",
+              "example": "12345abcde"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "editor"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Can edit content."
+                  },
+                  "scopes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "The scopes of the role. Required scope: `scope.write`"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated role details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "12345abcde"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "editor"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "Can edit content."
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "scopes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "The scopes of the role. Required scope: `scope.read`"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. The 'id' parameter or 'name' field is missing or invalid."
+          },
+          "403": {
+            "description": "Unauthorized access, missing XSRF token, or insufficient scope."
+          },
+          "404": {
+            "description": "Not found. The role with the specified ID does not exist."
+          },
+          "406": {
+            "description": "User state is not `ACTIVE`."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a role",
+        "description": "Deletes an existing role by its ID.<br/>Required scopes: `user.role.write` `scope.read`.",
+        "tags": [
+          "Role"
+        ],
+        "security": [
+          {
+            "BearerAuth": [],
+            "XSFR": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the role to delete.",
+            "schema": {
+              "type": "string",
+              "example": "12345abcde"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of the deleted role.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "12345abcde"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "editor"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "Can edit content."
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "scopes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "The scopes of the role. Required scope: `scope.read`"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. The 'id' parameter is missing or invalid."
+          },
+          "403": {
+            "description": "Unauthorized access, missing XSRF token, or insufficient scope."
+          },
+          "404": {
+            "description": "Not found. The role with the specified ID does not exist."
+          },
+          "406": {
+            "description": "User state is not `ACTIVE`."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/api/admin/roles": {
+      "get": {
+        "summary": "Retrieve all roles",
+        "description": "Fetches a list of all roles sorted by name.<br/>Required scopes: `user.role.read` `scope.read`.",
+        "tags": [
+          "Role"
+        ],
+        "security": [
+          {
+            "BearerAuth": [],
+            "XSFR": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of roles.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "12345abcde"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "editor"
+                      },
+                      "description": {
+                        "type": "string",
+                        "example": "Can edit content."
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "scopes": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "The scopes of the role. Required scope: `scope.read`"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized access, missing XSRF token, or insufficient scope."
+          },
+          "406": {
+            "description": "User state is not `ACTIVE`."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/api/admin/role": {
+      "post": {
+        "summary": "Create a new role",
+        "description": "Creates a new role with the specified name, description, and scopes. <br/>Required scopes: `user.role.write` `scope.read` `scope.write`.",
+        "tags": [
+          "Role"
+        ],
+        "security": [
+          {
+            "BearerAuth": [],
+            "XSFR": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "editor"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Can edit content."
+                  },
+                  "scopes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "The scopes of the role. Required scope: `scope.write`"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The newly created role.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "12345abcde"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "editor"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "Can edit content."
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "scopes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "The scopes of the role. Required scope: `scope.read`"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. The 'name' field is missing."
+          },
+          "403": {
+            "description": "Unauthorized access, missing XSRF token, or insufficient scope."
+          },
+          "409": {
+            "description": "Conflict. A role with the same name already exists."
+          },
+          "406": {
+            "description": "User state is not `ACTIVE`."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/api/admin/settings": {
+      "get": {
+        "summary": "Retrieve application settings",
+        "description": "Fetches the current application settings.<br/>>Required scope: `settings.read`.",
+        "tags": [
+          "Settings"
+        ],
+        "security": [
+          {
+            "BearerAuth": [],
+            "XSFR": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The current application settings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Settings"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized access, missing XSRF token, or insufficient scope."
+          },
+          "406": {
+            "description": "User state is not `ACTIVE`."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "put": {
+        "summary": "Update application settings",
+        "description": "Updates the application settings, including token expiration times.<br/>Required scope: `settings.write`.",
+        "tags": [
+          "Settings"
+        ],
+        "security": [
+          {
+            "BearerAuth": [],
+            "XSFR": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Settings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated application settings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Settings"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized access, missing XSRF token, or insufficient scope."
+          },
+          "406": {
+            "description": "User state is not `ACTIVE`."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/api/admin/blacklist": {
+      "get": {
+        "summary": "Retrieve blacklist entries",
+        "description": "Fetches all blacklist entries or searches by email query.<br/>Required scope: `blacklist.read`.",
+        "tags": [
+          "Blacklist"
+        ],
+        "security": [
+          {
+            "BearerAuth": [],
+            "XSFR": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "description": "The email to search for in the blacklist.",
+            "schema": {
+              "type": "string",
+              "example": "user@example.com"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of blacklist entries.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "ip": {
+                        "type": "string",
+                        "description": "The IP address of the blacklist entry.",
+                        "example": "192.168.0.1"
+                      },
+                      "email": {
+                        "type": "string",
+                        "description": "The email of the blacklist entry.",
+                        "example": "user@example.com"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The creation timestamp of the blacklist entry.",
+                        "example": "2023-01-01T12:00:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized access, missing XSRF token, or insufficient scope."
+          },
+          "406": {
+            "description": "User state is not `ACTIVE`."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/api/admin/blacklist/email": {
+      "post": {
+        "summary": "Add email to blacklist",
+        "description": "Adds an email to the blacklist. Cannot add admin emails.<br/>Required scope: `blacklist.write`.",
+        "tags": [
+          "Blacklist"
+        ],
+        "security": [
+          {
+            "BearerAuth": [],
+            "XSFR": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The email to add to the blacklist.",
+                    "example": "user@example.com"
+                  }
+                },
+                "required": [
+                  "email"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The email was successfully added to the blacklist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. Email is missing or invalid."
+          },
+          "403": {
+            "description": "Unauthorized access, missing XSRF token, or insufficient scope."
+          },
+          "406": {
+            "description": "User state is not `ACTIVE`."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove email from blacklist",
+        "description": "Removes an email from the blacklist.<br/>Required scope: `blacklist.write`.",
+        "tags": [
+          "Blacklist"
+        ],
+        "security": [
+          {
+            "BearerAuth": [],
+            "XSFR": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": true,
+            "description": "The email to remove from the blacklist.",
+            "schema": {
+              "type": "string",
+              "format": "email",
+              "example": "user@example.com"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The email was successfully removed from the blacklist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. Email is missing or invalid."
+          },
+          "403": {
+            "description": "Unauthorized access, missing XSRF token, or insufficient scope."
+          },
+          "406": {
+            "description": "User state is not `ACTIVE`."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/api/admin/blacklist/ip": {
+      "post": {
+        "summary": "Add IP to blacklist",
+        "description": "Adds an IP address to the blacklist. Cannot add admin IPs.<br/>>Required scope: `blacklist.write`.",
+        "tags": [
+          "Blacklist"
+        ],
+        "security": [
+          {
+            "BearerAuth": [],
+            "XSFR": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ip": {
+                    "type": "string",
+                    "description": "The IP address to add to the blacklist.",
+                    "example": "192.168.0.1"
+                  }
+                },
+                "required": [
+                  "ip"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The IP address was successfully added to the blacklist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. IP address is missing or invalid."
+          },
+          "403": {
+            "description": "Unauthorized access, missing XSRF token, or insufficient scope."
+          },
+          "406": {
+            "description": "User state is not `ACTIVE`."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove IP from blacklist",
+        "description": "Removes an IP address from the blacklist.<br/>>Required scope: `blacklist.write`.",
+        "tags": [
+          "Blacklist"
+        ],
+        "security": [
+          {
+            "BearerAuth": [],
+            "XSFR": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ip",
+            "in": "query",
+            "required": true,
+            "description": "The IP address to remove from the blacklist.",
+            "schema": {
+              "type": "string",
+              "example": "192.168.0.1"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The IP address was successfully removed from the blacklist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. IP address is missing or invalid."
+          },
+          "403": {
+            "description": "Unauthorized access, missing XSRF token, or insufficient scope."
+          },
+          "406": {
+            "description": "User state is not `ACTIVE`."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/admin/statistics": {
+      "get": {
+        "summary": "Retrieve application statistics",
+        "description": "Fetches various application statistics, including user counts, timeline history, role statistics, and security metrics.<br/>Required scope: `statistics.read`.",
+        "tags": ["Statistics"],
+        "security": [
+          {
+            "BearerAuth": [],
+            "XSFR": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The application statistics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalUsers": {
+                      "type": "number",
+                      "description": "The total number of users in the system.",
+                      "example": 12345
+                    },
+                    "newUsers": {
+                      "$ref": "#/components/schemas/TimeLineHistory"
+                    },
+                    "deletedUsers": {
+                      "$ref": "#/components/schemas/TimeLineHistory"
+                    },
+                    "activeUsers": {
+                      "$ref": "#/components/schemas/TimeLineHistory"
+                    },
+                    "userOfRoles": {
+                      "type": "array",
+                      "description": "Statistics about the number of users per role.",
+                      "items": {
+                        "$ref": "#/components/schemas/RoleStatistic"
+                      }
+                    },
+                    "failedLoginAttempts": {
+                      "$ref": "#/components/schemas/TimeLineHistory"
+                    },
+                    "securityStatistics": {
+                      "$ref": "#/components/schemas/SecurityStatistics"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized access, missing XSRF token, or insufficient scope."
+          },
+          "406": {
+            "description": "User state is not `ACTIVE`."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
     }
 
+  },
+  "components": {
+    "schemas": {
+      "Settings": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "The unique identifier for the settings object.",
+            "example": "63f71b54e8b2a6e84d3a01c4"
+          },
+          "ID": {
+            "type": "string",
+            "description": "A constant settings ID.",
+            "example": "ID"
+          },
+          "restrictLoginToAdmin": {
+            "type": "boolean",
+            "description": "Restrict logins to admin users only.",
+            "example": true
+          },
+          "enableRegistrationView": {
+            "type": "boolean",
+            "description": "Enable or disable the registration view.",
+            "example": false
+          },
+          "showPrivacyPolicy": {
+            "type": "boolean",
+            "description": "Whether to display the privacy policy.",
+            "example": true
+          },
+          "privacyPolicyUrl": {
+            "type": "string",
+            "description": "The URL for the privacy policy.",
+            "example": "https://example.com/privacy-policy"
+          },
+          "defaultRole": {
+            "type": "string",
+            "description": "The default role assigned to new users.",
+            "example": "USER"
+          },
+          "hooks": {
+            "type": "array",
+            "description": "A list of hooks for specific events.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "The type of the event for which the hook is triggered.",
+                  "enum": [
+                    "AUTHENTICATION",
+                    "PASSWORD_RESET",
+                    "PASSWORD_CHANGE",
+                    "EMAIL_CHANGE"
+                  ],
+                  "example": "AUTHENTICATION"
+                },
+                "url": {
+                  "type": "string",
+                  "description": "The URL of the hook that will be called when the event is triggered.",
+                  "example": "https://example.com/hook-endpoint"
+                }
+              },
+              "required": [
+                "type",
+                "url"
+              ]
+            }
+          },
+          "twoFactorAuthorization": {
+            "type": "object",
+            "properties": {
+              "admin": {
+                "type": "boolean",
+                "description": "Whether two-factor authorization is enabled for admins.",
+                "example": true
+              },
+              "clients": {
+                "type": "boolean",
+                "description": "Whether two-factor authorization is enabled for clients.",
+                "example": false
+              }
+            }
+          },
+          "encryptEmail": {
+            "type": "boolean",
+            "description": "Whether email addresses should be encrypted.",
+            "example": true
+          },
+          "tokenExpiration": {
+            "type": "object",
+            "properties": {
+              "authenticationToken": {
+                "type": "number",
+                "description": "The expiration time for authentication tokens, in minutes.",
+                "example": 30
+              },
+              "refreshToken": {
+                "type": "number",
+                "description": "The expiration time for refresh tokens, in minutes.",
+                "example": 400
+              }
+            }
+          }
+        }
+      },
+      "TimeLineHistory": {
+        "type": "object",
+        "description": "Historical data for a specific metric over different time periods.",
+        "properties": {
+          "last7Days": {
+            "type": "number",
+            "description": "The count for the last 7 days.",
+            "example": 500
+          },
+          "last30Days": {
+            "type": "number",
+            "description": "The count for the last 30 days.",
+            "example": 2000
+          },
+          "last3Months": {
+            "type": "number",
+            "description": "The count for the last 3 months.",
+            "example": 6000
+          },
+          "last6Months": {
+            "type": "number",
+            "description": "The count for the last 6 months.",
+            "example": 12000
+          },
+          "last12Months": {
+            "type": "number",
+            "description": "The count for the last 12 months.",
+            "example": 24000
+          }
+        }
+      },
+      "RoleStatistic": {
+        "type": "object",
+        "description": "Statistics about the number of users in a specific role.",
+        "properties": {
+          "role": {
+            "type": "string",
+            "description": "The name of the role.",
+            "example": "admin"
+          },
+          "totalUsers": {
+            "type": "number",
+            "description": "The total number of users with this role.",
+            "example": 300
+          }
+        }
+      },
+      "SecurityStatistics": {
+        "type": "object",
+        "description": "Security-related statistics such as blocked emails and IP addresses.",
+        "properties": {
+          "blockedEmails": {
+            "type": "number",
+            "description": "The number of blocked email addresses.",
+            "example": 50
+          },
+          "blockedIPs": {
+            "type": "number",
+            "description": "The number of blocked IP addresses.",
+            "example": 30
+          }
+        }
+      }
+
+
+
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "XSFR": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "XSRF-TOKEN",
+        "description": "XSFR token can be requested by `/api/system/xsfr`"
+      }
+    }
   }
 }
