@@ -10,6 +10,7 @@ import UnauthorizedError from "../errors/UnauthorizedError.ts";
 import {CookieNames} from "../constants/CookieNames.ts";
 import {getAuthenticationTokenSecret, getRefreshTokenSecret} from "./EncryptionUtil.ts";
 import {isDevEnvironment} from "./ConfigUtil.ts";
+import {Settings} from "../models/db/Settings.ts";
 
 export class JwtHandler {
 
@@ -150,6 +151,12 @@ export class JwtHandler {
 
     static updateRefreshTokenExpiration(timeInMinutes: number) {
         this.refreshTokenExpirationTime = timeInMinutes
+    }
+
+    static async initializeTokenExpirationDates() {
+        const settings = await Settings.load();
+        this.authenticationTokenExpirationTime = settings.tokenExpiration.authenticationToken;
+        this.refreshTokenExpirationTime = settings.tokenExpiration.refreshToken;
     }
 
 }

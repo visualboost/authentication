@@ -199,15 +199,15 @@ const SettingsComponent = () => {
             <Space size={0} direction={"vertical"} style={{width: '100%'}}>
                 <SaveInputComponent
                     type={"number"}
-                    addonBefore={<div style={{textAlign: 'start', width: '140px'}}>Authentication Token</div>}
+                    addonBefore={<div style={{textAlign: 'start', width: '140px'}}>Access Token</div>}
                     defaultValue={settings?.tokenExpiration.authenticationToken?.toString()}
-                    placeholder={"Enter the expiration time of the authentication token in minutes"}
+                    placeholder={"Enter the expiration time of the access token in minutes"}
                     onSave={setAuthTokenExpirationTime}/>
                 <SaveInputComponent
                     type={"number"}
                     addonBefore={<div style={{textAlign: 'start', width: '140px'}}>Refresh Token</div>}
                     defaultValue={settings?.tokenExpiration.refreshToken?.toString()}
-                    placeholder={"Enter the expiration time of the authentication token in minutes"}
+                    placeholder={"Enter the expiration time of the refresh token in minutes"}
                     onSave={setRefreshTokenExpirationTime}/>
             </Space>
         </div>

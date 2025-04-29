@@ -12,6 +12,7 @@ import {ServerUtil} from "./util/ServerUtil.ts";
 import {ServerConfig} from "./models/util/ServerConfig.ts";
 import {initAssets} from "./util/FileHandler.ts";
 import {logDebug, logError, logInfo} from "./server/middlewares/log/Logger.ts";
+import {JwtHandler} from "./util/JwtHandler.ts";
 
 initConfig();
 /**
@@ -84,6 +85,9 @@ const startApplication = async () => {
 
         const initializedRoles = await Role.initRolesByFile();
         logInfo("initialized roles: " + JSON.stringify(initializedRoles));
+
+        logInfo("Initialize token expiration...");
+        await JwtHandler.initializeTokenExpirationDates();
 
         initHttpServer();
     } catch (e) {
