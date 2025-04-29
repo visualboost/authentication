@@ -198,17 +198,6 @@
             "XSFR": []
           }
         ],
-        "parameters": [
-          {
-            "name": "x-xsrf-token",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "XSRF token obtained from the `/api/system/xsfr` endpoint"
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -268,17 +257,6 @@
         "security": [
           {
             "XSFR": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "x-xsrf-token",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "XSRF token obtained from the `/api/system/xsfr` endpoint"
           }
         ],
         "requestBody": {
@@ -357,17 +335,6 @@
             "XSFR": []
           }
         ],
-        "parameters": [
-          {
-            "name": "x-xsrf-token",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "XSRF token obtained from the `/api/system/xsfr` endpoint"
-          }
-        ],
         "responses": {
           "200": {
             "description": "User successfully logged out"
@@ -386,16 +353,12 @@
         "summary": "Confirm two-factor authentication",
         "description": "Validate the two-factor authentication code to complete the login process.",
         "operationId": "confirmTwoFactorAuthentication",
-        "parameters": [
+        "security": [
           {
-            "name": "x-xsrf-token",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "XSRF token obtained from the `/api/system/xsfr` endpoint"
-          },
+            "XSFR": []
+          }
+        ],
+        "parameters": [
           {
             "name": "twoFactorDocId",
             "in": "path",
@@ -925,6 +888,7 @@
       "get": {
         "summary": "Retrieve all non-blocked users",
         "description": "Returns a list of all non-blocked users. Results can be filtered by username or email using the query parameters `value` and `type`.<br/>Required scope: `user.read:all`",
+        "operationId": "getAllUsers",
         "tags": [
           "User"
         ],
@@ -1027,6 +991,7 @@
       "post": {
         "summary": "Create a new user",
         "description": "Creates a new user in the system. The user can optionally be activated immediately or sent an activation email.<br/>Required scope: `user.write`",
+        "operationId": "createUser",
         "tags": [
           "User"
         ],
@@ -1151,6 +1116,7 @@
       "post": {
         "summary": "Invite a new user",
         "description": "Invites a new user by sending an invitation email. The user will be assigned a specific role upon accepting the invitation.<br/>>Required scope: `user.write:invite`.",
+        "operationId": "inviteUser",
         "tags": [
           "User"
         ],
@@ -1236,6 +1202,7 @@
       "delete": {
         "summary": "Delete a user",
         "description": "Deletes a user by their user ID.<br/>Required scope: `user.write`.",
+        "operationId": "deleteUser",
         "tags": [
           "User"
         ],
@@ -1321,6 +1288,7 @@
       "patch": {
         "summary": "Update a user's role",
         "description": "Updates the role of a user by their user ID.<br/>Required scope: `user.write:role`.",
+        "operationId": "updateUserRole",
         "tags": [
           "User"
         ],
@@ -1429,6 +1397,7 @@
       "get": {
         "summary": "Retrieve a role by ID",
         "description": "Fetches the details of a specific role by its ID.<br/>Required scopes: `user.role.read` `scope.read`.",
+        "operationId": "getRole",
         "tags": [
           "Role"
         ],
@@ -1506,6 +1475,7 @@
       "put": {
         "summary": "Update a role",
         "description": "Updates the details of an existing role by its ID.<br/>Required scopes: `user.role.write` `scope.read` `scope.write`.",
+        "operationId": "upateRole",
         "tags": [
           "Role"
         ],
@@ -1613,6 +1583,7 @@
       "delete": {
         "summary": "Delete a role",
         "description": "Deletes an existing role by its ID.<br/>Required scopes: `user.role.write` `scope.read`.",
+        "operationId": "deleteRole",
         "tags": [
           "Role"
         ],
@@ -1692,6 +1663,7 @@
       "get": {
         "summary": "Retrieve all roles",
         "description": "Fetches a list of all roles sorted by name.<br/>Required scopes: `user.role.read` `scope.read`.",
+        "operationId": "getRoles",
         "tags": [
           "Role"
         ],
@@ -1756,6 +1728,7 @@
       "post": {
         "summary": "Create a new role",
         "description": "Creates a new role with the specified name, description, and scopes. <br/>Required scopes: `user.role.write` `scope.read` `scope.write`.",
+        "operationId": "createRole",
         "tags": [
           "Role"
         ],
@@ -1853,6 +1826,7 @@
       "get": {
         "summary": "Retrieve application settings",
         "description": "Fetches the current application settings.<br/>>Required scope: `settings.read`.",
+        "operationId": "getSettings",
         "tags": [
           "Settings"
         ],
@@ -1887,6 +1861,7 @@
       "put": {
         "summary": "Update application settings",
         "description": "Updates the application settings, including token expiration times.<br/>Required scope: `settings.write`.",
+        "operationId": "updateSettings",
         "tags": [
           "Settings"
         ],
@@ -1933,6 +1908,7 @@
       "get": {
         "summary": "Retrieve blacklist entries",
         "description": "Fetches all blacklist entries or searches by email query.<br/>Required scope: `blacklist.read`.",
+        "operationId": "getBlacklist",
         "tags": [
           "Blacklist"
         ],
@@ -2002,6 +1978,7 @@
       "post": {
         "summary": "Add email to blacklist",
         "description": "Adds an email to the blacklist. Cannot add admin emails.<br/>Required scope: `blacklist.write`.",
+        "operationId": "blockEmail",
         "tags": [
           "Blacklist"
         ],
@@ -2066,6 +2043,7 @@
       "delete": {
         "summary": "Remove email from blacklist",
         "description": "Removes an email from the blacklist.<br/>Required scope: `blacklist.write`.",
+        "operationId": "unblockEmail",
         "tags": [
           "Blacklist"
         ],
@@ -2124,6 +2102,7 @@
       "post": {
         "summary": "Add IP to blacklist",
         "description": "Adds an IP address to the blacklist. Cannot add admin IPs.<br/>>Required scope: `blacklist.write`.",
+        "operationId": "blockIp",
         "tags": [
           "Blacklist"
         ],
@@ -2187,6 +2166,7 @@
       "delete": {
         "summary": "Remove IP from blacklist",
         "description": "Removes an IP address from the blacklist.<br/>>Required scope: `blacklist.write`.",
+        "operationId": "unblockIp",
         "tags": [
           "Blacklist"
         ],
@@ -2240,10 +2220,11 @@
         }
       }
     },
-    "/admin/statistics": {
+    "/api/admin/statistics": {
       "get": {
         "summary": "Retrieve application statistics",
         "description": "Fetches various application statistics, including user counts, timeline history, role statistics, and security metrics.<br/>Required scope: `statistics.read`.",
+        "operationId": "getStatistics",
         "tags": ["Statistics"],
         "security": [
           {
