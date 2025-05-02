@@ -55,7 +55,7 @@ const AccessTokenTableComponent: React.FC<Props> = ({onItemClick}) => {
         showProgress();
         try {
             await AdminService.AccessToken.deleteAccessToken(token.getID()); // oder token.getId() falls benötigt
-            message.success(`Token "${token.getName()}" wurde gelöscht`);
+            message.success(`Token "${token.getName()}" deleted`);
             await fetchAccessTokens(); // neu laden
         } catch (e) {
             NotificationHandler.showErrorNotificationFromError(e as Error);
@@ -120,7 +120,7 @@ const AccessTokenTableComponent: React.FC<Props> = ({onItemClick}) => {
             </Tooltip>
         }>
             <Search
-                placeholder="Nach Token-Namen suchen"
+                placeholder="Search token"
                 onSearch={handleSearch}
                 onChange={(e) => handleSearch(e.target.value)}
                 style={{marginBottom: 16, width: '100%'}}
@@ -132,8 +132,7 @@ const AccessTokenTableComponent: React.FC<Props> = ({onItemClick}) => {
                 columns={columns}
                 dataSource={filteredTokens}
                 onRow={(record) => ({
-                    onClick: () => onItemClick?.(record),
-                    style: {cursor: 'pointer'},
+                    onClick: () => onItemClick?.(record)
                 })}
                 pagination={{pageSize: 10}}
             />
