@@ -11,6 +11,7 @@ import {CookieNames} from "../constants/CookieNames.ts";
 import {getAuthenticationTokenSecret, getRefreshTokenSecret} from "./EncryptionUtil.ts";
 import {isDevEnvironment} from "./ConfigUtil.ts";
 import {Settings} from "../models/db/Settings.ts";
+import {TokenType} from "../constants/TokenType.ts";
 
 export class JwtHandler {
 
@@ -19,13 +20,25 @@ export class JwtHandler {
     //The expiration time of the authentication token. This parameter will be overridden by the token expiration time defined in the settings
     private static refreshTokenExpirationTime: number = 480;
 
+    static createJwt(jwtContent: any, expiresIn: string): string {
+        return jwt.sign({...jwtContent}, getAuthenticationTokenSecret(), {expiresIn: expiresIn});
+    }
+
+    /**
+     * Create a personal access token.
+     */
+    static createPersonalAccessToken(tokenId: string, expiresIn: string): string {
+        return JwtHandler.createJwt({
+            tid: tokenId
+        }, expiresIn);
+    }
+
     /**
      * Create an authentication token.
-     * This token expires in 5 minutes.
      */
-    static createAuthToken(_id: string, role: string, scopes: string[], userstate: UserState): string {
+    static createAuthenticationToken(_id: string, role: string, scopes: string[], userstate: UserState): string {
         const jwtContent = new JwtContent(_id.toString(), role, scopes, userstate);
-        return jwt.sign({...jwtContent}, getAuthenticationTokenSecret(), {expiresIn: `${this.authenticationTokenExpirationTime}m`});
+        return JwtHandler.createJwt(jwtContent, `${this.authenticationTokenExpirationTime}m`);
     }
 
     /**
@@ -53,7 +66,7 @@ export class JwtHandler {
             if (!decodedToken.id) return null;
 
             return decodedToken.id;
-        }catch (e){
+        } catch (e) {
             if (e instanceof TokenExpiredError) {
                 throw new UnauthorizedError();
             }
@@ -62,29 +75,17 @@ export class JwtHandler {
         }
     }
 
-    static getBearerTokenFromRequest(req: Request): string {
-        //@ts-ignore
-        const authHeader = req.headers["authorization"];
-        if (!authHeader) return null;
-
-        const authHeaderWithoutPrefix = authHeader.replace("Bearer ", "")
-        if (!authHeaderWithoutPrefix) return null;
-
-        return authHeaderWithoutPrefix
-    }
-
-    static fromRequest(req: Request): JwtContent {
-        const authHeaderWithoutPrefix = JwtHandler.getBearerTokenFromRequest(req);
-        return this.decodeAuthToken(authHeaderWithoutPrefix)
-    }
-
-    static decodeAuthToken(token: string): JwtContent | null {
+    static getBearerTokenFromRequest(req: Request): JwtPayload | null {
         try {
-            const decodedToken = jwt.verify(token, getAuthenticationTokenSecret()) as JwtPayload;
-            const jwtContent = new JwtContent(decodedToken.userId, decodedToken.role, decodedToken.scopes, decodedToken.state)
+            //@ts-ignore
+            const authHeader = req.headers["authorization"];
+            if (!authHeader) return null;
 
-            if (jwtContent.isValid() !== true) return null;
-            return jwtContent;
+            const authHeaderWithoutPrefix = authHeader.replace("Bearer ", "")
+            if (!authHeaderWithoutPrefix) return null;
+
+            const decodedToken = jwt.verify(authHeaderWithoutPrefix, getAuthenticationTokenSecret()) as JwtPayload;
+            return decodedToken;
         } catch (e) {
             if (e instanceof TokenExpiredError) {
                 throw new UnauthorizedError();
@@ -94,8 +95,20 @@ export class JwtHandler {
         }
     }
 
+    static fromRequest(req: Request): JwtContent {
+        const authHeaderWithoutPrefix = JwtHandler.getBearerTokenFromRequest(req);
+        return this.decodeAuthToken(authHeaderWithoutPrefix)
+    }
+
+    static decodeAuthToken(decodedToken: JwtPayload): JwtContent | null {
+        const jwtContent = new JwtContent(decodedToken.userId, decodedToken.role, decodedToken.scopes, decodedToken.state);
+
+        if (jwtContent.isValid() !== true) return null;
+        return jwtContent;
+    }
+
     static createAuthTokenBody(_id: string, role: string, scopes: string[], userstate: UserState): JwtBody {
-        return new JwtBody(this.createAuthToken(_id, role, scopes, userstate));
+        return new JwtBody(this.createAuthenticationToken(_id, role, scopes, userstate));
     }
 
     /**
@@ -140,7 +153,7 @@ export class JwtHandler {
         return jwt.verify(token, key)
     }
 
-    static clearAuthenticationCookies(res: Response){
+    static clearAuthenticationCookies(res: Response) {
         res.clearCookie(CookieNames.AUTH_TOKEN);
         res.clearCookie(CookieNames.REFRESH_TOKEN);
     }

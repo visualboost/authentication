@@ -3,13 +3,18 @@ import {JwtContent} from "../../models/api/JwtContent.ts";
 import NotAcceptableError from "../../errors/NotAcceptableError.ts";
 
 const isActiveMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    const jwtContent = res.locals.authToken as JwtContent;
+    try{
+        const jwtContent = res.locals.authToken as JwtContent;
 
-    if(!jwtContent.userIsActive()) {
-        throw new NotAcceptableError();
+        if(!jwtContent.userIsActive()) {
+            throw new NotAcceptableError();
+        }
+
+        next();
+    }catch (e) {
+        next(e);
     }
 
-    next();
 };
 
 export {

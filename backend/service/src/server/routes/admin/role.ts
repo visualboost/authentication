@@ -7,7 +7,6 @@ import {RoleResponse} from "../../../models/api/RoleResponse.ts";
 import {hasReadRoleScope, hasWriteRoleScope} from "../../middlewares/scope/hasRoleScopesMiddleware.ts";
 import {JwtContent} from "../../../models/api/JwtContent.ts";
 import Scope from "../../../constants/role/Scope.ts";
-import {en} from "@faker-js/faker";
 import {ensureReadScopesForWriteScopes} from "../../../util/ScopeUtil.ts";
 import ForbiddenError from "../../../errors/ForbiddenError.ts";
 

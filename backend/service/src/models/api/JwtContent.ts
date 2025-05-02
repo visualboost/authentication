@@ -1,5 +1,6 @@
 import {UserState} from "../../constants/UserState.ts";
 import {SystemRoles} from "../../constants/role/SystemRoles.ts";
+import {TokenType} from "../../constants/TokenType.ts";
 
 export class JwtContent {
     private userId: string;

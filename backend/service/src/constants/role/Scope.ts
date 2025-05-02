@@ -10,6 +10,7 @@ class Scope {
         static readonly STATISTICS = "statistics"
         static readonly BLACKLIST = "blacklist"
         static readonly SCOPE = "scope"
+        static readonly ACCESS_TOKEN = "access_token"
     }
 
     static createId(...paths: string[]): string {
@@ -176,6 +177,29 @@ class Scope {
 
         static getAllScopes(): string[] {
             return [Scope.Statistics.READ]
+        }
+
+    }
+
+    static Api = class {
+
+        /**
+         * Read personal access token
+         *
+         * Endpoint: GET /admin/api/accesstoken/:userId
+         */
+        static readonly READ = Scope.createId(Scope.Resources.ACCESS_TOKEN, Scope.READ)
+
+
+        /**
+         * Create a personal access token
+         *
+         * Endpoint: POST /admin/api/accesstoken
+         */
+        static readonly WRITE = Scope.createId(Scope.Resources.ACCESS_TOKEN, Scope.WRITE)
+
+        static getAllScopes(): string[] {
+            return [Scope.Api.WRITE, Scope.Api.READ]
         }
 
     }

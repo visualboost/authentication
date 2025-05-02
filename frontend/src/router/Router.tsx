@@ -29,12 +29,13 @@ import EmailChangedConfirmComponent from "../component/authentication/cofirmatio
 import SetPasswordComponent from "../component/user/SetPasswordComponent.tsx";
 import PasswordChangedConfirmComponent
     from "../component/authentication/cofirmation/PasswordChangedConfirmComponent.tsx";
+import CreateAccessTokenComponent from "../component/settings/accesstoken/CreateAccessTokenComponent.tsx";
+import AccessTokenListComponent from "../component/settings/accesstoken/AccessTokenListComponent.tsx";
 
 const routerConfig = [
     {
         path: Routes.ROOT,
         element: <App/>,
-        // shouldRevalidate: () => false
     },
     {
         path: Routes.AUTHENTICATION,
@@ -143,6 +144,14 @@ const routerConfig = [
             {
                 path: Routes.Admin.Settings.CREDENTIALS,
                 element: <CredentialsSettingsComponent/>
+            },
+            {
+                path: Routes.Admin.ACCESSTOKEN.OVERVIEW,
+                element: <AccessTokenListComponent/>
+            },
+            {
+                path: Routes.Admin.ACCESSTOKEN.CREATE,
+                element: <CreateAccessTokenComponent/>
             },
         ]
     },

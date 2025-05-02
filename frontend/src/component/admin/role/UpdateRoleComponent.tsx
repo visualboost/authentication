@@ -99,14 +99,7 @@ const UpdateRoleComponent = () => {
                         rows={4}
                     />
                 </Form.Item>
-                <Collapse items={[
-                    {
-                        key: '1',
-                        label: 'Scopes',
-                        children: <ScopeComponent onScopesSelected={setScopes} scopes={scopes}/>
-                    }
-                ]}>
-                </Collapse>
+                <ScopeComponent scopes={scopes} onScopesSelected={setScopes}/>
                 <Form.Item>
                     {enabled &&
                         <Flex justify={"flex-end"} align={"flex-end"} style={{marginTop: '20px'}}>

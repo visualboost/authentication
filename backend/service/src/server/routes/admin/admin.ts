@@ -11,6 +11,7 @@ import {router as roleRouter} from "./role.ts";
 import {router as blacklistRouter} from "./blacklist.ts";
 import {router as settingsRouter} from "./settings.ts";
 import {router as statisticsRouter} from "./statistics.ts";
+import {router as accesstokenRouter} from "./accesstoken.ts";
 
 import {UserSearchCriterias} from "../../../constants/UserSearchCriterias.ts";
 import {EmailCredentialsModel, IEmailCredentials} from "../../../models/db/credentials/EMailCredentials.ts";
@@ -34,6 +35,7 @@ router.use("/", roleRouter)
 router.use("/blacklist", blacklistRouter)
 router.use("/settings", settingsRouter)
 router.use("/statistics", statisticsRouter)
+router.use("/accesstoken", accesstokenRouter)
 
 /**
  * Return all non-blocked user.

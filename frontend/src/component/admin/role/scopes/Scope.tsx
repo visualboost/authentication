@@ -88,7 +88,7 @@ class Scope {
 
 
         static getAllScopes(): string[] {
-            return [Scope.User.READ_MULTIPLE, Scope.User.WRITE, Scope.User.INVITE, Scope.User.CHANGE_EMAIL, Scope.User.CHANGE_ROLE]
+            return [Scope.User.READ, Scope.User.READ_MULTIPLE, Scope.User.WRITE, Scope.User.INVITE, Scope.User.CHANGE_EMAIL, Scope.User.CHANGE_ROLE]
         }
     }
 

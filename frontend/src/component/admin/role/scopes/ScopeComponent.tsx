@@ -1,14 +1,17 @@
 import React from 'react';
-import {Card, Checkbox, Flex, Space, Typography} from 'antd';
+import {Card, Checkbox, Collapse, Flex, Space, Tooltip, Typography} from 'antd';
 import Scope from './Scope';
 import {ensureReadScopesForWriteScopes, ensureWriteScopesForReadScopes} from "../../../../util/ScopeUtil.tsx";
 import {CheckboxChangeEvent} from "antd/es/checkbox/Checkbox";
+import {MdError} from "react-icons/md";
 
 const {Text} = Typography;
+const {Panel} = Collapse;
 
 const scopeDescriptions: Record<string, string> = {
     [Scope.Scopes.READ]: 'Read access to scopes',
     [Scope.Scopes.WRITE]: 'Write access to scopes',
+    [Scope.User.READ]: 'Read details of a single user',
     [Scope.User.READ_MULTIPLE]: 'Read details of multiple users',
     [Scope.User.WRITE]: 'Create and delete user accounts',
     [Scope.User.INVITE]: 'Invite new users',
@@ -35,9 +38,12 @@ const groupedScopes = {
 interface ScopeComponentProps {
     scopes: string[];
     onScopesSelected: (scopes: string[]) => void;
+    collapseKey?: string | string[] | undefined;
+    onCollapse?: (key: string | string[] | undefined) => void;
+    danger?: boolean;
 }
 
-const ScopeComponent: React.FC<ScopeComponentProps> = ( {scopes, onScopesSelected}) => {
+const ScopeComponent: React.FC<ScopeComponentProps> = ( {scopes, onScopesSelected, collapseKey, onCollapse, danger}) => {
     const handleOnScopeSelected = (e: CheckboxChangeEvent) => {
         let selectedValues = scopes;
 
@@ -77,14 +83,31 @@ const ScopeComponent: React.FC<ScopeComponentProps> = ( {scopes, onScopesSelecte
     }
 
     return (
-        <Flex vertical>
-            <Text style={{marginBottom: '10px'}}>Select the scopes you want to assign (optional):</Text>
-            <Space size={20} direction={'vertical'} style={{width: '100%'}}>
-                {Object.entries(groupedScopes).map(([groupName, scopes]) => (
-                    renderScopeGroup(groupName, scopes)
-                ))}
-            </Space>
-        </Flex>
+        <Collapse activeKey={collapseKey} onChange={onCollapse}>
+            <Panel
+                key="1"
+                style={{ borderRadius: '8px', width: '100%' }}
+                header={
+                    <div>
+                        Scopes
+                    </div>
+                }
+                extra={danger &&
+                    <Tooltip title={"No scopes selected"} color={"red"}>
+                    <MdError style={{color: "#ff4d4f", fontSize: 20}} />
+                    </Tooltip>
+            }
+            >
+                <Flex vertical style={{width:'100%'}}>
+                    <Text style={{marginBottom: '10px'}}>Select the scopes you want to assign (optional):</Text>
+                    <Space size={20} direction={'vertical'} style={{width: '100%'}}>
+                        {Object.entries(groupedScopes).map(([groupName, scopes]) => (
+                            renderScopeGroup(groupName, scopes)
+                        ))}
+                    </Space>
+                </Flex>
+            </Panel>
+        </Collapse>
     );
 };
 

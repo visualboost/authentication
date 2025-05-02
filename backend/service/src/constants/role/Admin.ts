@@ -14,7 +14,8 @@ export class Admin {
             ...Scope.Role.getAllScopes(),
             ...Scope.Blacklist.getAllScopes(),
             ...Scope.Settings.getAllScopes(),
-            ...Scope.Statistics.getAllScopes()
+            ...Scope.Statistics.getAllScopes(),
+            ...Scope.Api.getAllScopes()
         ]
     }
 

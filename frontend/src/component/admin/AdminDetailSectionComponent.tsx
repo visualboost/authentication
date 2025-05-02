@@ -7,6 +7,7 @@ import CardHeader from "../common/CardHeader.tsx";
 interface AdminDetailSectionComponentProps {
     enableLoading?: boolean
     title?: string;
+    subtitle?: string;
     actions?: JSX.Element | null;
 }
 
@@ -14,7 +15,7 @@ const AdminDetailSectionComponent = (props: PropsWithChildren<AdminDetailSection
 
     return (
         <div className={"admin_detail_section"}>
-            {props.title && <CardHeader title={props.title} actions={props.actions}/>}
+            {props.title && <CardHeader title={props.title} subtitle={props.subtitle} actions={props.actions}/>}
             {props.enableLoading &&
                 <ProgressComponent>
                     {props.children}

@@ -42,8 +42,6 @@ app.use("/confirm", confirmationRouter)
 app.use("/admin", hasJwtMiddleware, isActiveMiddleware, hasXsrfTokenMiddleware, adminRouter)
 app.use("/system", systemRouter)
 
-
-
 // catch route not found
 app.use(function (req, res, next) {
     next(new NotFoundError());

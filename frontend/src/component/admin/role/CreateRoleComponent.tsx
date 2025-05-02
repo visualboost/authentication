@@ -48,14 +48,7 @@ const CreateRoleCOmponent = () => {
                         rows={4}
                     />
                 </Form.Item>
-                <Collapse items={[
-                    {
-                        key: '1',
-                        label: 'Scopes',
-                        children: <ScopeComponent scopes={scopes} onScopesSelected={setScopes}/>
-                    }
-                ]}>
-                </Collapse>
+                <ScopeComponent scopes={scopes} onScopesSelected={setScopes}/>
                 <Form.Item>
                     <Flex justify={"flex-end"} align={"flex-end"} style={{marginTop: '20px'}}>
                         <Button type="primary" htmlType="submit" loading={loading} icon={<MdSave/>}>

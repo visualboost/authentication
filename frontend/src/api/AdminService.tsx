@@ -9,6 +9,7 @@ import {Settings} from "../models/settings/Settings.ts";
 import {Statistics} from "../models/statistics/Statistics.ts";
 import {InvitationFormInput} from "../models/user/InvitationFormInput.tsx";
 import {Interceptor} from "./Interceptors.tsx";
+import {AccessToken} from "../models/accesstoken/AccessToken.ts";
 
 export interface UserFilterParams {
     value: string;
@@ -168,6 +169,32 @@ export class AdminService extends APIHandler {
             return AdminService.instance.get<Statistics>(AdminService.PREFIX + this.PREFIX + "/", function (jsonResponse) {
                 //@ts-ignore
                 return Statistics.fromJson(jsonResponse)
+            });
+        }
+
+    }
+
+    static AccessToken = class {
+        static PREFIX = "/accesstoken"
+
+        static async createAccessToken(name: string, expiresIn: string, scopes: string[]): Promise<string> {
+            return AdminService.instance.post<string>(AdminService.PREFIX + this.PREFIX + "/", {name: name, expiresIn: expiresIn, scopes: scopes}, function (jsonResponse) {
+                //@ts-ignore
+                return jsonResponse.accessToken
+            });
+        }
+
+        static async getAccessTokens(userId: string): Promise<AccessToken[]> {
+            return AdminService.instance.get<AccessToken[]>(AdminService.PREFIX + this.PREFIX + "?userId=" + userId, function (jsonResponse) {
+                //@ts-ignore
+                return jsonResponse.map(token => AccessToken.fromJson(token));
+            });
+        }
+
+        static async deleteAccessToken(userId: string): Promise<AccessToken> {
+            return AdminService.instance.delete<AccessToken>(AdminService.PREFIX + this.PREFIX + "/" + userId, function (jsonResponse) {
+                //@ts-ignore
+                return AccessToken.fromJson(jsonResponse)
             });
         }
 

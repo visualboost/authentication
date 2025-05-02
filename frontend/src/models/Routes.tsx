@@ -52,6 +52,11 @@ export class Routes {
             static OVERVIEW = Routes.ADMIN + "/settings";
             static CREDENTIALS = Routes.ADMIN + "/settings/credentials";
         }
+
+        static ACCESSTOKEN = class {
+            static OVERVIEW = Routes.ADMIN + "/accesstokens";
+            static CREATE = Routes.ADMIN + "/accesstoken";
+        }
     }
 
     static User = class {
