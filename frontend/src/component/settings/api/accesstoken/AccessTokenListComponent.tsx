@@ -13,7 +13,6 @@ import {IoAddSharp} from "react-icons/io5";
 import {SystemStateService} from "../../../../api/SystemStateService.tsx";
 
 const {Search} = Input;
-const {Paragraph} = Typography;
 
 interface Props {
     onItemClick?: (token: AccessToken) => void;
@@ -118,13 +117,12 @@ const AccessTokenTableComponent: React.FC<Props> = ({onItemClick}) => {
             <p>
                 Use personal access tokens to authenticate with our API when traditional login methods are not
                 available. For further information, please refer to our{" "}
-                <span onClick={() => window.open(SystemStateService.getDocumentationUrl(), "_blank")} style={{color: "blue", cursor: "pointer", textDecoration: "underline"}}>
-        documentation
-      </span>
-                .
+                <span onClick={() => window.open(SystemStateService.getDocumentationUrl(), "_blank")}
+                      style={{color: "blue", cursor: "pointer", textDecoration: "underline"}}>
+                    documentation
+                </span>.
             </p>
-        }
-                                     enableLoading={false} actions={
+        } enableLoading={false} actions={
             <Tooltip title={"New Access Token"} placement={"bottom"}>
                 <Button size={"large"} type={"text"} icon={<IoAddSharp/>}
                         onClick={() => navigate(Routes.Admin.Api.AccessToken.CREATE)

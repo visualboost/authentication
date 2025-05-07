@@ -57,11 +57,7 @@ export class Routes {
         static Api = class {
             static AccessToken = class {
                 static OVERVIEW = Routes.ADMIN  + Routes.API + "/accesstokens";
-                static CREATE = Routes.ADMIN + + Routes.API + "/accesstoken";
-            }
-
-            static Documentation = class {
-                static OVERVIEW = Routes.ADMIN  + Routes.API + "/docs";
+                static CREATE = Routes.ADMIN + Routes.API + "/accesstoken";
             }
         }
     }

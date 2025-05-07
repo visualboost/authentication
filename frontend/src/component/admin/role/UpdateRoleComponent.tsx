@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Button, Collapse, Flex, Form, Input, Modal, Space} from 'antd';
+import {Button, Flex, Form, Input, Modal, Space} from 'antd';
 import {AdminService} from "../../../api/AdminService.tsx";
 import {useNavigate, useParams} from "react-router-dom";
 import {Routes} from "../../../models/Routes.tsx";

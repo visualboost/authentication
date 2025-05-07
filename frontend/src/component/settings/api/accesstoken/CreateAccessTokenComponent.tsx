@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {Button, Collapse, Flex, Form, Input, Select} from 'antd';
+import {Button, Flex, Form, Input, Select} from 'antd';
 import {NotificationHandler} from "../../../../util/NotificationHandler.tsx";
 import CardHeader from "../../../common/CardHeader.tsx";
 import {MdSave} from "react-icons/md";
@@ -21,7 +21,7 @@ const durations = [
 const CreateAccessTokenComponent = () => {
     const [form] = Form.useForm();
     const [loading, isLoading] = useState(false);
-    const [expiresIn, setExpiresIn] = useState<string | null>(null);
+    const [, setExpiresIn] = useState<string | null>(null);
     const [scopes, setScopes] = useState<string[]>([]);
     const [accessToken, setAccessToken] = useState<string | undefined>(undefined);
     const [collapseKey, setCollapseKey] = useState<string | string[] | undefined>();
