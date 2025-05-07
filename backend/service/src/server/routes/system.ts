@@ -8,6 +8,7 @@ import {hasXsrfTokenMiddleware} from "../middlewares/hasXsrfTokenMiddleware.ts";
 import {ServerConfig} from "../../models/util/ServerConfig.ts";
 import {CookieOptions} from "express-serve-static-core";
 import {isDevEnvironment} from "../../util/ConfigUtil.ts";
+import {getApiDocumentation} from "../../util/FileHandler.ts";
 
 const router = express.Router();
 
@@ -108,6 +109,14 @@ router.get(
             result[hook.type] = hook.url;
         });
         return res.json(result);
+    }
+);
+
+router.get(
+    '/documentation',
+    async (req, res, next) => {
+        const documentation = await getApiDocumentation();
+        return res.send(documentation);
     }
 );
 

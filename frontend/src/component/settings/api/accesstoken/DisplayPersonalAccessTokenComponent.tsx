@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import {Button, Input, Space, Typography, message, Flex} from 'antd';
+import React from 'react';
+import {Button, Input,  Typography, message, Flex} from 'antd';
 import { EyeInvisibleOutlined, EyeTwoTone, CopyOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
 
@@ -11,7 +11,6 @@ interface IDisplayPersonalAccessTokenComponentProps {
 }
 
 const DisplayPersonalAccessTokenComponent: React.FC<IDisplayPersonalAccessTokenComponentProps>  = ({accessToken, style}) => {
-    // const [visible, setVisible] = useState(false);
 
     const handleCopy = async () => {
         await navigator.clipboard.writeText(accessToken || "");

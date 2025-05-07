@@ -9,6 +9,7 @@ export class Routes {
     static INVITATION = "/invited";
     static ERROR = "/error/:status";
     static CONFIRMED = "/confirmed";
+    static API = "/api";
 
     static Authentication = class {
         static LOGIN = Routes.AUTHENTICATION + "/login";
@@ -53,9 +54,15 @@ export class Routes {
             static CREDENTIALS = Routes.ADMIN + "/settings/credentials";
         }
 
-        static ACCESSTOKEN = class {
-            static OVERVIEW = Routes.ADMIN + "/accesstokens";
-            static CREATE = Routes.ADMIN + "/accesstoken";
+        static Api = class {
+            static AccessToken = class {
+                static OVERVIEW = Routes.ADMIN  + Routes.API + "/accesstokens";
+                static CREATE = Routes.ADMIN + + Routes.API + "/accesstoken";
+            }
+
+            static Documentation = class {
+                static OVERVIEW = Routes.ADMIN  + Routes.API + "/docs";
+            }
         }
     }
 

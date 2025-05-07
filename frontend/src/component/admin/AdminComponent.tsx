@@ -12,7 +12,6 @@ import {MdBlock, MdOutlineAddModerator, MdOutlineSecurity} from "react-icons/md"
 import {AiFillSecurityScan} from "react-icons/ai";
 import {TbLayoutDashboardFilled} from "react-icons/tb";
 import {AuthenticationService} from "../../api/AuthenticationService.tsx";
-import {PiKeyFill} from "react-icons/pi";
 
 const {Content, Sider} = Layout;
 
@@ -40,9 +39,11 @@ const AdminComponent = () => {
             navigate(Routes.Admin.Settings.OVERVIEW)
         } else if (key === 'settings_credentials') {
             navigate(Routes.Admin.Settings.CREDENTIALS)
-        }else if (key === 'settings_access_token') {
-            navigate(Routes.Admin.ACCESSTOKEN.OVERVIEW)
+        } else if (key === 'settings_access_token') {
+            navigate(Routes.Admin.Api.AccessToken.OVERVIEW)
         }
+
+
     };
 
     const handleLogout = async () => {
@@ -119,8 +120,9 @@ const AdminComponent = () => {
                 {
                     key: 'settings_access_token',
                     label: 'Access Token',
-                    icon: <PiKeyFill />
-                },
+                    icon: <AiFillSecurityScan/>
+
+                }
             ],
         },
     ];

@@ -1,10 +1,10 @@
 import {useState} from 'react';
 import {Button, Collapse, Flex, Form, Input, Select} from 'antd';
-import {NotificationHandler} from "../../../util/NotificationHandler.tsx";
-import CardHeader from "../../common/CardHeader.tsx";
+import {NotificationHandler} from "../../../../util/NotificationHandler.tsx";
+import CardHeader from "../../../common/CardHeader.tsx";
 import {MdSave} from "react-icons/md";
-import ScopeComponent from "../../admin/role/scopes/ScopeComponent.tsx";
-import {AdminService} from "../../../api/AdminService.tsx";
+import ScopeComponent from "../../../admin/role/scopes/ScopeComponent.tsx";
+import {AdminService} from "../../../../api/AdminService.tsx";
 import DisplayPersonalAccessTokenComponent from "./DisplayPersonalAccessTokenComponent.tsx";
 
 const durations = [
@@ -76,9 +76,9 @@ const CreateAccessTokenComponent = () => {
                         onChange={setExpiresIn}
                     >
                         {durations.map(({label, value}) => (
-                            <Option key={value} value={value}>
+                            <Select.Option key={value} value={value}>
                                 {label}
-                            </Option>
+                            </Select.Option>
                         ))}
                     </Select>
                 </Form.Item>

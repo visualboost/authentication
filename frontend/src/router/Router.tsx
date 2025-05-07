@@ -29,8 +29,8 @@ import EmailChangedConfirmComponent from "../component/authentication/cofirmatio
 import SetPasswordComponent from "../component/user/SetPasswordComponent.tsx";
 import PasswordChangedConfirmComponent
     from "../component/authentication/cofirmation/PasswordChangedConfirmComponent.tsx";
-import CreateAccessTokenComponent from "../component/settings/accesstoken/CreateAccessTokenComponent.tsx";
-import AccessTokenListComponent from "../component/settings/accesstoken/AccessTokenListComponent.tsx";
+import CreateAccessTokenComponent from "../component/settings/api/accesstoken/CreateAccessTokenComponent.tsx";
+import AccessTokenListComponent from "../component/settings/api/accesstoken/AccessTokenListComponent.tsx";
 
 const routerConfig = [
     {
@@ -146,13 +146,13 @@ const routerConfig = [
                 element: <CredentialsSettingsComponent/>
             },
             {
-                path: Routes.Admin.ACCESSTOKEN.OVERVIEW,
+                path: Routes.Admin.Api.AccessToken.OVERVIEW,
                 element: <AccessTokenListComponent/>
             },
             {
-                path: Routes.Admin.ACCESSTOKEN.CREATE,
+                path: Routes.Admin.Api.AccessToken.CREATE,
                 element: <CreateAccessTokenComponent/>
-            },
+            }
         ]
     },
     {

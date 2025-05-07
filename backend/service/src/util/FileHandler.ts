@@ -51,6 +51,10 @@ const getTemplate = async (filename: string, placeHolders: object = undefined) =
     return replacePlaceHolders(plainAsset, placeHolders)
 }
 
+const getApiDocumentation = async () => {
+    return getTemplate("redoc-static.html")
+}
+
 const replacePlaceHolders = (fileContent: string, placeHolders: object) => {
     if (!placeHolders) return fileContent;
 
@@ -97,6 +101,7 @@ const getRolesByFile = async ():Promise<Array<Role>> => {
 export {
     initAssets,
     getTemplate,
+    getApiDocumentation,
     getRolesByFile,
     getRoleFilePath
 }

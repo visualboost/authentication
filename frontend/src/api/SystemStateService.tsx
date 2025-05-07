@@ -38,5 +38,9 @@ export class SystemStateService extends APIHandler {
     }
 
 
+    static getDocumentationUrl(): string {
+        return SystemStateService.instance.getBackendUrl() + "/system/documentation"
+    }
+
 }
 

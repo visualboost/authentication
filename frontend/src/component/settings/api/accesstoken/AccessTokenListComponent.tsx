@@ -1,17 +1,19 @@
 import React, {useEffect, useState} from 'react';
 import {Button, Input, message, Popconfirm, Table, Tooltip, Typography} from 'antd';
 import {DeleteOutlined} from '@ant-design/icons';
-import {AccessToken} from '../../../models/accesstoken/AccessToken.ts';
-import {AdminService} from '../../../api/AdminService.tsx';
-import {NotificationHandler} from '../../../util/NotificationHandler.tsx';
-import {useLoader} from '../../common/LoaderProvider.tsx';
-import {CookieHandler} from '../../../util/CookieHandler.tsx';
-import AdminDetailSectionComponent from "../../admin/AdminDetailSectionComponent.tsx";
+import {AccessToken} from '../../../../models/accesstoken/AccessToken.ts';
+import {AdminService} from '../../../../api/AdminService.tsx';
+import {NotificationHandler} from '../../../../util/NotificationHandler.tsx';
+import {useLoader} from '../../../common/LoaderProvider.tsx';
+import {CookieHandler} from '../../../../util/CookieHandler.tsx';
+import AdminDetailSectionComponent from "../../../admin/AdminDetailSectionComponent.tsx";
 import {useNavigate} from "react-router-dom";
-import {Routes} from "../../../models/Routes.tsx";
+import {Routes} from "../../../../models/Routes.tsx";
 import {IoAddSharp} from "react-icons/io5";
+import {SystemStateService} from "../../../../api/SystemStateService.tsx";
 
 const {Search} = Input;
+const {Paragraph} = Typography;
 
 interface Props {
     onItemClick?: (token: AccessToken) => void;
@@ -112,10 +114,20 @@ const AccessTokenTableComponent: React.FC<Props> = ({onItemClick}) => {
     ];
 
     return (
-        <AdminDetailSectionComponent title={"Access Tokens"} subtitle={"Use personal access tokens to authenticate with our API when traditional login methods are not available."} enableLoading={false} actions={
+        <AdminDetailSectionComponent title={"Access Tokens"} subtitleElement={
+            <p>
+                Use personal access tokens to authenticate with our API when traditional login methods are not
+                available. For further information, please refer to our{" "}
+                <span onClick={() => window.open(SystemStateService.getDocumentationUrl(), "_blank")} style={{color: "blue", cursor: "pointer", textDecoration: "underline"}}>
+        documentation
+      </span>
+                .
+            </p>
+        }
+                                     enableLoading={false} actions={
             <Tooltip title={"New Access Token"} placement={"bottom"}>
-                <Button size={"large"} type={"text"} icon={<IoAddSharp />}
-                        onClick={() => navigate(Routes.Admin.ACCESSTOKEN.CREATE)
+                <Button size={"large"} type={"text"} icon={<IoAddSharp/>}
+                        onClick={() => navigate(Routes.Admin.Api.AccessToken.CREATE)
                         }></Button>
             </Tooltip>
         }>
