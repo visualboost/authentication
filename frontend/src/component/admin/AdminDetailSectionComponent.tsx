@@ -10,12 +10,13 @@ interface AdminDetailSectionComponentProps {
     subtitle?: string;
     subtitleElement?: ReactNode;
     actions?: JSX.Element | null;
+    style?: React.CSSProperties;
 }
 
 const AdminDetailSectionComponent = (props: PropsWithChildren<AdminDetailSectionComponentProps>) => {
 
     return (
-        <div className={"admin_detail_section"}>
+        <div className={"admin_detail_section"} style={{...props.style}}>
             {props.title && <CardHeader title={props.title} subtitle={props.subtitle} subtitleElement={props.subtitleElement} actions={props.actions}/>}
             {props.enableLoading &&
                 <ProgressComponent>

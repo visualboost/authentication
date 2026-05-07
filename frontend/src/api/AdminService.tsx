@@ -10,6 +10,7 @@ import {Statistics} from "../models/statistics/Statistics.ts";
 import {InvitationFormInput} from "../models/user/InvitationFormInput.tsx";
 import {Interceptor} from "./Interceptors.tsx";
 import {AccessToken} from "../models/accesstoken/AccessToken.ts";
+import {UITheme} from "../models/settings/UITheme.ts";
 
 export interface UserFilterParams {
     value: string;
@@ -159,6 +160,18 @@ export class AdminService extends APIHandler {
                 return Settings.fromJson(jsonResponse as Settings)
             });
         }
+
+        static async updateUITheme(theme: UITheme): Promise<UITheme> {
+            return AdminService.instance.put<UITheme>(AdminService.PREFIX + this.PREFIX + "/theme", {theme: theme}, function (jsonResponse) {
+                return UITheme.fromJson(jsonResponse as UITheme)
+            });
+        }
+
+        static async resetUITheme(): Promise<UITheme> {
+            return AdminService.instance.put<UITheme>(AdminService.PREFIX + this.PREFIX + "/theme/reset", {}, function (jsonResponse) {
+                return UITheme.fromJson(jsonResponse as UITheme)
+            });
+        }
     }
 
     static Statistics = class {
@@ -178,7 +191,11 @@ export class AdminService extends APIHandler {
         static PREFIX = "/accesstoken"
 
         static async createAccessToken(name: string, expiresIn: string, scopes: string[]): Promise<string> {
-            return AdminService.instance.post<string>(AdminService.PREFIX + this.PREFIX + "/", {name: name, expiresIn: expiresIn, scopes: scopes}, function (jsonResponse) {
+            return AdminService.instance.post<string>(AdminService.PREFIX + this.PREFIX + "/", {
+                name: name,
+                expiresIn: expiresIn,
+                scopes: scopes
+            }, function (jsonResponse) {
                 //@ts-ignore
                 return jsonResponse.accessToken
             });

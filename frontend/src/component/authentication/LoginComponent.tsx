@@ -1,7 +1,7 @@
-import {Button, Flex, Form, Input} from 'antd';
+import {Button, Card, Flex, Form, Image, Input} from 'antd';
 import {Link, useNavigate} from "react-router-dom";
 import {LoginFormInput} from "../../models/auth/LoginFormInput.tsx";
-import {useEffect, useState} from "react";
+import React, {PropsWithChildren, useEffect, useState} from "react";
 import {AuthenticationService} from "../../api/AuthenticationService.tsx";
 import {CookieHandler} from "../../util/CookieHandler.tsx";
 import {Routes} from "../../models/Routes.tsx";
@@ -9,9 +9,18 @@ import {SystemStateService} from "../../api/SystemStateService.tsx";
 import {HttpError} from "../../models/errors/HttpError.tsx";
 import {JwtContent} from "../../models/auth/JwtContent.ts";
 import {NotificationHandler} from "../../util/NotificationHandler.tsx";
+import {UITheme} from "../../models/settings/UITheme.ts";
+import {useUITheme} from "../settings/UIThemeProvider.tsx";
 
-const LoginComponent = () => {
+interface LoginComponentProps {
+    uiTheme?: UITheme;
+    preventDefault?: boolean
+}
+
+const LoginComponent = (props: PropsWithChildren<LoginComponentProps>) => {
     const navigate = useNavigate();
+    const {uiTheme} = useUITheme();
+    const theme = props?.uiTheme || uiTheme;
 
     const [loading, isLoading] = useState(false);
     const [enabled, isEnabled] = useState(true);
@@ -45,7 +54,7 @@ const LoginComponent = () => {
              * If two factor auth is enabled, navigate to two factor authentication
              */
             const signinResponseBody = await AuthenticationService.signin(data);
-            if(signinResponseBody.twoFactorAuthIdNotNull()){
+            if (signinResponseBody.twoFactorAuthIdNotNull()) {
                 navigate(Routes.getConfirmTwoFactorAuth(signinResponseBody.twoFactorAuthId as string));
                 return;
             }
@@ -85,59 +94,93 @@ const LoginComponent = () => {
     };
 
     return (
-        <Form
-            form={form}
-            name="login"
-            layout="vertical"
-            onFinish={onFinish}
-            autoComplete="off"
-            disabled={!enabled}
-        >
-            <h2 style={{textAlign: 'center'}}>Login</h2>
-
-            <Form.Item
-                label="Email"
-                name="email"
-                rules={[
-                    {required: true, message: 'Please enter your email!'},
-                    {type: 'email', message: 'Please enter a valid email!'},
-                ]}
+        <Card style={{
+            background: theme?.cardBackgroundColor || "#FFFFFF",
+            borderColor: theme?.cardBorderColor || undefined
+        }}>
+            <Form
+                form={form}
+                name="login"
+                layout="vertical"
+                onFinish={onFinish}
+                autoComplete="off"
+                disabled={!enabled}
             >
-                <Input aria-label={"Login Email Input"} status={(error instanceof HttpError && error.status === 404) ? "error" : ""} placeholder="Enter your email"/>
-            </Form.Item>
+                {theme?.loginLogo ? <Flex justify={"center"}>
+                        <Image src={theme?.loginLogo} preview={false}/>
+                    </Flex> :
+                    <h2 style={{textAlign: 'center', color: theme?.inputTextColor}}>Login</h2>}
 
-            <Form.Item
-                label="Password"
-                name="password"
-                rules={[{required: true, message: 'Please enter your password!'}]}
-                style={{marginBottom: 0}}
-            >
-                <Input.Password aria-label={"Login Password Input"} status={(error instanceof HttpError && error.status === 404) ? "error" : ""} placeholder="Enter your password"/>
-            </Form.Item>
-            <Flex justify={"flex-end"}>
-                <p style={{margin: '0 0 20px 0'}}>
-                    <Link aria-label="Forgot Password Link"
-                          to={Routes.Authentication.RESET_PASSWORD}>Forgot your password?
-                    </Link>
-                </p>
-            </Flex>
-
-            <Form.Item>
-                <Button aria-label={"Login Button"} type="primary" htmlType="submit" style={{width: '100%'}} loading={loading}>
-                    Log In
-                </Button>
-            </Form.Item>
-
-            {allowRegistrationView &&
-                <Form.Item style={{textAlign: 'center'}}>
-                    <p>
-                        Don't have an account?{' '}
-                        <Link aria-label={"Registration Link"} to={Routes.Authentication.REGISTRATION}>Register
-                            here</Link>
-                    </p>
+                <Form.Item
+                    label={<span style={{color: theme?.inputTextColor}}>E-Mail</span>}
+                    name="email"
+                    rules={[
+                        {required: true, message: 'Please enter your email!'},
+                        {type: 'email', message: 'Please enter a valid email!'},
+                    ]}
+                >
+                    <Input aria-label={"Login Email Input"}
+                           status={(error instanceof HttpError && error.status === 404) ? "error" : ""}
+                           placeholder="Enter your email"/>
                 </Form.Item>
-            }
-        </Form>
+
+                <Form.Item
+                    label={<span style={{color: theme?.inputTextColor}}>Password</span>}
+                    name="password"
+                    rules={[{required: true, message: 'Please enter your password!'}]}
+                    style={{marginBottom: 0}}
+                >
+                    <Input.Password aria-label={"Login Password Input"}
+                                    status={(error instanceof HttpError && error.status === 404) ? "error" : ""}
+                                    placeholder="Enter your password"/>
+                </Form.Item>
+                <Flex justify={"flex-end"}>
+                    <p style={{margin: '0 0 20px 0'}}>
+                        <Link aria-label="Forgot Password Link"
+                              to={Routes.Authentication.RESET_PASSWORD} style={{
+                            color: theme?.linkColor,
+                        }} onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
+                            if (props?.preventDefault) {
+                                event.preventDefault();
+                            }
+                        }}>Forgot your password?
+                        </Link>
+                    </p>
+                </Flex>
+
+                <Form.Item>
+                    <Button aria-label={"Login Button"} type="primary" htmlType="submit" style={{
+                        width: '100%',
+                        backgroundColor: theme?.buttonColor,
+                        color: theme?.buttonTextColor,
+                        borderColor: theme?.buttonColor
+                    }}
+                            loading={loading} onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
+                        if (props?.preventDefault) {
+                            event.preventDefault();
+                        }
+                    }}>
+                        Log In
+                    </Button>
+                </Form.Item>
+
+                {allowRegistrationView &&
+                    <Form.Item style={{textAlign: 'center', color: theme?.inputTextColor}}>
+                        <p>
+                            Don't have an account?{' '}
+                            <Link aria-label={"Registration Link"} to={Routes.Authentication.REGISTRATION} style={{
+                                color: theme?.linkColor,
+                            }} onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
+                                if (props?.preventDefault) {
+                                    event.preventDefault();
+                                }
+                            }}>Register
+                                here</Link>
+                        </p>
+                    </Form.Item>
+                }
+            </Form>
+        </Card>
     );
 };
 

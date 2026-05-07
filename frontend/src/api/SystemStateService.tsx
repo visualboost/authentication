@@ -2,6 +2,7 @@ import {SystemState} from "../models/SystemState.tsx";
 import {APIHandler} from "./APIHandler.tsx";
 import {PrivacyPolicyOptions} from "../models/system/PrivacyPolicyOptions.tsx";
 import {Hooks} from "../models/settings/Hooks.ts";
+import {UITheme} from "../models/settings/UITheme.ts";
 
 export class SystemStateService extends APIHandler {
 
@@ -40,6 +41,12 @@ export class SystemStateService extends APIHandler {
 
     static getDocumentationUrl(): string {
         return SystemStateService.instance.getBackendUrl() + "/system/documentation"
+    }
+
+    static async getUITheme(): Promise<UITheme> {
+        return SystemStateService.instance.get<UITheme>("/system/theme", function (jsonResponse) {
+            return UITheme.fromJson(jsonResponse as UITheme)
+        });
     }
 
 }

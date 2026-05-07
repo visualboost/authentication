@@ -9,6 +9,7 @@ import {ServerConfig} from "../../models/util/ServerConfig.ts";
 import {CookieOptions} from "express-serve-static-core";
 import {isDevEnvironment} from "../../util/ConfigUtil.ts";
 import {getApiDocumentation} from "../../util/FileHandler.ts";
+import {UITheme} from "../../models/db/UITheme.ts";
 
 const router = express.Router();
 
@@ -117,6 +118,18 @@ router.get(
     async (req, res, next) => {
         const documentation = await getApiDocumentation();
         return res.send(documentation);
+    }
+);
+
+router.get(
+    '/theme',
+    async (req, res, next) => {
+        try {
+            const theme = await UITheme.load();
+            return res.json(theme);
+        } catch (e) {
+            next(e);
+        }
     }
 );
 

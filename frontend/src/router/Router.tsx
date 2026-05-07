@@ -31,6 +31,7 @@ import PasswordChangedConfirmComponent
     from "../component/authentication/cofirmation/PasswordChangedConfirmComponent.tsx";
 import CreateAccessTokenComponent from "../component/settings/api/accesstoken/CreateAccessTokenComponent.tsx";
 import AccessTokenListComponent from "../component/settings/api/accesstoken/AccessTokenListComponent.tsx";
+import UIThemeComponent from "../component/settings/UIThemeComponent.tsx";
 
 const routerConfig = [
     {
@@ -152,6 +153,10 @@ const routerConfig = [
             {
                 path: Routes.Admin.Api.AccessToken.CREATE,
                 element: <CreateAccessTokenComponent/>
+            },
+            {
+                path: Routes.Admin.Settings.UI_THEME,
+                element: <UIThemeComponent/>
             }
         ]
     },

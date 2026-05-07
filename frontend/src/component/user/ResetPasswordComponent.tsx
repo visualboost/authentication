@@ -1,8 +1,10 @@
-import {useState} from 'react';
-import {Alert, Button, Form, Input, Typography} from 'antd';
+import React, {useState} from 'react';
+import {Alert, Button, Card, Form, Input, Typography} from 'antd';
 import {MailOutlined} from '@ant-design/icons';
 import {AuthenticationService} from "../../api/AuthenticationService.tsx";
 import {NotificationHandler} from "../../util/NotificationHandler.tsx";
+import {UITheme} from "../../models/settings/UITheme.ts";
+import {useUITheme} from "../settings/UIThemeProvider.tsx";
 
 const {Title, Paragraph} = Typography;
 
@@ -10,7 +12,14 @@ interface ResetPasswordItem {
     email: string;
 }
 
-const ResetPasswordComponent = () => {
+interface ResetPasswordComponentProps {
+    uiTheme?: UITheme;
+    preventDefault?: boolean;
+}
+
+const ResetPasswordComponent = (props: ResetPasswordComponentProps) => {
+    const {uiTheme} = useUITheme();
+    const theme = props?.uiTheme || uiTheme;
 
     const [loading, setLoading] = useState(false);
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
@@ -35,10 +44,13 @@ const ResetPasswordComponent = () => {
     }
 
     return (
-        <div>
+        <Card style={{
+            background: theme?.cardBackgroundColor || "#FFFFFF",
+            borderColor: theme?.cardBorderColor || undefined
+        }}>
             <Typography>
-                <Title level={2}>Reset Your Password</Title>
-                <Paragraph>
+                <Title level={2} style={{color: theme?.inputTextColor}}>Reset Your Password</Title>
+                <Paragraph style={{color: theme?.inputTextColor}}>
                     Please enter your email address below and we'll send you a link to reset your password.
                 </Paragraph>
             </Typography>
@@ -49,7 +61,7 @@ const ResetPasswordComponent = () => {
                 onFinish={onFinish}
             >
                 <Form.Item
-                    label="Email Address"
+                    label={<span style={{color: theme?.inputTextColor}}>E-Mail</span>}
                     name="email"
                     rules={[
                         {
@@ -74,6 +86,17 @@ const ResetPasswordComponent = () => {
                         htmlType="submit"
                         loading={loading}
                         block
+                        style={{
+                            width: '100%',
+                            backgroundColor: theme?.buttonColor,
+                            color: theme?.buttonTextColor,
+                            borderColor: theme?.buttonColor
+                        }}
+                        onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
+                            if (props?.preventDefault) {
+                                event.preventDefault();
+                            }
+                        }}
                     >
                         Send Reset Link
                     </Button>
@@ -82,7 +105,7 @@ const ResetPasswordComponent = () => {
                                                 type="success"/>}
                 </Form.Item>
             </Form>
-        </div>
+        </Card>
     );
 };
 

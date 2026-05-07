@@ -4,6 +4,7 @@ import BadRequestError from "../../../errors/BadRequestError.ts";
 import {TimeUtil} from "../../../util/TimeUtil.ts";
 import {JwtHandler} from "../../../util/JwtHandler.ts";
 import {hasSettingsReadRoleScope, hasSettingsWriteRoleScope} from "../../middlewares/scope/hasSettingsScopesMiddleware.ts";
+import {UITheme} from "../../../models/db/UITheme.ts";
 
 const router = express.Router();
 
@@ -58,6 +59,33 @@ router.post(
 
             const settings = await Settings.load();
             return res.json(settings);
+        } catch (e) {
+            next(e);
+        }
+    }
+);
+
+router.put(
+    '/theme',
+    hasSettingsWriteRoleScope,
+    async (req, res, next) => {
+        try {
+            const theme = req.body.theme
+            const updatedTheme = await UITheme.updateTheme(theme);
+            return res.json(updatedTheme);
+        } catch (e) {
+            next(e);
+        }
+    }
+);
+
+router.put(
+    '/theme/reset',
+    hasSettingsWriteRoleScope,
+    async (req, res, next) => {
+        try {
+            const updatedTheme = await UITheme.resetTheme();
+            return res.json(updatedTheme);
         } catch (e) {
             next(e);
         }

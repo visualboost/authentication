@@ -11,6 +11,8 @@ import {IoPeople, IoPersonAdd} from "react-icons/io5";
 import {MdBlock, MdOutlineAddModerator, MdOutlineSecurity} from "react-icons/md";
 import {AiFillSecurityScan} from "react-icons/ai";
 import {TbLayoutDashboardFilled} from "react-icons/tb";
+import { MdOutlineStyle } from "react-icons/md";
+import { IoKey } from "react-icons/io5";
 import {AuthenticationService} from "../../api/AuthenticationService.tsx";
 
 const {Content, Sider} = Layout;
@@ -41,8 +43,9 @@ const AdminComponent = () => {
             navigate(Routes.Admin.Settings.CREDENTIALS)
         } else if (key === 'settings_access_token') {
             navigate(Routes.Admin.Api.AccessToken.OVERVIEW)
+        }else if (key === 'settings_ui_theme') {
+            navigate(Routes.Admin.Settings.UI_THEME)
         }
-
 
     };
 
@@ -120,8 +123,13 @@ const AdminComponent = () => {
                 {
                     key: 'settings_access_token',
                     label: 'Access Token',
-                    icon: <AiFillSecurityScan/>
+                    icon: <IoKey/>
 
+                },
+                {
+                    key: 'settings_ui_theme',
+                    label: 'UI-Theme',
+                    icon: <MdOutlineStyle/>
                 }
             ],
         },

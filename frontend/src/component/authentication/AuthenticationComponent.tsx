@@ -8,6 +8,8 @@ import {SystemStateService} from "../../api/SystemStateService.tsx";
 import {SystemState} from "../../models/SystemState.tsx";
 import {UserState} from "../../models/auth/UserState.ts";
 import {Hooks} from "../../models/settings/Hooks.ts";
+import {UIThemeProvider} from "../settings/UIThemeProvider.tsx";
+import AuthenticationLayout from "./AuthenticationLayout.tsx";
 
 function AuthenticationComponent() {
     const navigate = useNavigate();
@@ -42,7 +44,7 @@ function AuthenticationComponent() {
 
             const allHooks = await SystemStateService.getHooks();
             const authHook = allHooks[Hooks.AUTHENTICATION] as string;
-            if(authHook){
+            if (authHook) {
                 window.location.replace(authHook)
             } else {
                 navigate(Routes.Confirmation.LOGIN);
@@ -53,11 +55,9 @@ function AuthenticationComponent() {
     }
 
     return (
-        <div className={"verification-parent"}>
-            <div className={"verification-form"}>
-                <Outlet/>
-            </div>
-        </div>
+        <UIThemeProvider>
+            <AuthenticationLayout/>
+        </UIThemeProvider>
     )
 }
 

@@ -52,6 +52,7 @@ export class Routes {
         static Settings = class {
             static OVERVIEW = Routes.ADMIN + "/settings";
             static CREDENTIALS = Routes.ADMIN + "/settings/credentials";
+            static UI_THEME = Routes.ADMIN + "/theme";
         }
 
         static Api = class {
