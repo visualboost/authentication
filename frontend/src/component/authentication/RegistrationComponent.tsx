@@ -141,7 +141,7 @@ const RegistrationComponent = (props: RegistrationComponentProps) => {
                         ]}
                     >
                         <Checkbox
-                            aria-label={"Registration Privacy Policy Checkbox"}
+                            aria-label={"Registration Privacy Policy Link"}
                             checked={agreeToPrivacy}
                             onChange={(e) => setAgreeToPrivacy(e.target.checked)}
                         >
