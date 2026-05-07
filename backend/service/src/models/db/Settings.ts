@@ -41,6 +41,8 @@ interface ISettings extends mongoose.Document {
     encryptEmail: boolean;
 
     tokenExpiration: TokenExpiration;
+
+    authenticationLanguage: string;
 }
 
 interface ISettingsModel extends Model<ISettings> {
@@ -81,7 +83,8 @@ const SettingsSchema = new Schema<ISettings, ISettingsModel>({
         authenticationToken: {type: Number, required: true, default: 30},
         //Default is 8h
         refreshToken: {type: Number, required: true, default: 480}
-    }
+    },
+    authenticationLanguage: {type: String, required: true, default: "en"}
 }, {
     statics: {
         load: async function (): Promise<ISettings> {
@@ -114,7 +117,8 @@ const SettingsSchema = new Schema<ISettings, ISettingsModel>({
                         admin: false,
                         clients: false
                     },
-                    encryptEmail: false
+                    encryptEmail: false,
+                    authenticationLanguage: "en"
                 })
                 await settings.save();
             }

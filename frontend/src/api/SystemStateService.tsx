@@ -49,5 +49,13 @@ export class SystemStateService extends APIHandler {
         });
     }
 
+    static async getLanguage(): Promise<{ language: string }> {
+        return SystemStateService.instance.get<{ language: string }>("/system/language", function (jsonResponse: unknown) {
+            return {
+                language: (jsonResponse as { language: string }).language
+            };
+        });
+    }
+
 }
 

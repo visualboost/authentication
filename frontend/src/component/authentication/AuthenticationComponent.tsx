@@ -1,5 +1,5 @@
 import './Verification.css'
-import {Outlet, useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import {useEffect} from "react";
 import {Routes} from "../../models/Routes.tsx";
 import {CookieHandler} from "../../util/CookieHandler.tsx";
@@ -10,6 +10,7 @@ import {UserState} from "../../models/auth/UserState.ts";
 import {Hooks} from "../../models/settings/Hooks.ts";
 import {UIThemeProvider} from "../settings/UIThemeProvider.tsx";
 import AuthenticationLayout from "./AuthenticationLayout.tsx";
+import {LanguageProvider} from "../settings/LanguageProvider.tsx";
 
 function AuthenticationComponent() {
     const navigate = useNavigate();
@@ -55,9 +56,11 @@ function AuthenticationComponent() {
     }
 
     return (
-        <UIThemeProvider>
-            <AuthenticationLayout/>
-        </UIThemeProvider>
+        <LanguageProvider>
+            <UIThemeProvider>
+                <AuthenticationLayout/>
+            </UIThemeProvider>
+        </LanguageProvider>
     )
 }
 

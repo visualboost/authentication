@@ -1,0 +1,63 @@
+{
+    "auth": {
+        "login": {
+            "title": "Anmelden",
+            "email": {
+                "label": "E-Mail",
+                "required": "Bitte gib deine E-Mail ein!",
+                "invalid": "Bitte gib eine gültige E-Mail ein!",
+                "placeholder": "E-Mail eingeben"
+            },
+            "password": {
+                "label": "Passwort",
+                "required": "Bitte gib dein Passwort ein!",
+                "placeholder": "Passwort eingeben"
+            },
+            "forgotPassword": "Passwort vergessen?",
+            "submit": "Einloggen",
+            "noAccount": "Du hast noch kein Konto?",
+            "registerHere": "Hier registrieren"
+        },
+        "registration": {
+            "title": "Registrierung",
+            "username": {
+                "label": "Benutzername",
+                "required": "Bitte gib einen Benutzernamen ein!",
+                "placeholder": "Benutzernamen eingeben"
+            },
+            "email": {
+                "label": "E-Mail",
+                "required": "Bitte gib eine E-Mail ein!",
+                "invalid": "Bitte gib eine gültige E-Mail ein!",
+                "placeholder": "E-Mail eingeben"
+            },
+            "password": {
+                "label": "Passwort",
+                "required": "Bitte gib ein Passwort ein!",
+                "placeholder": "Passwort eingeben"
+            },
+            "privacyPolicy": {
+                "label": "Ich stimme der ",
+                "labelEnd": " zu.",
+                "link": "Datenschutzerklärung",
+                "required": "Du musst der Datenschutzerklärung zustimmen!"
+            },
+            "submit": "Registrieren",
+            "alreadyHaveAccount": "Du hast bereits ein Konto?",
+            "loginHere": "Hier anmelden"
+        },
+        "resetPassword": {
+            "title": "Passwort zurücksetzen",
+            "description": "Bitte gib unten deine E-Mail-Adresse ein. Wir senden dir einen Link zum Zurücksetzen deines Passworts.",
+            "email": {
+                "label": "E-Mail",
+                "required": "Bitte gib deine E-Mail-Adresse ein!",
+                "invalid": "Bitte gib eine gültige E-Mail-Adresse ein!",
+                "placeholder": "E-Mail-Adresse eingeben"
+            },
+            "submit": "Link zum Zurücksetzen senden",
+            "successMessage": "Wenn diese E-Mail registriert ist, erhältst du in Kürze einen Link zum Zurücksetzen des Passworts.",
+            "back": "Zurück"
+        }
+    }
+}

@@ -133,6 +133,20 @@ router.get(
     }
 );
 
+router.get(
+    '/language',
+    async (req, res, next) => {
+        try {
+            const settings = await Settings.load();
+            return res.json({
+                language: settings.authenticationLanguage,
+            });
+        } catch (e) {
+            next(e);
+        }
+    }
+);
+
 
 export {
     router

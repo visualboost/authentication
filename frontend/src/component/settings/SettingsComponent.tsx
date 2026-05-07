@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Alert, Card, Flex, Modal, Space, Switch, Tabs, Typography,} from 'antd';
+import {Alert, Card, Flex, Modal, Select, Space, Switch, Tabs, Typography,} from 'antd';
 import {Settings} from "../../models/settings/Settings.ts";
 import {AdminService} from "../../api/AdminService.tsx";
 import SaveInputComponent from "../common/SaveInputComponent.tsx";
@@ -10,6 +10,7 @@ import {ExclamationCircleFilled} from "@ant-design/icons";
 import {NotificationHandler} from "../../util/NotificationHandler.tsx";
 import AdminDetailSectionComponent from "../admin/AdminDetailSectionComponent.tsx";
 import {useLoader} from "../common/LoaderProvider.tsx";
+import {languages} from "../../i18n/languages.tsx";
 
 const {Title, Text} = Typography;
 const {confirm} = Modal;
@@ -76,7 +77,7 @@ const SettingsComponent = () => {
 
     const setAuthTokenExpirationTime = async (expirationTime?: string) => {
         if (!settings) return;
-        if(!expirationTimeIsValid(expirationTime)) return;
+        if (!expirationTimeIsValid(expirationTime)) return;
 
         settings.tokenExpiration.authenticationToken = parseInt(expirationTime as string);
         await updateSettings();
@@ -84,19 +85,19 @@ const SettingsComponent = () => {
 
     const setRefreshTokenExpirationTime = async (expirationTime?: string) => {
         if (!settings) return;
-        if(!expirationTimeIsValid(expirationTime)) return;
+        if (!expirationTimeIsValid(expirationTime)) return;
         settings.tokenExpiration.refreshToken = parseInt(expirationTime as string);
         await updateSettings();
     }
 
     const expirationTimeIsValid = (expirationTime?: string) => {
-        if(!expirationTime || expirationTime === ""){
+        if (!expirationTime || expirationTime === "") {
             NotificationHandler.showErrorNotification("Invalid expiration Time", "Please enter a valid expiration time (> 0)", 5);
             return false;
         }
 
         const expTime = parseInt(expirationTime);
-        if(expTime <= 0){
+        if (expTime <= 0) {
             NotificationHandler.showErrorNotification("Invalid expiration Time", "Please enter a valid expiration time (> 0)", 5);
             return false;
         }
@@ -137,6 +138,12 @@ const SettingsComponent = () => {
         } catch (e) {
             NotificationHandler.showErrorNotificationFromError(e as Error);
         }
+    }
+
+    const updateAuthenticationLanguage = async (value: string) => {
+        if (!settings) return;
+        settings.authenticationLanguage = value;
+        await updateSettings();
     }
 
     const renderHooks = () => {
@@ -339,7 +346,22 @@ const SettingsComponent = () => {
 
                         </Card>,
                     },
-                ]
+                    {
+                        key: 'language',
+                        label: 'Language',
+                        children: <Card>
+                            <Title level={4} style={{margin: '0 0 25px 0'}}>Language:</Title>
+
+                            <Space size={20} direction={"vertical"}>
+                                <Text type="secondary">
+                                    Define the language of the login and registration components.
+                                </Text>
+                                <Select options={languages} value={settings?.authenticationLanguage} defaultValue={"en"} onChange={updateAuthenticationLanguage}></Select>
+                            </Space>
+
+                    </Card>,
+                },
+                    ]
                 }
             />
         </AdminDetailSectionComponent>);

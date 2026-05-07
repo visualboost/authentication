@@ -5,6 +5,8 @@ import {AuthenticationService} from "../../api/AuthenticationService.tsx";
 import {NotificationHandler} from "../../util/NotificationHandler.tsx";
 import {UITheme} from "../../models/settings/UITheme.ts";
 import {useUITheme} from "../settings/UIThemeProvider.tsx";
+import {useTranslation} from "react-i18next";
+import {useNavigate} from "react-router-dom";
 
 const {Title, Paragraph} = Typography;
 
@@ -18,9 +20,11 @@ interface ResetPasswordComponentProps {
 }
 
 const ResetPasswordComponent = (props: ResetPasswordComponentProps) => {
+    const { t } = useTranslation();
     const {uiTheme} = useUITheme();
     const theme = props?.uiTheme || uiTheme;
 
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 
@@ -28,7 +32,7 @@ const ResetPasswordComponent = (props: ResetPasswordComponentProps) => {
         setLoading(true);
         try {
             await AuthenticationService.resetPassword(values.email);
-            showSuccessNotification()
+            showSuccessNotification();
         } catch (e) {
             NotificationHandler.showErrorNotificationFromError(e as Error);
         } finally {
@@ -38,10 +42,8 @@ const ResetPasswordComponent = (props: ResetPasswordComponentProps) => {
 
     const showSuccessNotification = () => {
         setShowSuccessAlert(true);
-        setTimeout(() => {
-            setShowSuccessAlert(false);
-        }, 2000)
-    }
+        setTimeout(() => setShowSuccessAlert(false), 2000);
+    };
 
     return (
         <Card style={{
@@ -49,11 +51,15 @@ const ResetPasswordComponent = (props: ResetPasswordComponentProps) => {
             borderColor: theme?.cardBorderColor || undefined
         }}>
             <Typography>
-                <Title level={2} style={{color: theme?.inputTextColor}}>Reset Your Password</Title>
+                <Title level={2} style={{color: theme?.inputTextColor}}>
+                    {t("auth.resetPassword.title")}
+                </Title>
+
                 <Paragraph style={{color: theme?.inputTextColor}}>
-                    Please enter your email address below and we'll send you a link to reset your password.
+                    {t("auth.resetPassword.description")}
                 </Paragraph>
             </Typography>
+
             <Form
                 name="reset_password"
                 layout="vertical"
@@ -61,22 +67,18 @@ const ResetPasswordComponent = (props: ResetPasswordComponentProps) => {
                 onFinish={onFinish}
             >
                 <Form.Item
-                    label={<span style={{color: theme?.inputTextColor}}>E-Mail</span>}
+                    label={<span style={{color: theme?.inputTextColor}}>
+                        {t("auth.resetPassword.email.label")}
+                    </span>}
                     name="email"
                     rules={[
-                        {
-                            required: true,
-                            message: 'Please input your email address!'
-                        },
-                        {
-                            type: 'email',
-                            message: 'Please enter a valid email address!'
-                        },
+                        {required: true, message: t("auth.resetPassword.email.required")},
+                        {type: 'email', message: t("auth.resetPassword.email.invalid")}
                     ]}
                 >
                     <Input
                         prefix={<MailOutlined/>}
-                        placeholder="Enter your email address"
+                        placeholder={t("auth.resetPassword.email.placeholder")}
                     />
                 </Form.Item>
 
@@ -93,16 +95,40 @@ const ResetPasswordComponent = (props: ResetPasswordComponentProps) => {
                             borderColor: theme?.buttonColor
                         }}
                         onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
-                            if (props?.preventDefault) {
-                                event.preventDefault();
-                            }
+                            if (props?.preventDefault) event.preventDefault();
                         }}
                     >
-                        Send Reset Link
+                        {t("auth.resetPassword.submit")}
                     </Button>
-                    {showSuccessAlert && <Alert style={{marginTop: '20px'}}
-                                                message="If this email is registered, you will receive a password reset link shortly."
-                                                type="success"/>}
+
+                    <Button
+                        type="primary"
+                        block
+                        style={{
+                            marginTop: "10px",
+                            width: '100%',
+                            backgroundColor: theme?.buttonColor,
+                            color: theme?.buttonTextColor,
+                            borderColor: theme?.buttonColor
+                        }}
+                        onClick={() => {
+                            if (props?.preventDefault) {
+                                return;
+                            }
+
+                            navigate(-1);
+                        }}
+                    >
+                        {t("auth.resetPassword.back")}
+                    </Button>
+
+                    {showSuccessAlert && (
+                        <Alert
+                            style={{marginTop: '20px'}}
+                            message={t("auth.resetPassword.successMessage")}
+                            type="success"
+                        />
+                    )}
                 </Form.Item>
             </Form>
         </Card>

@@ -11,6 +11,7 @@ import {JwtContent} from "../../models/auth/JwtContent.ts";
 import {NotificationHandler} from "../../util/NotificationHandler.tsx";
 import {UITheme} from "../../models/settings/UITheme.ts";
 import {useUITheme} from "../settings/UIThemeProvider.tsx";
+import {useTranslation} from "react-i18next";
 
 interface LoginComponentProps {
     uiTheme?: UITheme;
@@ -18,6 +19,7 @@ interface LoginComponentProps {
 }
 
 const LoginComponent = (props: PropsWithChildren<LoginComponentProps>) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const {uiTheme} = useUITheme();
     const theme = props?.uiTheme || uiTheme;
@@ -50,9 +52,6 @@ const LoginComponent = (props: PropsWithChildren<LoginComponentProps>) => {
 
             await AuthenticationService.logout();
 
-            /**
-             * If two factor auth is enabled, navigate to two factor authentication
-             */
             const signinResponseBody = await AuthenticationService.signin(data);
             if (signinResponseBody.twoFactorAuthIdNotNull()) {
                 navigate(Routes.getConfirmTwoFactorAuth(signinResponseBody.twoFactorAuthId as string));
@@ -106,79 +105,96 @@ const LoginComponent = (props: PropsWithChildren<LoginComponentProps>) => {
                 autoComplete="off"
                 disabled={!enabled}
             >
-                {theme?.loginLogo ? <Flex justify={"center"}>
+                {theme?.loginLogo ? (
+                    <Flex justify={"center"}>
                         <Image src={theme?.loginLogo} preview={false}/>
-                    </Flex> :
-                    <h2 style={{textAlign: 'center', color: theme?.inputTextColor}}>Login</h2>}
+                    </Flex>
+                ) : (
+                    <h2 style={{textAlign: 'center', color: theme?.inputTextColor}}>
+                        {t("auth.login.title")}
+                    </h2>
+                )}
 
                 <Form.Item
-                    label={<span style={{color: theme?.inputTextColor}}>E-Mail</span>}
+                    label={<span style={{color: theme?.inputTextColor}}>{t("auth.login.email.label")}</span>}
                     name="email"
                     rules={[
-                        {required: true, message: 'Please enter your email!'},
-                        {type: 'email', message: 'Please enter a valid email!'},
+                        {required: true, message: t("auth.login.email.required")},
+                        {type: 'email', message: t("auth.login.email.invalid")},
                     ]}
                 >
-                    <Input aria-label={"Login Email Input"}
-                           status={(error instanceof HttpError && error.status === 404) ? "error" : ""}
-                           placeholder="Enter your email"/>
+                    <Input
+                        aria-label={"Login Email Input"}
+                        status={(error instanceof HttpError && error.status === 404) ? "error" : ""}
+                        placeholder={t("auth.login.email.placeholder")}
+                    />
                 </Form.Item>
 
                 <Form.Item
-                    label={<span style={{color: theme?.inputTextColor}}>Password</span>}
+                    label={<span style={{color: theme?.inputTextColor}}>{t("auth.login.password.label")}</span>}
                     name="password"
-                    rules={[{required: true, message: 'Please enter your password!'}]}
+                    rules={[{required: true, message: t("auth.login.password.required")}]}
                     style={{marginBottom: 0}}
                 >
-                    <Input.Password aria-label={"Login Password Input"}
-                                    status={(error instanceof HttpError && error.status === 404) ? "error" : ""}
-                                    placeholder="Enter your password"/>
+                    <Input.Password
+                        aria-label={"Login Password Input"}
+                        status={(error instanceof HttpError && error.status === 404) ? "error" : ""}
+                        placeholder={t("auth.login.password.placeholder")}
+                    />
                 </Form.Item>
+
                 <Flex justify={"flex-end"}>
                     <p style={{margin: '0 0 20px 0'}}>
-                        <Link aria-label="Forgot Password Link"
-                              to={Routes.Authentication.RESET_PASSWORD} style={{
-                            color: theme?.linkColor,
-                        }} onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
-                            if (props?.preventDefault) {
-                                event.preventDefault();
-                            }
-                        }}>Forgot your password?
+                        <Link
+                            aria-label="Forgot Password Link"
+                            to={Routes.Authentication.RESET_PASSWORD}
+                            style={{color: theme?.linkColor}}
+                            onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
+                                if (props?.preventDefault) event.preventDefault();
+                            }}
+                        >
+                            {t("auth.login.forgotPassword")}
                         </Link>
                     </p>
                 </Flex>
 
                 <Form.Item>
-                    <Button aria-label={"Login Button"} type="primary" htmlType="submit" style={{
-                        width: '100%',
-                        backgroundColor: theme?.buttonColor,
-                        color: theme?.buttonTextColor,
-                        borderColor: theme?.buttonColor
-                    }}
-                            loading={loading} onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
-                        if (props?.preventDefault) {
-                            event.preventDefault();
-                        }
-                    }}>
-                        Log In
+                    <Button
+                        aria-label={"Login Button"}
+                        type="primary"
+                        htmlType="submit"
+                        style={{
+                            width: '100%',
+                            backgroundColor: theme?.buttonColor,
+                            color: theme?.buttonTextColor,
+                            borderColor: theme?.buttonColor
+                        }}
+                        loading={loading}
+                        onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
+                            if (props?.preventDefault) event.preventDefault();
+                        }}
+                    >
+                        {t("auth.login.submit")}
                     </Button>
                 </Form.Item>
 
-                {allowRegistrationView &&
+                {allowRegistrationView && (
                     <Form.Item style={{textAlign: 'center', color: theme?.inputTextColor}}>
                         <p>
-                            Don't have an account?{' '}
-                            <Link aria-label={"Registration Link"} to={Routes.Authentication.REGISTRATION} style={{
-                                color: theme?.linkColor,
-                            }} onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
-                                if (props?.preventDefault) {
-                                    event.preventDefault();
-                                }
-                            }}>Register
-                                here</Link>
+                            {t("auth.login.noAccount")}{" "}
+                            <Link
+                                aria-label={"Registration Link"}
+                                to={Routes.Authentication.REGISTRATION}
+                                style={{color: theme?.linkColor}}
+                                onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
+                                    if (props?.preventDefault) event.preventDefault();
+                                }}
+                            >
+                                {t("auth.login.registerHere")}
+                            </Link>
                         </p>
                     </Form.Item>
-                }
+                )}
             </Form>
         </Card>
     );

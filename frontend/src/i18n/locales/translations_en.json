@@ -1,0 +1,63 @@
+{
+    "auth": {
+        "login": {
+            "title": "Login",
+            "email": {
+                "label": "E-Mail",
+                "required": "Please enter your email!",
+                "invalid": "Please enter a valid email!",
+                "placeholder": "Enter your email"
+            },
+            "password": {
+                "label": "Password",
+                "required": "Please enter your password!",
+                "placeholder": "Enter your password"
+            },
+            "forgotPassword": "Forgot your password?",
+            "submit": "Log In",
+            "noAccount": "Don't have an account?",
+            "registerHere": "Register here"
+        },
+        "registration": {
+            "title": "Registration",
+            "username": {
+                "label": "Username",
+                "required": "Please enter a username!",
+                "placeholder": "Enter username"
+            },
+            "email": {
+                "label": "E-Mail",
+                "required": "Please enter an email!",
+                "invalid": "Please enter a valid email!",
+                "placeholder": "Enter email"
+            },
+            "password": {
+                "label": "Password",
+                "required": "Please enter a password!",
+                "placeholder": "Enter password"
+            },
+            "privacyPolicy": {
+                "label": "I agree to the ",
+                "labelEnd": "",
+                "link": "privacy policy.",
+                "required": "You must agree to the privacy policy!"
+            },
+            "submit": "Register",
+            "alreadyHaveAccount": "Already have an account?",
+            "loginHere": "Login"
+        },
+        "resetPassword": {
+            "title": "Reset Your Password",
+            "description": "Please enter your email address below and we'll send you a link to reset your password.",
+            "email": {
+                "label": "E-Mail",
+                "required": "Please input your email address!",
+                "invalid": "Please enter a valid email address!",
+                "placeholder": "Enter your email address"
+            },
+            "submit": "Send Reset Link",
+            "successMessage": "If this email is registered, you will receive a password reset link shortly.",
+            "back": "Back"
+        }
+    }
+}

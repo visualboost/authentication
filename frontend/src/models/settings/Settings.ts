@@ -29,8 +29,9 @@ export class Settings {
     encryptEmail: boolean;
 
     tokenExpiration: TokenExpiration;
+    authenticationLanguage: string;
 
-    constructor(allowLogin: boolean, allowRegistration: boolean, showPrivacyPolicy: boolean, privacyPolicyUrl: string, defaultRole: string, hooks: Hook[] = [], twoFactorAuthorization: TwoFactorAuthorization, encryptEmail: boolean, tokenExpiration: TokenExpiration) {
+    constructor(allowLogin: boolean, allowRegistration: boolean, showPrivacyPolicy: boolean, privacyPolicyUrl: string, defaultRole: string, hooks: Hook[] = [], twoFactorAuthorization: TwoFactorAuthorization, encryptEmail: boolean, tokenExpiration: TokenExpiration, authenticationLanguage: string) {
         this.restrictLoginToAdmin = allowLogin;
         this.enableRegistrationView = allowRegistration;
 
@@ -43,6 +44,8 @@ export class Settings {
         this.twoFactorAuthorization = twoFactorAuthorization;
         this.encryptEmail = encryptEmail;
         this.tokenExpiration = tokenExpiration;
+
+        this.authenticationLanguage = authenticationLanguage;
     }
 
     setHook(type: Hooks, url: string | null) {
@@ -75,7 +78,8 @@ export class Settings {
             }),
             {admin: json.twoFactorAuthorization.admin, clients: json.twoFactorAuthorization.clients},
             json.encryptEmail,
-            json.tokenExpiration
+            json.tokenExpiration,
+            json.authenticationLanguage
         )
     }
 }
