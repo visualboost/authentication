@@ -9,6 +9,7 @@ const {Text} = Typography;
 const {Panel} = Collapse;
 
 const scopeDescriptions: Record<string, string> = {
+    [Scope.Authentication.API]: 'Use the authentication api. Using this scope, will return the refresh token in the response body of the api-call instead of creating a http-only cookie.',
     [Scope.Scopes.READ]: 'Read access to scopes',
     [Scope.Scopes.WRITE]: 'Write access to scopes',
     [Scope.User.READ]: 'Read details of a single user',
@@ -27,12 +28,13 @@ const scopeDescriptions: Record<string, string> = {
 };
 
 const groupedScopes = {
-    "Scope Management": Scope.Scopes.getAllScopes(),
+    "Authentication": Scope.Authentication.getAllScopes(),
     "User Management": Scope.User.getAllScopes(),
     "Role Management": Scope.Role.getAllScopes(),
     "Blacklist Management": Scope.Blacklist.getAllScopes(),
     "Settings Management": Scope.Settings.getAllScopes(),
     "Statistics Management": Scope.Statistics.getAllScopes(),
+    "Scope Management": Scope.Scopes.getAllScopes()
 };
 
 interface ScopeComponentProps {

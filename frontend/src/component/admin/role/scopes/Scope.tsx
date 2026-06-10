@@ -4,6 +4,7 @@ class Scope {
     static readonly WRITE = "write"
 
     static Resources = class {
+        static readonly AUTHENTICATION = "authentication"
         static readonly USER = "user"
         static readonly ROLE = "role"
         static readonly SETTINGS = "settings"
@@ -21,6 +22,24 @@ class Scope {
      */
     static getAllScopes(): string[] {
         return [Scope.READ, Scope.WRITE]
+    }
+
+    static Authentication = class {
+
+        /**
+         * Allow authentication for non browser clients (refresh token will be return by the response body instead of a http-only cookie)
+         * Endpoints:
+         *  - /authentication/registration (POST)
+         *  - /authentication/signin (POST)
+         *   - /authentication/token (POST)
+         *  - /confirm/two-factor/{twoFactorDocId} (POST)
+         *  - /system/xsfr (GET)
+         */
+        static readonly API = Scope.createId(Scope.Resources.AUTHENTICATION, "api")
+
+        static getAllScopes(): string[] {
+            return [Scope.Authentication.API]
+        }
     }
 
     static Scopes = class {

@@ -9,13 +9,14 @@ export class Admin {
     constructor() {
         this.name = SystemRoles.ADMIN
         this.scopes = [
-            ...Scope.Scopes.getAllScopes(),
+            ...Scope.Authentication.getAllScopes(),
             ...Scope.User.getAllScopes(),
             ...Scope.Role.getAllScopes(),
             ...Scope.Blacklist.getAllScopes(),
             ...Scope.Settings.getAllScopes(),
             ...Scope.Statistics.getAllScopes(),
-            ...Scope.Api.getAllScopes()
+            ...Scope.Scopes.getAllScopes(),
+            ...Scope.Api.getAllScopes(),
         ]
     }
 

@@ -8,10 +8,9 @@ import {initConfig} from "./env/config";
 import {Role} from "./models/db/Roles.ts";
 import {validateSecrets} from "./util/EncryptionUtil.ts";
 import {DatabaseConfig} from "./models/util/DatabaseConfig.ts";
-import {ServerUtil} from "./util/ServerUtil.ts";
 import {ServerConfig} from "./models/util/ServerConfig.ts";
 import {initAssets} from "./util/FileHandler.ts";
-import {logDebug, logError, logInfo} from "./server/middlewares/log/Logger.ts";
+import {logError, logInfo} from "./server/middlewares/log/Logger.ts";
 import {JwtHandler} from "./util/JwtHandler.ts";
 
 initConfig();

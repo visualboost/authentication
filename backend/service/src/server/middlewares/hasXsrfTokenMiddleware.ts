@@ -1,13 +1,16 @@
 import {NextFunction, Request, Response} from "express";
 import ForbiddenError from "../../errors/ForbiddenError.ts";
 import {TokenType} from "../../constants/TokenType.ts";
+import {JwtHandler} from "../../util/JwtHandler.ts";
 
 /**
  * Validates if the request header contains the xsfr-token, that was created by /system/xsfr
  */
-const hasXsrfTokenMiddleware = (req: Request, res: Response, next: NextFunction) => {
+const hasXsrfTokenMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        if (res.locals.tokenType === TokenType.ACCESS_TOKEN) {
+        //Ignore xsfr because we can trust the access token
+        const personalAccessTokenId = JwtHandler.getPersonalAccessTokenIdFromRequest(req);
+        if (personalAccessTokenId) {
             next();
             return;
         }

@@ -1,67 +1,22 @@
-import {useEffect, useState} from 'react';
-import {Alert, Button} from 'antd';
+import {useState} from 'react';
+import {Alert, Button, Input} from 'antd';
 import {AuthenticationService} from "../../api/AuthenticationService.tsx";
-import {useInterval} from 'usehooks-ts'
-import {CookieHandler} from "../../util/CookieHandler.tsx";
-import {useNavigate} from "react-router-dom";
-import {Routes} from "../../models/Routes.tsx";
-import {SystemStateService} from "../../api/SystemStateService.tsx";
-import {Hooks} from "../../models/settings/Hooks.ts";
-import ServiceUnavailableError from "../../models/errors/ServiceUnavailableError.ts";
 import {NotificationHandler} from "../../util/NotificationHandler.tsx";
+import {useTranslation} from "react-i18next";
 
 const ConfirmEmailComponent = () => {
-    const navigate = useNavigate();
+    const {t} = useTranslation();
 
     const [showAlert, isShowingAlert] = useState(false);
     const [loading, isLoading] = useState(false);
-    const [fetching, isFetching] = useState(true);
-
-    useEffect(() => {
-        callRefetchToken();
-    }, []);
-
-    useInterval(
-        async () => {
-            await callRefetchToken();
-        },
-        fetching ? 3000 : null,
-    )
-
-    const callRefetchToken = async () => {
-        try {
-            if(!fetching) return;
-
-            const token = await AuthenticationService.refreshToken();
-            CookieHandler.setAuthToken(token);
-
-            const decodedToken = CookieHandler.getAuthTokenDecoded();
-            if (!decodedToken?.isActive()) return;
-            isFetching(false);
-
-            if (decodedToken?.isAdmin()) {
-                navigate(Routes.ADMIN);
-                return;
-            }
-
-            const allHooks = await SystemStateService.getHooks();
-            const authHook = allHooks[Hooks.AUTHENTICATION] as string;
-            if(authHook){
-                window.location.replace(authHook)
-            } else {
-                navigate(Routes.Confirmation.LOGIN);
-            }
-        } catch (e) {
-            navigate(Routes.Error.getErrorRoute(new ServiceUnavailableError().status));
-        } finally {
-            isLoading(false);
-        }
-    };
+    const [email, setEmail] = useState<string>("");
 
     const handleResendEmail = async () => {
         try {
+            if (email.length === 0) return;
+
             isLoading(true);
-            await AuthenticationService.resendConfirmRegistrationMail();
+            await AuthenticationService.resendConfirmRegistrationMail(email);
             isShowingAlert(true);
             setTimeout(() => {
                 isShowingAlert(false)
@@ -76,18 +31,21 @@ const ConfirmEmailComponent = () => {
     return (
         <div style={{maxWidth: 600, margin: '50px auto', textAlign: 'center'}}>
             <Alert
-                message="Email Confirmation Required"
-                description="Please confirm your email address by clicking the confirmation button in the email we have sent you."
+                message={t('auth.confirmEmail.title')}
+                description={t('auth.confirmEmail.description')}
                 type="info"
                 showIcon
                 style={{marginBottom: 20}}
             />
-            <Button type="primary" onClick={handleResendEmail} loading={loading}>
-                Resend Confirmation Email
+
+            <Input placeholder={t('auth.confirmEmail.input_placeholder')} style={{marginBottom: 20}} value={email}
+                   onChange={(e) => setEmail(e.target.value)}></Input>
+            <Button style={{width: '100%'}} type="primary" onClick={handleResendEmail} loading={loading}>
+                {t('auth.confirmEmail.btn_text')}
             </Button>
 
             {showAlert &&
-                <Alert message="We have sent a new confirmation email to you." type="success"
+                <Alert message={t('auth.confirmEmail.sent_confirm_text')} type="success"
                        style={{marginTop: 40}}/>
             }
         </div>

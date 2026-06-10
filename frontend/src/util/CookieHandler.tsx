@@ -52,11 +52,6 @@ export class CookieHandler {
         cookies.remove(CookieNames.AUTH_TOKEN);
     }
 
-    static removeRefreshToken(): void {
-        const cookies = new Cookies();
-        cookies.remove(CookieNames.REFRESH_TOKEN);
-    }
-
     static getAuthTokenDecoded(): JwtContent | null {
         const jwt = this.getAuthToken();
         if (!jwt) return null
@@ -72,10 +67,30 @@ export class CookieHandler {
         return true;
     }
 
+    static authTokenExpired(): boolean {
+        const jwt = this.getAuthToken();
+
+        if (!jwt) return false;
+        return true;
+    }
+
     static getXsfrToken(): string | null {
         const cookies = new Cookies();
         return cookies.get('XSRF-TOKEN');
     }
 
+    static authTokenIsExpired(): boolean {
+        const authToken = this.getAuthToken();
+        if (!authToken) return true;
+        return this.tokenIsExpired(authToken);
+    }
+
+    static tokenIsExpired(token: string): boolean {
+        const decodedToken = jwtDecode(token);
+        const currentDate = new Date();
+
+        if(!decodedToken.exp) return true;
+        return decodedToken.exp * 1000 < currentDate.getTime();
+    }
 
 }

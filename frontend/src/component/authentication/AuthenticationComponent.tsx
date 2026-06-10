@@ -11,6 +11,8 @@ import {Hooks} from "../../models/settings/Hooks.ts";
 import {UIThemeProvider} from "../settings/UIThemeProvider.tsx";
 import AuthenticationLayout from "./AuthenticationLayout.tsx";
 import {LanguageProvider} from "../settings/LanguageProvider.tsx";
+import {AuthenticationService} from "../../api/AuthenticationService.tsx";
+import UnauthorizedError from "../../models/errors/UnauthorizedError.ts";
 
 function AuthenticationComponent() {
     const navigate = useNavigate();
@@ -22,14 +24,24 @@ function AuthenticationComponent() {
     const handleNavigation = async () => {
         try {
             const systemState = await SystemStateService.getSystemState();
+            //register in the beginning
             if (systemState === SystemState.NOT_INITIALIZED) {
                 navigate(Routes.Authentication.REGISTRATION_ADMIN);
                 return;
             }
 
-            if (!CookieHandler.authTokenExists() && systemState === SystemState.INITIALIZED) {
-                navigate(Routes.Authentication.LOGIN);
-                return;
+            //Login if no token exists
+            if (CookieHandler.authTokenIsExpired()) {
+                try{
+                    const authToken = await AuthenticationService.refreshToken();
+                    CookieHandler.setAuthToken(authToken);
+                }catch (e) {
+                    if (e instanceof UnauthorizedError) {
+                        navigate(Routes.Authentication.LOGIN);
+                    }
+
+                    return;
+                }
             }
 
             const decodedToken = CookieHandler.getAuthTokenDecoded();

@@ -36,10 +36,10 @@ app.use(cookieParser());
 
 //routes
 app.use("/authentication", hasXsrfTokenMiddleware, authenticationRouter)
-app.use("/user", hasJwtMiddleware, isActiveMiddleware, hasXsrfTokenMiddleware, userRouter);
+app.use("/user", hasXsrfTokenMiddleware, hasJwtMiddleware, isActiveMiddleware, userRouter);
 app.use("/modification", hasModificationToken, userModificationRouter)
 app.use("/confirm", confirmationRouter)
-app.use("/admin", hasJwtMiddleware, isActiveMiddleware, hasXsrfTokenMiddleware, adminRouter)
+app.use("/admin", hasXsrfTokenMiddleware, hasJwtMiddleware, isActiveMiddleware, adminRouter)
 app.use("/system", systemRouter)
 
 // catch route not found

@@ -14,6 +14,8 @@ import {SigninResponseBody} from "../../../models/api/SigninResponseBody.ts";
 import {JwtHandler} from "../../../util/JwtHandler.ts";
 import {UserInvitation} from "../../../models/db/UserInvitation.ts";
 import {Success} from "../../../models/api/Success.ts";
+import Scope from "../../../constants/role/Scope.ts";
+import {getAccessTokenFromRequest} from "../../middlewares/getAccessToken.ts";
 
 const router = express.Router();
 
@@ -36,10 +38,10 @@ router.get(
             const user = await User.activate(userId);
 
             const hook = await Settings.getAuthenticationHook();
-            let url : string;
+            let url: string;
 
             if (hook?.url) {
-                url = hook.url;
+                url = hook.url + "?user=" + user._id.toString();
             } else {
                 url = ServerUtil.getConfirmedRegistrationUrl()
             }
@@ -78,7 +80,6 @@ router.get(
             const url = new URL(urlAsString);
             url.searchParams.append("token", res.locals.modificationToken)
             return res.redirect(url.toString());
-
         } catch (e) {
             next(e);
         }
@@ -86,10 +87,13 @@ router.get(
 );
 
 /**
- * Validate authentication
+ * Validate two factor ident code
+ *
+ * The response contains the refresh token in the refresh_token if the request was called with an access token that contains scope "authentication.api".
  */
 router.post(
     '/two-factor/:twoFactorDocId',
+    getAccessTokenFromRequest,
     async (req, res, next) => {
         try {
             const twoFactorDocId = req.params.twoFactorDocId;
@@ -125,10 +129,17 @@ router.post(
             const authTokenBody = await user.getAuthToken();
             const authToken = authTokenBody.token;
 
-            //Set refreshToken as cookie
-            JwtHandler.setRefreshTokenCookie(user.getRefreshToken(), res);
+            const accessToken = res.locals.authToken;
+            const hasApiScope = accessToken?.containsScopes(Scope.Authentication.API)
 
-            const response = new SigninResponseBody(authToken, hook?.url, null)
+            let response = null;
+            if (hasApiScope === true) {
+                response = new SigninResponseBody(authToken, user.getRefreshToken(), hook?.url, null)
+            } else {
+                JwtHandler.setRefreshTokenCookie(user.getRefreshToken(), res)
+                response = new SigninResponseBody(authToken, null, hook?.url, null)
+            }
+
             return res.json(response);
         } catch (e) {
             next(e);

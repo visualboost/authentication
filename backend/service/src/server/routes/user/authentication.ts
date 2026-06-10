@@ -18,6 +18,8 @@ import {TwoFactorAuthCodeModel} from "../../../models/db/FactorAuthCode.ts";
 import {logDebug} from "../../middlewares/log/Logger.ts";
 import {CookieNames} from "../../../constants/CookieNames.ts";
 import {decryptEmailIfAllowedBySystem} from "../../../util/EncryptionUtil.ts";
+import Scope from "../../../constants/role/Scope.ts";
+import {getAccessTokenFromRequest} from "../../middlewares/getAccessToken.ts";
 
 const router = express.Router();
 
@@ -84,7 +86,6 @@ router.post(
             await user.updateLastLogin(res.locals.ip);
             await MailHandler.sendRegistrationMail(email, user._id.toString(), user.userName)
 
-            JwtHandler.setRefreshTokenCookie(user.getRefreshToken(), res)
             res.status(201).json(new Success());
         } catch (e) {
             next(e);
@@ -95,6 +96,7 @@ router.post(
 router.post(
     '/signin',
     isBlacklistedMiddleware,
+    getAccessTokenFromRequest,
     async (req, res, next) => {
         try {
             const email = req.body.email;
@@ -133,15 +135,20 @@ router.post(
                 const code = twoFactorAuthDoc.code;
 
                 await MailHandler.send2FactorAuthMail(email, user.userName, code);
-                response = new SigninResponseBody(null, null, twoFactorAuthId)
+                response = new SigninResponseBody(null, null, null, twoFactorAuthId)
             } else {
                 const hook = await Settings.getAuthenticationHook();
                 const authTokenBody = await user.getAuthToken();
                 const authToken = authTokenBody.token;
+                const accessToken = res.locals.authToken as JwtContent;
 
-                //Set refreshToken as cookie
-                JwtHandler.setRefreshTokenCookie(user.getRefreshToken(), res);
-                response = new SigninResponseBody(authToken, hook?.url || null, null)
+                if (accessToken?.containsScopes(Scope.Authentication.API)) {
+                    response = new SigninResponseBody(authToken, user.getRefreshToken(), hook?.url, null)
+                } else {
+                    JwtHandler.setRefreshTokenCookie(user.getRefreshToken(), res)
+                    response = new SigninResponseBody(authToken, null, hook?.url, null)
+                }
+                res.json(response);
             }
 
             return res.json(response);
@@ -151,25 +158,19 @@ router.post(
     }
 );
 
-
+//TODO: adapt doku
 router.post(
     '/registration/resend',
-    hasJwtMiddleware,
     async (req, res, next) => {
         try {
-            const jwt = res.locals.authToken as JwtContent;
-            const userId = jwt.getUserId();
+            const email = req.body.email;
 
-            const user = await User.findById(userId);
+            const user = await User.getByEmail(email);
             if (!user) {
                 throw new NotFoundError();
             }
 
-            const credentials = await user.getCredentials();
-            const email = await decryptEmailIfAllowedBySystem(credentials.email);
-
             await MailHandler.sendRegistrationMail(email, user._id.toString(), user.userName)
-
             res.json(new Success());
         } catch (e) {
             next(e);
@@ -178,20 +179,28 @@ router.post(
 );
 
 /**
- * Creates a new auth token and sets a new refresh token as httponly cookie.
- * This route expects the refresh token.
+ * Creates a new auth token and sets a new refresh token as httponly cookie or return it in the response body if the request contains an access token.
+ * This route expects the refresh token as cookie or in the request header (refresh_token) if the request contains an access token.
  *
- * The refresh token needs to be sent with a cookie that is created during registration and signin.
  * If the refresh token is expired, an { @class UnauthorizedError }.
  */
 router.put(
     '/token',
+    getAccessTokenFromRequest,
     async (req, res, next) => {
         try {
-            const cookies = req.cookies;
-            const refreshToken = cookies[CookieNames.REFRESH_TOKEN];
+            const accessToken = res.locals.authToken;
+            const hasApiScope = accessToken?.containsScopes(Scope.Authentication.API)
 
-            if (!refreshToken) {
+            let refreshToken = null;
+            if(hasApiScope === true){
+                refreshToken = req.headers["refresh_token"] as string;
+            }else{
+                const cookies = req.cookies;
+                refreshToken = cookies[CookieNames.REFRESH_TOKEN];
+            }
+
+            if (!refreshToken || refreshToken === "") {
                 throw new ForbiddenError();
             }
 
@@ -202,9 +211,17 @@ router.put(
                 throw new NotFoundError();
             }
 
-            const jwtBody = await user.getAuthToken();
-            JwtHandler.setRefreshTokenCookie(user.getRefreshToken(), res)
-            res.json(jwtBody);
+            const authTokenBody = await user.getAuthToken();
+            const authToken = authTokenBody.token;
+
+            let response = null;
+            if (hasApiScope === true) {
+                response = new SigninResponseBody(authToken, user.getRefreshToken(), null, null)
+            } else {
+                JwtHandler.setRefreshTokenCookie(user.getRefreshToken(), res)
+                response = new SigninResponseBody(authToken, null, null, null)
+            }
+            res.json(response);
         } catch (e) {
             next(e);
         }

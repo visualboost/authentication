@@ -97,8 +97,11 @@ export class APIHandler {
         }
 
         const jwt = CookieHandler.getAuthToken();
-        //@ts-ignore
-        headers["Authorization"] = `Bearer ${jwt}`;
+        if(jwt){
+            //@ts-ignore
+            headers["Authorization"] = `Bearer ${jwt}`;
+        }
+
         //@ts-ignore
         headers["X-XSRF-TOKEN"] = CookieHandler.getXsfrToken();
 

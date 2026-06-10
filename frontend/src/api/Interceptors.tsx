@@ -30,7 +30,9 @@ export class Interceptor {
                     const authToken = await AuthenticationService.refreshToken();
                     CookieHandler.setAuthToken(authToken);
 
-                    originalRequest.headers['Authorization'] = `Bearer ${authToken}`;
+                    if(authToken){
+                        originalRequest.headers['Authorization'] = `Bearer ${authToken}`;
+                    }
                     return client(originalRequest);
                 } catch (e) {
                     if (e instanceof UnauthorizedError) {

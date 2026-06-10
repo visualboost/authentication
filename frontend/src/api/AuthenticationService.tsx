@@ -51,9 +51,11 @@ export class AuthenticationService extends APIHandler {
                 jsonResponse => jsonResponse as string)
     }
 
-    static async resendConfirmRegistrationMail(): Promise<void> {
+    static async resendConfirmRegistrationMail(email: string): Promise<void> {
         //@ts-ignore
-        await AuthenticationService.instance.post<void>(this.PREFIX + "/registration/resend", {}, jsonResponse => jsonResponse)
+        await AuthenticationService.instance.post<void>(this.PREFIX + "/registration/resend", {
+            email: email
+        }, jsonResponse => jsonResponse)
     }
 
     static async refreshToken(): Promise<string> {

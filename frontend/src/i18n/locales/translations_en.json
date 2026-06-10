@@ -58,6 +58,13 @@
             "submit": "Send Reset Link",
             "successMessage": "If this email is registered, you will receive a password reset link shortly.",
             "back": "Back"
+        },
+        "confirmEmail": {
+            "title": "Email Confirmation Required",
+            "description": "Please confirm your email address by clicking the confirmation button in the email we have sent you.",
+            "input_placeholder": "E-Mail...",
+            "btn_text": "Resend Confirmation Email",
+            "sent_confirm_text": "We have sent a new confirmation email to you."
         }
     }
 }

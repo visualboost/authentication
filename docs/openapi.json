@@ -252,11 +252,27 @@
           "Authentication"
         ],
         "summary": "Sign in",
-        "description": "Authenticate a user with their email and password.",
+        "description": "Authenticate a user with their email and password. If the request is authenticated with an access token that includes the scope \"authentication.api\", the response will additionally include a refresh_token.",
         "operationId": "signin",
-        "security": [
+        "parameters": [
           {
-            "XSFR Token": []
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            },
+            "description": "Optional Bearer access token. If provided and it includes the scope \"authentication.api\", the refresh token will be returned in the response body instead of being set as an HttpOnly cookie."
+          },
+          {
+            "name": "x-xsrf-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "XSRF token obtained from the `/api/system/xsfr` endpoint. Not required when calling this endpoint with a Bearer access token that includes the scope \"authentication.api\""
           }
         ],
         "requestBody": {
@@ -295,6 +311,12 @@
                       "type": "string",
                       "description": "The authentication token. It is only present if two-factor authentication is not enabled.",
                       "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    },
+                    "refresh_token": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Returned only if the request was made using an access token that includes the scope \"authentication.api\".",
+                      "example": "dGhpc0lzQW5FeGFtcGxlUmVmcmVzaFRva2V..."
                     },
                     "hook": {
                       "type": "string",
@@ -351,14 +373,28 @@
           "Authentication"
         ],
         "summary": "Confirm two-factor authentication",
-        "description": "Validate the two-factor authentication code to complete the login process.",
+        "description": "Validate the two-factor authentication code to complete the login process. If the request is authenticated with a Bearer access token that includes the scope \"authentication.api\", the refresh token will be returned in the response body. Otherwise, the refresh token is returned as an HttpOnly cookie.",
         "operationId": "confirmTwoFactorAuthentication",
-        "security": [
-          {
-            "XSFR Token": []
-          }
-        ],
         "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            },
+            "description": "Optional Bearer access token. If provided and it includes the scope \"authentication.api\", the refresh token will be returned in the response body instead of being set as an HttpOnly cookie."
+          },
+          {
+            "name": "x-xsrf-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "XSRF token obtained from the `/api/system/xsfr` endpoint. Not required when calling this endpoint with a Bearer access token that includes the scope \"authentication.api\""
+          },
           {
             "name": "twoFactorDocId",
             "in": "path",
@@ -399,6 +435,12 @@
                       "description": "The authentication token provided upon successful validation.",
                       "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                     },
+                    "refresh_token": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Returned only if the request was made using a Bearer access token that includes the scope \"authentication.api\".",
+                      "example": "dGhpc0lzQW5FeGFtcGxlUmVmcmVzaFRva2Vu..."
+                    },
                     "hook": {
                       "type": "string",
                       "nullable": true,
@@ -412,6 +454,14 @@
                       "example": null
                     }
                   }
+                }
+              }
+            },
+            "headers": {
+              "Set-Cookie": {
+                "description": "Contains the new refresh token when the request is NOT authenticated with a Bearer access token.",
+                "schema": {
+                  "type": "string"
                 }
               }
             }
@@ -573,9 +623,19 @@
           "Authentication"
         ],
         "summary": "Refresh authentication token",
-        "description": "Creates a new authentication token and sets a new refresh token as an HttpOnly cookie. Requires a valid refresh token sent as a cookie.",
+        "description": "Creates a new authentication token. If the request is authenticated with a Bearer access token that includes the scope \"authentication.api\", the refresh token will be returned in the response body and must be provided via the \"refresh_token\" header. Otherwise, the refresh token is returned as an HttpOnly cookie.",
         "operationId": "fetchToken",
         "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            },
+            "description": "Optional Bearer access token. If provided and it includes the scope \"authentication.api\", the refresh token will be returned in the response body instead of being set as an HttpOnly cookie."
+          },
           {
             "name": "x-xsrf-token",
             "in": "header",
@@ -583,7 +643,16 @@
             "schema": {
               "type": "string"
             },
-            "description": "XSRF token obtained from the `/api/system/xsfr` endpoint"
+            "description": "XSRF token obtained from the `/api/system/xsfr` endpoint. Not required when calling this endpoint with a Bearer access token that includes the scope \"authentication.api\""
+          },
+          {
+            "name": "refresh_token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Required only when calling this endpoint with a Bearer access token that includes the scope \"authentication.api\"."
           }
         ],
         "responses": {
@@ -598,6 +667,12 @@
                       "type": "string",
                       "description": "The new authentication token.",
                       "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    },
+                    "refresh_token": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Returned only if the request was made using a Bearer access token that includes the scope \"authentication.api\".",
+                      "example": "dGhpc0lzQW5FeGFtcGxlUmVmcmVzaFRva2Vu..."
                     }
                   }
                 }
@@ -605,7 +680,7 @@
             },
             "headers": {
               "Set-Cookie": {
-                "description": "Contains the new refresh token.",
+                "description": "Contains the new refresh token when the request is NOT authenticated with a Bearer access token.",
                 "schema": {
                   "type": "string"
                 }
@@ -893,8 +968,13 @@
           "User"
         ],
         "security": [
-          { "Access Token": [] },
-          { "Access Token": [], "XSFR Token": [] }
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
         ],
         "parameters": [
           {
@@ -994,8 +1074,13 @@
           "User"
         ],
         "security": [
-          { "Access Token": [] },
-          { "Access Token": [], "XSFR Token": [] }
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
         ],
         "requestBody": {
           "required": true,
@@ -1117,8 +1202,13 @@
           "User"
         ],
         "security": [
-          { "Access Token": [] },
-          { "Access Token": [], "XSFR Token": [] }
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
         ],
         "requestBody": {
           "required": true,
@@ -1201,8 +1291,13 @@
           "User"
         ],
         "security": [
-          { "Access Token": [] },
-          { "Access Token": [], "XSFR Token": [] }
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
         ],
         "parameters": [
           {
@@ -1285,8 +1380,13 @@
           "User"
         ],
         "security": [
-          { "Access Token": [] },
-          { "Access Token": [], "XSFR Token": [] }
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
         ],
         "parameters": [
           {
@@ -1392,8 +1492,13 @@
           "Role"
         ],
         "security": [
-          { "Access Token": [] },
-          { "Access Token": [], "XSFR Token": [] }
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
         ],
         "parameters": [
           {
@@ -1468,8 +1573,13 @@
           "Role"
         ],
         "security": [
-          { "Access Token": [] },
-          { "Access Token": [], "XSFR Token": [] }
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
         ],
         "parameters": [
           {
@@ -1574,8 +1684,13 @@
           "Role"
         ],
         "security": [
-          { "Access Token": [] },
-          { "Access Token": [], "XSFR Token": [] }
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
         ],
         "parameters": [
           {
@@ -1652,8 +1767,13 @@
           "Role"
         ],
         "security": [
-          { "Access Token": [] },
-          { "Access Token": [], "XSFR Token": [] }
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
         ],
         "responses": {
           "200": {
@@ -1715,8 +1835,13 @@
           "Role"
         ],
         "security": [
-          { "Access Token": [] },
-          { "Access Token": [], "XSFR Token": [] }
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
         ],
         "requestBody": {
           "required": true,
@@ -1811,8 +1936,13 @@
           "Settings"
         ],
         "security": [
-          { "Access Token": [] },
-          { "Access Token": [], "XSFR Token": [] }
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
         ],
         "responses": {
           "200": {
@@ -1844,8 +1974,13 @@
           "Settings"
         ],
         "security": [
-          { "Access Token": [] },
-          { "Access Token": [], "XSFR Token": [] }
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
         ],
         "requestBody": {
           "required": true,
@@ -1889,8 +2024,13 @@
           "Blacklist"
         ],
         "security": [
-          { "Access Token": [] },
-          { "Access Token": [], "XSFR Token": [] }
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
         ],
         "parameters": [
           {
@@ -1957,8 +2097,13 @@
           "Blacklist"
         ],
         "security": [
-          { "Access Token": [] },
-          { "Access Token": [], "XSFR Token": [] }
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
         ],
         "requestBody": {
           "required": true,
@@ -2020,8 +2165,13 @@
           "Blacklist"
         ],
         "security": [
-          { "Access Token": [] },
-          { "Access Token": [], "XSFR Token": [] }
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
         ],
         "parameters": [
           {
@@ -2077,8 +2227,13 @@
           "Blacklist"
         ],
         "security": [
-          { "Access Token": [] },
-          { "Access Token": [], "XSFR Token": [] }
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
         ],
         "requestBody": {
           "required": true,
@@ -2139,8 +2294,13 @@
           "Blacklist"
         ],
         "security": [
-          { "Access Token": [] },
-          { "Access Token": [], "XSFR Token": [] }
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
         ],
         "parameters": [
           {
@@ -2191,10 +2351,17 @@
         "summary": "Retrieve application statistics",
         "description": "Fetches various application statistics, including user counts, timeline history, role statistics, and security metrics.<br/>Required scope: `statistics.read`.",
         "operationId": "getStatistics",
-        "tags": ["Statistics"],
+        "tags": [
+          "Statistics"
+        ],
         "security": [
-          { "Access Token": [] },
-          { "Access Token": [], "XSFR Token": [] }
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
         ],
         "responses": {
           "200": {
@@ -2248,7 +2415,6 @@
         }
       }
     }
-
   },
   "components": {
     "schemas": {
@@ -2419,9 +2585,6 @@
           }
         }
       }
-
-
-
     },
     "securitySchemes": {
       "Access Token": {

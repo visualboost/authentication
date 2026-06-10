@@ -4,14 +4,14 @@ import {JwtBody} from "../models/api/JwtBody.ts";
 import {UserState} from "../constants/UserState.ts";
 import {InvitationToken} from "../models/api/InvitationToken.ts";
 import ForbiddenError from "../errors/ForbiddenError.ts";
-import {Response, Request} from "express";
+import {Request, Response} from "express";
 import {TimeUtil} from "./TimeUtil.ts";
 import UnauthorizedError from "../errors/UnauthorizedError.ts";
 import {CookieNames} from "../constants/CookieNames.ts";
 import {getAuthenticationTokenSecret, getRefreshTokenSecret} from "./EncryptionUtil.ts";
 import {isDevEnvironment} from "./ConfigUtil.ts";
 import {Settings} from "../models/db/Settings.ts";
-import {TokenType} from "../constants/TokenType.ts";
+import {AccessToken, IAccessToken} from "../models/db/AccessToken.ts";
 
 export class JwtHandler {
 
@@ -23,6 +23,32 @@ export class JwtHandler {
     static createJwt(jwtContent: any, expiresIn: string): string {
         return jwt.sign({...jwtContent}, getAuthenticationTokenSecret(), {expiresIn: expiresIn});
     }
+
+    static async getPersonalAccessTokenFromRequest(req: Request): Promise<IAccessToken | null> {
+        const tokenId = this.getPersonalAccessTokenIdFromRequest(req);
+        if (!tokenId) return null;
+        //@ts-ignore
+        const accessToken = await AccessToken.findById(tokenId).lean() as IAccessToken;
+        if (!accessToken) {
+            return null;
+        }
+
+        return accessToken;
+    }
+
+    static getPersonalAccessTokenIdFromRequest(req: Request): string | null {
+        try {
+            const token = JwtHandler.getBearerTokenFromRequest(req);
+            if (!token || !token?.tid) {
+                return null;
+            }
+
+            return token.tid;
+        } catch (e) {
+            return null;
+        }
+    }
+
 
     /**
      * Create a personal access token.
@@ -75,17 +101,38 @@ export class JwtHandler {
         }
     }
 
+    static getAuthTokenAsStringFromRequest(req: Request): string | null {
+        //@ts-ignore
+        const authHeader = req.headers["authorization"];
+        if (!authHeader) return null;
+
+        const authHeaderWithoutPrefix = authHeader.replace("Bearer ", "")
+        if (!authHeaderWithoutPrefix) return null;
+
+        return authHeaderWithoutPrefix;
+    }
+
     static getBearerTokenFromRequest(req: Request): JwtPayload | null {
         try {
-            //@ts-ignore
-            const authHeader = req.headers["authorization"];
-            if (!authHeader) return null;
-
-            const authHeaderWithoutPrefix = authHeader.replace("Bearer ", "")
+            const authHeaderWithoutPrefix = this.getAuthTokenAsStringFromRequest(req)
             if (!authHeaderWithoutPrefix) return null;
 
             const decodedToken = jwt.verify(authHeaderWithoutPrefix, getAuthenticationTokenSecret()) as JwtPayload;
             return decodedToken;
+        } catch (e) {
+            if (e instanceof TokenExpiredError) {
+                throw new UnauthorizedError();
+            }
+
+            throw new ForbiddenError()
+        }
+    }
+
+    static getAuthTokenContentFromString(jwtAsString: string): JwtContent {
+        try {
+            if (!jwtAsString || jwtAsString.length < 1) return null;
+            const decodedToken = jwt.verify(jwtAsString, getAuthenticationTokenSecret()) as JwtPayload;
+            return this.decodeAuthToken(decodedToken)
         } catch (e) {
             if (e instanceof TokenExpiredError) {
                 throw new UnauthorizedError();

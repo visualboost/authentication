@@ -58,6 +58,14 @@
             "submit": "Link zum Zurücksetzen senden",
             "successMessage": "Wenn diese E-Mail registriert ist, erhältst du in Kürze einen Link zum Zurücksetzen des Passworts.",
             "back": "Zurück"
+        },
+        "confirmEmail": {
+            "title": "E-Mail-Bestätigung erforderlich",
+            "description": "Bitte bestätige deine E-Mail-Adresse, indem du auf den Bestätigungsbutton in der E-Mail klickst, die wir dir gesendet haben.",
+            "input_placeholder": "E-Mail...",
+            "btn_text": "Bestätigungs-E-Mail erneut senden",
+            "sent_confirm_text": "Wir haben dir eine neue Bestätigungs-E-Mail gesendet."
         }
+
     }
 }

@@ -1,5 +1,4 @@
 import mongoose, {Model,ObjectId} from "mongoose";
-import {UserState} from "../../constants/UserState.ts";
 
 const Schema = mongoose.Schema;
 
