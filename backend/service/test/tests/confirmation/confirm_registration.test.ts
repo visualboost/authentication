@@ -20,13 +20,13 @@ describe('GET /confirm/registration', () => {
             const mockUserId = '123';
             const mockHookUrl = 'https://example.com/redirect';
 
-            (User.activate as jest.Mock).mockResolvedValueOnce(true);
+            (User.activate as jest.Mock).mockResolvedValueOnce({_id: mockUserId});
             (Settings.getAuthenticationHook as jest.Mock).mockResolvedValueOnce({ url: mockHookUrl });
 
             const res = await request(app).get(endpoint).query({ userId: mockUserId });
 
             expect(res.status).toBe(302);  // 302 Found, indicating a redirect
-            expect(res.header.location).toBe(mockHookUrl);  // Check the redirect location
+            expect(res.header.location).toBe(mockHookUrl + "?user=" + mockUserId);  // Check the redirect location
         });
 
         it('should return 302 and redirect to default URL if no hook URL is provided', async () => {

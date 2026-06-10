@@ -55,7 +55,7 @@ describe('POST /authentication/signin', () => {
             const res = await request(app).post(endpoint).send({ email: 'admin@example.com', password: 'password' });
 
             expect(res.status).toBe(200);
-            expect(res.body).toEqual({ token: null, hook: null, twoFactorAuthId: '456' });
+            expect(res.body).toEqual({ token: null, refresh_token: null, hook: null, twoFactorAuthId: '456' });
             expect(TwoFactorAuthCodeModel.createNewAuthCode).toHaveBeenCalledWith('123');
             expect(MailHandler.send2FactorAuthMail).toHaveBeenCalledWith('admin@example.com', undefined, '123456');
         });
@@ -78,7 +78,7 @@ describe('POST /authentication/signin', () => {
             const res = await request(app).post(endpoint).send({ email: 'client@example.com', password: 'password' });
 
             expect(res.status).toBe(200);
-            expect(res.body).toEqual({ token: null, hook: null, twoFactorAuthId: '456' });
+            expect(res.body).toEqual({ token: null, refresh_token: null, hook: null, twoFactorAuthId: '456' });
             expect(TwoFactorAuthCodeModel.createNewAuthCode).toHaveBeenCalledWith('123');
             expect(MailHandler.send2FactorAuthMail).toHaveBeenCalledWith('client@example.com', undefined, '123456');
         });
@@ -100,7 +100,7 @@ describe('POST /authentication/signin', () => {
             const res = await request(app).post(endpoint).send({ email: 'user@example.com', password: 'password' });
 
             expect(res.status).toBe(200);
-            expect(res.body).toEqual({ token: 'auth-token', hook: null, twoFactorAuthId: null });
+            expect(res.body).toEqual({ token: 'auth-token', refresh_token: null, hook: null, twoFactorAuthId: null });
         });
 
         it('Sets the refresh token as httponly cookie if two-factor is disabled', async () => {

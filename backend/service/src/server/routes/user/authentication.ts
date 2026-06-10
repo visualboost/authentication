@@ -146,7 +146,7 @@ router.post(
                     response = new SigninResponseBody(authToken, user.getRefreshToken(), hook?.url, null)
                 } else {
                     JwtHandler.setRefreshTokenCookie(user.getRefreshToken(), res)
-                    response = new SigninResponseBody(authToken, null, hook?.url, null)
+                    response = new SigninResponseBody(authToken, null, hook?.url || null, null)
                 }
                 res.json(response);
             }

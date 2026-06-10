@@ -43,7 +43,7 @@ describe('PUT /authentication/token', () => {
                 .set('Cookie', `${CookieNames.REFRESH_TOKEN}=valid-refresh-token`);
 
             expect(res.status).toBe(200);
-            expect(res.body).toEqual({ token: 'new-auth-token' });
+            expect(res.body).toEqual({ token: 'new-auth-token', refresh_token: null, hook: null, twoFactorAuthId: null });
             expect(User.findById).toHaveBeenCalledWith('user123');
             expect(JwtHandler.setRefreshTokenCookie).toHaveBeenCalledWith('new-refresh-token', expect.anything());
         });

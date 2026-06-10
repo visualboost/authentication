@@ -67,13 +67,6 @@ export class CookieHandler {
         return true;
     }
 
-    static authTokenExpired(): boolean {
-        const jwt = this.getAuthToken();
-
-        if (!jwt) return false;
-        return true;
-    }
-
     static getXsfrToken(): string | null {
         const cookies = new Cookies();
         return cookies.get('XSRF-TOKEN');

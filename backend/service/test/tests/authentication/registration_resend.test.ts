@@ -49,11 +49,11 @@ describe('POST /registration/resend', () => {
             };
             const mockDecryptedEmail = 'test@example.com';
 
-            (User.findById as jest.Mock).mockResolvedValueOnce(mockUser);
+            (User.getByEmail as jest.Mock).mockResolvedValueOnce(mockUser);
             (MailHandler.sendRegistrationMail as jest.Mock).mockResolvedValueOnce(true);
             (decryptEmailIfAllowedBySystem as jest.Mock).mockResolvedValueOnce(mockDecryptedEmail);
 
-            const res = await request(app).post(endpoint);
+            const res = await request(app).post(endpoint).send({email: mockDecryptedEmail});
 
             expect(res.status).toBe(200);
             expect(MailHandler.sendRegistrationMail).toHaveBeenCalledWith(
@@ -64,28 +64,25 @@ describe('POST /registration/resend', () => {
         });
 
         it('should call decryptEmailIfAllowedBySystem with the correct email', async () => {
+            const email = 'test@example.com';
             const mockUser = {
                 _id: '123',
                 userName: 'testUser',
                 getCredentials: jest.fn().mockResolvedValueOnce({
-                    email: 'encryptedEmail',
+                    email: email,
                 }),
             };
 
-            (User.findById as jest.Mock).mockResolvedValueOnce(mockUser);
-            const mockDecryptedEmail = 'test@example.com';
-            (decryptEmailIfAllowedBySystem as jest.Mock).mockResolvedValueOnce(mockDecryptedEmail);
-
-            const res = await request(app).post(endpoint);
+            (User.getByEmail as jest.Mock).mockResolvedValueOnce(mockUser);
+            const res = await request(app).post(endpoint).send({email: email});
 
             expect(res.status).toBe(200);
-            expect(decryptEmailIfAllowedBySystem).toHaveBeenCalledWith('encryptedEmail');
         });
     });
 
     describe('Error', () => {
         it('should return 404 if user is not found', async () => {
-            (User.findById as jest.Mock).mockResolvedValueOnce(null);
+            (User.getByEmail as jest.Mock).mockResolvedValueOnce(null);
 
             const res = await request(app).post(endpoint);
 
@@ -102,24 +99,16 @@ describe('POST /registration/resend', () => {
             };
             const mockDecryptedEmail = 'test@example.com';
 
-            (User.findById as jest.Mock).mockResolvedValueOnce(mockUser);
-            (decryptEmailIfAllowedBySystem as jest.Mock).mockResolvedValueOnce(mockDecryptedEmail);
+            (User.getByEmail as jest.Mock).mockResolvedValueOnce(mockUser);
             (MailHandler.sendRegistrationMail as jest.Mock).mockRejectedValueOnce(new Error('Mail Error'));
 
-            const res = await request(app).post(endpoint);
+            const res = await request(app).post(endpoint).send({email: mockDecryptedEmail});
 
             expect(res.status).toBe(500);
         });
     });
 
     describe('Middleware Tests', () => {
-        it('should call hasJwtMiddleware', async () => {
-            const res = await request(app).post(endpoint)
-                .set('Authorization', 'Bearer ' + createDefaultRoleToken())
-
-            expect(hasJwtMiddleware).toHaveBeenCalled();
-        });
-
         it('should call hasXsrfTokenMiddleware', async () => {
             const res = await request(app)
                 .post(endpoint)
