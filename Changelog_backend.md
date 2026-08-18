@@ -1,5 +1,9 @@
 # Versions:
 
+## 1.0.3
+
+- Extended upload limit for theme customization (upload images)
+
 ## 1.0.2
 
 - Added more logs
