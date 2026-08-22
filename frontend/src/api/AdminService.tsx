@@ -56,7 +56,15 @@ export class AdminService extends APIHandler {
                 {role: role},
                 function (jsonResponse) {
                     //@ts-ignore
-                    return new UserDetails(jsonResponse._id, jsonResponse.ip, jsonResponse.username, jsonResponse.email, jsonResponse.role, jsonResponse.state, new Date(jsonResponse.createdAt), new Date(jsonResponse.updatedAt), new Date(jsonResponse.lastLogin));
+                    return new UserDetails(jsonResponse._id, jsonResponse.ip, jsonResponse.username, jsonResponse.email, jsonResponse.role, jsonResponse.state, new Date(jsonResponse.createdAt), new Date(jsonResponse.updatedAt), new Date(jsonResponse.lastLogin), jsonResponse.metadata);
+                })
+        }
+
+        static async updateMetaData(userId: string, metadata: object): Promise<object> {
+            return await AdminService.instance.patch<object>(AdminService.PREFIX + this.PREFIX + "/" + userId + "/metadata",
+                {...metadata},
+                function (jsonResponse) {
+                    return jsonResponse as object;
                 })
         }
 
@@ -64,7 +72,7 @@ export class AdminService extends APIHandler {
             return await AdminService.instance.delete<UserDetails>(AdminService.PREFIX + this.PREFIX + "/" + userId,
                 function (jsonResponse) {
                     //@ts-ignore
-                    return new UserDetails(jsonResponse._id, jsonResponse.ip, jsonResponse.username, jsonResponse.email, jsonResponse.role, jsonResponse.state, new Date(jsonResponse.createdAt), new Date(jsonResponse.updatedAt), new Date(jsonResponse.lastLogin));
+                    return new UserDetails(jsonResponse._id, jsonResponse.ip, jsonResponse.username, jsonResponse.email, jsonResponse.role, jsonResponse.state, new Date(jsonResponse.createdAt), new Date(jsonResponse.updatedAt), new Date(jsonResponse.lastLogin), jsonResponse.metadata);
                 })
         }
     }

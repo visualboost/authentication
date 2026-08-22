@@ -106,9 +106,14 @@ class Scope {
          */
         static readonly CHANGE_ROLE = Scope.createId(Scope.Resources.USER, Scope.WRITE) + ":role"
 
+        /**
+         * Update the metadata of a user
+         * Endpoint: /admin/user/:userId/metadata
+         */
+        static readonly CHANGE_METADATA = Scope.createId(Scope.Resources.USER, Scope.WRITE) + ":metadata"
 
         static getAllScopes(): string[] {
-            return [Scope.User.READ, Scope.User.READ_MULTIPLE, Scope.User.WRITE, Scope.User.INVITE, Scope.User.CHANGE_EMAIL, Scope.User.CHANGE_ROLE]
+            return [Scope.User.READ, Scope.User.READ_MULTIPLE, Scope.User.WRITE, Scope.User.INVITE, Scope.User.CHANGE_EMAIL, Scope.User.CHANGE_ROLE, Scope.User.CHANGE_METADATA]
         }
     }
 

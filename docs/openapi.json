@@ -792,6 +792,13 @@
                       "format": "date-time",
                       "description": "The timestamp of the user's last login.",
                       "example": "2023-07-01T10:00:00Z"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "description": "The metadata of the user.",
+                      "example": {
+                        "isBetaTester": true
+                      }
                     }
                   }
                 }
@@ -1920,6 +1927,71 @@
           },
           "406": {
             "description": "User state is not `ACTIVE`."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/api/admin/user/{userId}/metadata": {
+      "patch": {
+        "summary": "Update user metadata",
+        "description": "Update the metadata of a user.<br/>Required scope: `user.write:metadata`.",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "Access Token": []
+          },
+          {
+            "Access Token": [],
+            "XSFR Token": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the user whose metadata should be updated."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Arbitrary metadata values to be stored for the user.",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated metadata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "isBetaTester": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request – userId is missing or invalid."
+          },
+          "404": {
+            "description": "User not found."
           },
           "500": {
             "description": "Internal server error."

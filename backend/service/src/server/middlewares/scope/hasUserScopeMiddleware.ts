@@ -18,11 +18,16 @@ const hasChangeUserRoleScope = (req: Request, res: Response, next: NextFunction)
     handleScopes([Scope.User.CHANGE_ROLE], req, res, next)
 };
 
+const hasUpdateMetaDataScope = (req: Request, res: Response, next: NextFunction) => {
+    handleScopes([Scope.User.CHANGE_METADATA], req, res, next)
+};
+
 export {
     hasReadMultipleUserScope,
     hasWriteUserScope,
     hasInviteUserScope,
-    hasChangeUserRoleScope
+    hasChangeUserRoleScope,
+    hasUpdateMetaDataScope
 }
 
 

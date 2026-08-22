@@ -18,6 +18,7 @@ const scopeDescriptions: Record<string, string> = {
     [Scope.User.INVITE]: 'Invite new users',
     [Scope.User.CHANGE_EMAIL]: 'Request new email address for other users',
     [Scope.User.CHANGE_ROLE]: 'Change user role',
+    [Scope.User.CHANGE_METADATA]: 'Update the metadata of a user',
     [Scope.Role.READ]: 'Read role details.',
     [Scope.Role.WRITE]: 'Manage user roles',
     [Scope.Blacklist.READ]: 'Get blocked user and IP addresses',

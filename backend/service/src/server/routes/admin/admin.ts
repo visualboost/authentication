@@ -26,7 +26,8 @@ import {
     hasChangeUserRoleScope,
     hasInviteUserScope,
     hasReadMultipleUserScope,
-    hasWriteUserScope
+    hasWriteUserScope,
+    hasUpdateMetaDataScope
 } from "../../middlewares/scope/hasUserScopeMiddleware.ts";
 
 const router = express.Router();
@@ -214,6 +215,30 @@ router.patch(
             //@ts-ignore
             const patchedUser = await User.getDetails(user._id);
             return res.json(patchedUser)
+        } catch (e) {
+            next(e);
+        }
+    }
+);
+
+router.patch(
+    '/user/:userId/metadata',
+    hasUpdateMetaDataScope,
+    async (req, res, next) => {
+        try {
+            const userId = req.params.userId;
+            const metadata = req.body;
+
+            if (!userId) {
+                throw new BadRequestError();
+            }
+
+            const updatedMetaData = await User.updateMetaData(userId, metadata);
+            if (!updatedMetaData) {
+                throw new NotFoundError();
+            }
+
+            return res.json(updatedMetaData)
         } catch (e) {
             next(e);
         }

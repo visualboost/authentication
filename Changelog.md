@@ -1,5 +1,22 @@
 # Versions:
 
+## 1.0.6 (22.08.2026)
+
+### Backend
+- Added metadata to the user object. Can be modified with `/admin/user/:userId/metadata` and scope `user.write:metadata`.
+
+### Frontend
+- Added view to update users' metadata in the user detail view
+
+### Frontend
+
+### Backend:
+- Allow the user to specify scopes for different roles
+  - Add ``scopes`` to `Role`
+  - Adapted ``/admin/role/*`` endpoints to create and read scopes
+  - Added middlewares to ensure that endpoints can only be called if the authentication token contains the relevant scopes
+- Fixed: Set default role from settings during `createNewUser` in `/registration`.
+
 ## 1.0.5 (23.12.2024)
 
 ### Backend:

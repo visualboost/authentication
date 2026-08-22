@@ -3,7 +3,9 @@ import {app} from '../../../../src/server/server.ts';
 import {NextFunction, Request, Response} from "express";
 import {JwtHandler} from "../../../../src/util/JwtHandler.ts";
 import {createTestAdminToken} from "../../../util/JwtUtil.ts";
-import {hasWriteUserScope} from "../../../../src/server/middlewares/scope/hasUserScopeMiddleware.ts";
+import {
+    hasWriteUserScope
+} from "../../../../src/server/middlewares/scope/hasUserScopeMiddleware.ts";
 
 jest.mock('../../../../src/models/db/User.ts');
 jest.mock('../../../../src/models/db/Settings.ts');
@@ -38,6 +40,9 @@ jest.mock('../../../../src/server/middlewares/scope/hasUserScopeMiddleware.ts', 
         next();
     }),
     hasChangeUserRoleScope: jest.fn((req: Request, res: Response, next: NextFunction) => {
+        next();
+    }),
+    hasUpdateMetaDataScope: jest.fn((req: Request, res: Response, next: NextFunction) => {
         next();
     })
 }));

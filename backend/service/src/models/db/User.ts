@@ -29,6 +29,7 @@ export interface IUser extends mongoose.Document {
     lastLogin: Date;
     createdAt: Date;
     updatedAt: Date;
+    metadata: object;
 
     getAuthToken(): Promise<JwtBody>;
 
@@ -69,6 +70,8 @@ export interface IUserModel extends Model<IUser> {
     delete(_id: ObjectId): Promise<IUser>;
 
     getDetails(_id: ObjectId | string): Promise<UserDetails | null>
+    updateMetaData(_id: ObjectId | string, metaData: object): Promise<object | null>
+
     activate(_id: ObjectId | string): Promise<IUser>,
     getByIP(ip: string, populate: boolean): Promise<IUser | null>
 
@@ -93,6 +96,7 @@ const UserSchema = new Schema<IUser, IUserModel>({
         },
         role: {type: String, required: true, indexed: true},
         lastLogin: {type: Date, required: true, default: new Date(), indexed: true},
+        metadata: {type: Schema.Types.Mixed, default: {}},
     },
     {
         timestamps: true,
@@ -258,7 +262,14 @@ const UserSchema = new Schema<IUser, IUserModel>({
                     email = decrypt(email)
                 }
 
-                return new UserDetails(user._id.toString(), user.ip, user.userName, email, user.role, user.confirmation.state, user.createdAt, user.updatedAt, user.lastLogin);
+                return new UserDetails(user._id.toString(), user.ip, user.userName, email, user.role, user.confirmation.state, user.createdAt, user.updatedAt, user.lastLogin, user.metadata);
+            },
+            updateMetaData: async function (_id: string, metadata: object): Promise<object | null> {
+                const user = await this.findOneAndUpdate({_id: _id}, {metadata: metadata}, {new: true});
+                if(!user){
+                    return null;
+                }
+                return user.metadata;
             },
             activate: async function (_id: ObjectId | string): Promise<IUser> {
                 return User.findOneAndUpdate({_id: _id}, {"confirmation.state": UserState.ACTIVE}, {new: true}) as Promise<IUser>;

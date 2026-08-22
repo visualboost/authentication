@@ -1,8 +1,8 @@
 import "../admin/ContentComponent.css";
 
 import {useEffect, useState} from 'react';
-import {Button, Descriptions, Flex, Space, Tooltip} from 'antd';
-import {DeleteOutlined, StopOutlined} from '@ant-design/icons';
+import {Button, Card, Descriptions, Flex, Input, Space, Tooltip, Typography} from 'antd';
+import {CloseCircleOutlined, DeleteOutlined, StopOutlined} from '@ant-design/icons';
 import {useNavigate, useParams} from "react-router-dom";
 import {UserService} from "../../api/UserService.tsx";
 import {UserDetails} from "../../models/user/UserDetails.ts";
@@ -29,12 +29,13 @@ const UserDetailComponent = () => {
     const [user, setUser] = useState<UserDetails | null>(null);
     const [editModeEnabled, enabledEditMode] = useState(false);
     const [userRole, setUserRole] = useState<string | null>(null);
-
     const [modalConfig, setModalConfig] = useState<ModalComponentProps | null>(null);
+    const [metadata, setMetadata] = useState<{ key: string, value: string }[]>([]);
 
     useEffect(() => {
         loadUser();
     }, []);
+
 
     const loadUser = async () => {
         try {
@@ -44,11 +45,18 @@ const UserDetailComponent = () => {
             const userDetails = await UserService.getUserDetails(userId);
             setUser(userDetails);
             setUserRole(userDetails.role);
+            setMetaDataFromUserDetails(userDetails);
         } catch (e) {
             NotificationHandler.showErrorNotificationFromError(e as Error);
         } finally {
             hideProgress();
         }
+    }
+
+    const setMetaDataFromUserDetails = (userDetails: UserDetails) => {
+        setMetadata(Object.entries(userDetails.metadata || {}).map(([key, value]) => {
+            return {key: key, value: value}
+        }));
     }
 
     const getUserState = (): UserState => {
@@ -58,7 +66,7 @@ const UserDetailComponent = () => {
     }
 
     const openConfirmModal = () => {
-        setModalConfig(createProps(true, "Update User", "Yes, save changes", updateUserRole, () => setModalConfig(null), false,
+        setModalConfig(createProps(true, "Update User", "Yes, save changes", updateUser, () => setModalConfig(null), false,
             <p>Do you want to confirm you changes?</p>))
     }
 
@@ -72,21 +80,53 @@ const UserDetailComponent = () => {
             <p>Do you want add the user <b>{user?.username}</b> to the blacklist?</p>))
     }
 
-    const updateUserRole = async () => {
+    const updateUser = async () => {
         try {
             showProgress();
             if (!userId) return;
-            if (!userRole) return;
 
-            const userDetails = await AdminService.User.updateUserRole(userId, userRole);
-            setUser(userDetails);
-            setUserRole(userDetails.role);
+            await updateUserRole();
+            await updateMetaData();
+
             enabledEditMode(false);
         } catch (e) {
             NotificationHandler.showErrorNotificationFromError(e as Error);
         } finally {
             hideProgress();
             setModalConfig(null);
+        }
+    }
+
+    const updateMetaData = async () => {
+        try {
+            if (!userId) return;
+            const localMetaData = convertMetadataToObject();
+            const metaDataChanged = JSON.stringify(localMetaData) !== JSON.stringify(user?.metadata || {});
+            if (!metaDataChanged) return;
+
+            const updatedMetaData = await AdminService.User.updateMetaData(userId, localMetaData);
+            const updatedUserDetails = {
+                ...user,
+                metadata: updatedMetaData
+            } as UserDetails
+            setUser(updatedUserDetails)
+            setMetaDataFromUserDetails(updatedUserDetails);
+        } catch (e) {
+            NotificationHandler.showErrorNotificationFromError(e as Error);
+        }
+    }
+
+    const updateUserRole = async () => {
+        try {
+            if (!userId) return;
+            if (!userRole) return;
+            if (userRole === user?.role) return;
+
+            const userDetails = await AdminService.User.updateUserRole(userId, userRole);
+            setUser(userDetails);
+            setUserRole(userDetails.role);
+        } catch (e) {
+            NotificationHandler.showErrorNotificationFromError(e as Error);
         }
     }
 
@@ -120,21 +160,53 @@ const UserDetailComponent = () => {
         }
     }
 
+    const addMetadataRow = () => {
+        setMetadata([...metadata, {key: "", value: ""}]);
+    };
+
+    const updateMetadataRow = (index: number, field: "key" | "value", newValue: string) => {
+        const updated = [...metadata];
+        updated[index][field] = newValue;
+        setMetadata(updated);
+    };
+
+    const removeMetadataRow = (index: number) => {
+        const updated = [...metadata];
+        updated.splice(index, 1);
+        setMetadata(updated);
+    };
+
+    const convertMetadataToObject = () => {
+        return metadata.reduce((acc, item) => {
+            if (item.key.trim().length > 0) {
+                acc[item.key] = item.value;
+            }
+            return acc;
+        }, {} as Record<string, string>);
+    }
+
     return (
         <AdminDetailSectionComponent title={"Details"} actions={<div>
             {!editModeEnabled &&
                 <Tooltip title={"Edit User"} placement={"bottom"}>
                     <Button size={"large"} type={"text"} icon={<CiEdit/>}
-                            onClick={() => enabledEditMode(!editModeEnabled)}></Button>
+                            onClick={() => enabledEditMode(!editModeEnabled)}>
+                    </Button>
                 </Tooltip>
 
             }
             {editModeEnabled &&
                 <Space direction={"horizontal"}>
-
                     <Tooltip title={"Discard"} placement={"bottom"}>
                         <Button size={"large"} type={"text"} icon={<VscDiscard/>}
-                                onClick={() => enabledEditMode(!editModeEnabled)}></Button>
+                                onClick={() => {
+                                    //Reset metaData
+                                    if (user) {
+                                        setMetaDataFromUserDetails(user);
+                                    }
+                                    enabledEditMode(!editModeEnabled)
+                                }
+                                }></Button>
                     </Tooltip>
 
                     <Tooltip title={"Save changes"} placement={"bottom"}>
@@ -144,37 +216,76 @@ const UserDetailComponent = () => {
                 </Space>
             }
         </div>}>
-            <Descriptions column={1} bordered>
-                <Descriptions.Item labelStyle={{width: "200px"}} label="ID">{user?._id}</Descriptions.Item>
-                <Descriptions.Item label="IP">
-                    <Space>
-                        {user?.ip}
-                        {user?.ip && <Tooltip title={"Copy IP-Address"} placement={"right"}>
-                            <CopyToClipboardButton value={user?.ip}/>
-                        </Tooltip>
-                        }
-                    </Space>
-                </Descriptions.Item>
-                <Descriptions.Item label="Username">{user?.username}</Descriptions.Item>
-                <Descriptions.Item label="Email">
-                    <Space>
-                        {user?.email}
-                        <Tooltip title={"Copy E-Mail"} placement={"right"}>
-                            <CopyToClipboardButton value={user?.email}/>
-                        </Tooltip>
-                    </Space>
-                </Descriptions.Item>
-                <Descriptions.Item label="Role">
-                    {/*@ts-ignore*/}
-                    {editModeEnabled &&
-                        <RoleSelectComponent roleName={userRole} onRoleChanged={(role) => setUserRole(role)}/>}
-                    {!editModeEnabled && user?.role}
-                </Descriptions.Item>
-                <Descriptions.Item label="Status"><StateComponent state={getUserState()}/></Descriptions.Item>
-                <Descriptions.Item label="Created at">{user?.createdAt?.toLocaleString()}</Descriptions.Item>
-                <Descriptions.Item label="Last Update">{user?.updatedAt?.toLocaleString()}</Descriptions.Item>
-                <Descriptions.Item label="Last Login">{user?.lastLogin?.toLocaleString()}</Descriptions.Item>
-            </Descriptions>
+            <Flex gap={10}>
+                <Descriptions column={1} bordered style={{width: '70%'}}>
+                    <Descriptions.Item labelStyle={{width: "200px"}} label="ID">{user?._id}</Descriptions.Item>
+                    <Descriptions.Item label="IP">
+                        <Space>
+                            {user?.ip}
+                            {user?.ip && <Tooltip title={"Copy IP-Address"} placement={"right"}>
+                                <CopyToClipboardButton value={user?.ip}/>
+                            </Tooltip>
+                            }
+                        </Space>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Username">{user?.username}</Descriptions.Item>
+                    <Descriptions.Item label="Email">
+                        <Space>
+                            {user?.email}
+                            <Tooltip title={"Copy E-Mail"} placement={"right"}>
+                                <CopyToClipboardButton value={user?.email}/>
+                            </Tooltip>
+                        </Space>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Role">
+                        {/*@ts-ignore*/}
+                        {editModeEnabled &&
+                            <RoleSelectComponent roleName={userRole} onRoleChanged={(role) => setUserRole(role)}/>}
+                        {!editModeEnabled && user?.role}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Status"><StateComponent state={getUserState()}/></Descriptions.Item>
+                    <Descriptions.Item label="Created at">{user?.createdAt?.toLocaleString()}</Descriptions.Item>
+                    <Descriptions.Item label="Last Update">{user?.updatedAt?.toLocaleString()}</Descriptions.Item>
+                    <Descriptions.Item label="Last Login">{user?.lastLogin?.toLocaleString()}</Descriptions.Item>
+                </Descriptions>
+
+                <Flex vertical style={{width: '30%'}}>
+                    <Card title={"Metadata"}>
+                        <Space direction="vertical" size="middle" style={{width: "100%", marginTop: 8}}>
+                            {(!metadata || Object.keys(metadata).length === 0) && !editModeEnabled &&
+                                <Typography.Text>Keine Metadaten vorhanden</Typography.Text>
+                            }
+                            {metadata.map((entry, index) => (
+                                <Flex gap={10} key={index} align="center" style={{width: "100%"}}>
+                                    <Input
+                                        disabled={!editModeEnabled}
+                                        placeholder="Key"
+                                        value={entry.key}
+                                        onChange={(e) => updateMetadataRow(index, "key", e.target.value)}
+                                    />
+
+                                    <Input
+                                        disabled={!editModeEnabled}
+                                        placeholder="Value"
+                                        value={entry.value}
+                                        onChange={(e) => updateMetadataRow(index, "value", e.target.value)}
+                                    />
+
+                                    <Button disabled={!editModeEnabled} onClick={() => removeMetadataRow(index)}
+                                            icon={<CloseCircleOutlined/>}
+                                            type={"default"} shape={"circle"}/>
+                                </Flex>
+                            ))}
+
+                            {editModeEnabled &&
+                                <Button type="dashed" onClick={addMetadataRow} style={{width: "100%"}}>
+                                    + Metadaten hinzufügen
+                                </Button>
+                            }
+                        </Space>
+                    </Card>
+                </Flex>
+            </Flex>
             <Flex justify={"flex-end"} align={"flex-end"}>
                 <Space style={{marginTop: 16}}>
                     {user?.role !== SystemRoles.ADMIN &&

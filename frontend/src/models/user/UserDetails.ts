@@ -11,8 +11,9 @@ export class UserDetails {
     createdAt: Date;
     updatedAt: Date;
     lastLogin: Date;
+    metadata: object;
 
-    constructor(id: string, ip: string, username: string, email: string, role: string, state: UserState, createdAt: Date, updatedAt: Date, lastLogin: Date) {
+    constructor(id: string, ip: string, username: string, email: string, role: string, state: UserState, createdAt: Date, updatedAt: Date, lastLogin: Date, metadata: object) {
         this._id = id;
         this.ip = ip;
         this.username = username;
@@ -22,5 +23,6 @@ export class UserDetails {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.lastLogin = lastLogin;
+        this.metadata = metadata;
     }
 }

@@ -3,7 +3,7 @@ import {app} from '../../../../src/server/server.ts';
 import {NextFunction, Request, Response} from "express";
 import {JwtHandler} from "../../../../src/util/JwtHandler.ts";
 import {createTestAdminToken} from "../../../util/JwtUtil.ts";
-import {hasInviteUserScope} from "../../../../src/server/middlewares/scope/hasUserScopeMiddleware.ts";
+import {hasUpdateMetaDataScope} from "../../../../src/server/middlewares/scope/hasUserScopeMiddleware.ts";
 
 jest.mock('../../../../src/models/db/User.ts');
 jest.mock('../../../../src/models/db/Settings.ts');
@@ -45,9 +45,9 @@ jest.mock('../../../../src/server/middlewares/scope/hasUserScopeMiddleware.ts', 
     })
 }));
 
-const endpoint = '/admin/user/invite';
+const endpoint = '/admin/user/:userId/metadata';
 
-describe(`POST ${endpoint}`, () => {
+describe(`PATCH ${endpoint}`, () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -55,11 +55,11 @@ describe(`POST ${endpoint}`, () => {
 
     describe('Middleware Tests', () => {
 
-        it('should call has hasInviteUserScope middleware', async () => {
+        it('should call has hasUpdateMetaDataScope middleware', async () => {
             const res = await request(app)
-                .post(endpoint)
+                .delete(endpoint)
                 .set('Authorization', 'Bearer ' + createTestAdminToken())
-            expect(hasInviteUserScope).toHaveBeenCalled();
+            expect(hasUpdateMetaDataScope).toHaveBeenCalled();
         });
 
 

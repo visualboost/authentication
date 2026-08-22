@@ -47,6 +47,9 @@ jest.mock('../../../../src/server/middlewares/scope/hasUserScopeMiddleware.ts', 
     }),
     hasChangeUserRoleScope: jest.fn((req: Request, res: Response, next: NextFunction) => {
         next();
+    }),
+    hasUpdateMetaDataScope: jest.fn((req: Request, res: Response, next: NextFunction) => {
+        next();
     })
 }));
 

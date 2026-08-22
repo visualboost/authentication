@@ -14,7 +14,7 @@ export class UserService extends APIHandler {
 
     static async getUserDetails(id: string): Promise<UserDetails> {
         //@ts-ignore
-        return UserService.instance.get<UserDetails>(this.PREFIX + "/" + id, jsonResponse => new UserDetails(jsonResponse._id, jsonResponse.ip, jsonResponse.username, jsonResponse.email, jsonResponse.role, jsonResponse.state, new Date(jsonResponse.createdAt), new Date(jsonResponse.updatedAt), new Date(jsonResponse.lastLogin)))
+        return UserService.instance.get<UserDetails>(this.PREFIX + "/" + id, jsonResponse => new UserDetails(jsonResponse._id, jsonResponse.ip, jsonResponse.username, jsonResponse.email, jsonResponse.role, jsonResponse.state, new Date(jsonResponse.createdAt), new Date(jsonResponse.updatedAt), new Date(jsonResponse.lastLogin), jsonResponse.metadata))
     }
 
     static async modifyEmail(email: string): Promise<void> {
